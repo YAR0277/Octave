@@ -5,6 +5,8 @@ function [] = plotf(fileName,typeStr)
   % fileName - file name
   % typeStr - type of plot [open,low,high,close,volume]
 
+  pkg load io;
+
   dataFolder = 'c:\users\drdav\data\financial'; % financial data folder
   data=csv2cell(fullfile(dataFolder,fileName));
   dateTimeColNr=1; % column 1 is Date/Time

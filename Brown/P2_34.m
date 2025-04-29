@@ -1,3 +1,5 @@
+pkg load statistics;
+
 format long;
 
 addpath(genpath('../Common'));
@@ -20,10 +22,12 @@ title('a. Gauss-Markov Process, N=256, dt=1.0');
 % (b)-(c)
 figure;
 hold on;
-semilogy(DSP.Periodogram(x,64,1,0),'.-');
-semilogy(DSP.Periodogram(x,128,1,0),'.-');
-y=DSP.Periodogram(x,256,1,0);
-semilogy(y,'.-');
+[f,P]=DSP.Periodogram(x,64,1);
+plot(f,P);
+[f,P]=DSP.Periodogram(x,128,1);
+plot(f,P);
+[f,P]=DSP.Periodogram(x,256,1);
+plot(f,P);
 xlabel('Frequencies (Hz)');
 ylabel('Spectrum');
 title('c. Periodograms, dt=1.0');
@@ -37,12 +41,12 @@ grid on;
 %mean(reshape(y,8,[]));
 figure;
 hold on;
-t=1:256;
-semilogy(t,2./(t.^2+1),'k.');
-semilogy(y,'-.');
-semilogy(movmean(y,16),'-.');
+%t=0:.01:0.5;
+%plot(t,2./(t.^2+1),'k.');
+plot(f,P,'-.');
+plot(f,movmean(P,16),'-.');
 xlabel('Frequencies (Hz)');
 ylabel('Spectrum');
 title('d. Smoothing of Periodogram');
-legend('exact','y','y16');
+legend('P','P16');
 grid on;

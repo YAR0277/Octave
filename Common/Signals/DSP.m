@@ -44,20 +44,21 @@ classdef DSP
       endfor
     endfunction
 
-    function [r] = Periodogram(x,N,dt,biFlag)
+    function [f,P] = Periodogram(x,N,biFlag)
       % calculates the periodogram for a random sequence over [0,T], [1], p. 109.
       % x - the random sequence
       % N - the number of samples
-      % dt - distance between sample points
       % biFlag - built-in flag (1-use built-in fcn)
-      r = zeros(N,1);
+      f = zeros(N/2+1,1); % frequency values
+      P = zeros(N/2+1,1); % periodogram values
       if biFlag==1
-        X = transpose((1/N)*fft(x,N));
+        X = (1/N)*fft(x,N);
         else
         X = DSP.DFT(x,N);
       endif
-      T = dt*N; % length of time domain interval
-      r = (1/T)*(abs(X).^2);
+      X = X(1:N/2+1); % unscaled periodogram, need only first N/2+1 of FT
+      P = (4/N)*(abs(X).^2); % scaled periodogram, 4 is scale factor
+      f = transpose((0:N/2)/N);
     endfunction
 
     function [rex,imx] = RealDFT(x,Nt)
