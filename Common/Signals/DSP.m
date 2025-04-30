@@ -49,6 +49,12 @@ classdef DSP
       % x - the random sequence
       % N - the number of samples
       % biFlag - built-in flag (1-use built-in fcn)
+
+      if mod(N,2) ~= 0 % adjustment if N is odd
+        N = N-1;
+        x = x(1:N);
+      endif
+
       f = zeros(N/2+1,1); % frequency values
       P = zeros(N/2+1,1); % periodogram values
       if biFlag==1

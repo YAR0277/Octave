@@ -1,10 +1,10 @@
-function [f,P] = doPeriodogram
+function [f,P] = doPeriodogram(x,n)
 
   format long;
   addpath(genpath('../Common'));
 
 % Ex. data from file
-  [x,n]=GetSignalFromFile('SPX.csv','close');
+##  [x,n]=GetSignalFromFile('DJIND.csv','close');
 
 % Ex. generated data
 ##  N=500;

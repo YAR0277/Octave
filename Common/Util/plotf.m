@@ -1,9 +1,6 @@
-% function to plot financial data
-% Ref.: search string "octave read in datatime from csv"
-%                     "octave plot with datestr"
+% plotf(fileName,typeStr) - function to plot financial data
+% Ex. plotf("DJIND.csv","close")
 function [] = plotf(fileName,typeStr)
-  % fileName - file name
-  % typeStr - type of plot [open,low,high,close,volume]
 
   pkg load io;
 
@@ -21,5 +18,7 @@ function [] = plotf(fileName,typeStr)
   title(name);
   grid on;
 endfunction
+% Ref.: search string "octave read in datatime from csv"
+%                     "octave plot with datestr"
 
 
