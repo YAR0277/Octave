@@ -1,20 +1,18 @@
-% plotf(fileName,typeStr) - function to plot financial data
-% Ex. plotf("DJIND.csv","close")
-function [] = plotf(fileName,typeStr)
+% plotf(finput) - function to plot financial data
+function [] = plotf(finput)
+  % finput - instance of Finput
 
   pkg load io;
 
-  dataFolder = 'c:\users\drdav\data\financial'; % financial data folder
-  data=csv2cell(fullfile(dataFolder,fileName));
-  dateTimeColNr=1; % column 1 is Date/Time
-  dataRowNr=2; % row 1 is for the header
-  timeFormat='mm-dd-yyyy';
-  t=datenum(flip(data(dataRowNr:end,dateTimeColNr)),timeFormat);
-  typeIdx = find(strcmpi(typeStr,{'timestamp','open','low','high','close','volume'}));
-  x=flip(cell2mat(data(dataRowNr:end,typeIdx)));
+  if ~isa(finput, 'Finput')
+    return;
+  endif
+
+  [t,x] = showf(finput);
+
   plot(t,x,'--.');
-  datetick('x',timeFormat,'keepticks');
-  [~,name,ext] = fileparts(fileName);
+  datetick('x',finput.dateFormat,'keepticks');
+  [~,name,ext] = fileparts(finput.fileName);
   title(name);
   grid on;
 endfunction

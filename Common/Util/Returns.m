@@ -3,32 +3,27 @@ classdef Returns < handle
 
   properties
     A
+    finput
     price
     returns
-    symbol
     timestamp
   endproperties
 
   methods % Public
 
-    function obj = Returns(symbol)
-      if isempty(symbol)
-        obj = [];
+    function obj = Returns(finput)
+
+      if ~isa(finput, 'Finput')
         return;
       endif
-      obj.symbol = symbol;
-      filename = strcat(symbol,".csv");
-      [obj.timestamp,obj.price] = showf(filename,"close"); % use closing values
+
+      obj.finput = finput;
+      [obj.timestamp,obj.price] = showf(finput);
     endfunction
 
     function [r] = GetDate(this,daynr)
       i = find( this.timestamp == daynr );
       r = datestr(this.timestamp(i));
-    endfunction
-
-    function [r] = GetPriceDate(this,date)
-      daynr = datenum(date,'yyyy-mm-dd');   % daynr array contains Unix days (e.g. 737915)
-      r = this.GetPrice(daynr);
     endfunction
 
     function [r] = GetPrice(this,daynr)
@@ -42,10 +37,51 @@ classdef Returns < handle
       endif
     endfunction
 
+    function [r] = GetReturn(this,y,q)
+      if nargin == 2
+        d1=datenum(strcat(num2str(y),'-01-01'),'yyyy-mm-dd');
+        d2=datenum(strcat(num2str(y),'-12-31'),'yyyy-mm-dd');
+      else
+        d1=this.GetDayNr(q,y,'first');
+        d2=this.GetDayNr(q,y,'last');
+      endif
+      r =this.CalcRateOfReturn(d1,d2);
+    endfunction
+
     function [] = Plot(this)
-      stem([this.returns.lastDay],[this.returns.rateOfReturn]);
-      timeFormat='mm-yyyy';
-      datetick('x',timeFormat,'keepticks');
+
+      if isempty(this.returns)
+        return;
+      endif
+
+      if isfield(this.returns,'quarter')
+        % plot quarterly returns (QTR) at the end of the quarter, lastDay
+        stem([this.returns.lastDay],[this.returns.rateOfReturn]);
+      else
+        % plot annual returns (YRL) at the beginning of the year, firstDay
+        stem([this.returns.firstDay],[this.returns.rateOfReturn]);
+      endif
+
+      % add labels
+      t = [this.returns.firstDay];
+      x = [this.returns.rateOfReturn];
+
+      labels = num2str(x(:));
+
+      ix = x > 0;
+      x(ix) = arrayfun(@(x) x+0.5, x(ix)); % adjust position for pos returns
+      ix = x <= 0;
+      x(ix) = arrayfun(@(x) x-0.5, x(ix)); % adjust position for neg returns
+
+      text(t,x,labels,'FontWeight','bold');
+
+      ax = gca;
+      xticks = [this.returns.year];
+      set(ax,"XTick",datenum(xticks,1,1));
+      datetick('x','YYYY','keepticks','keeplimits');
+
+      ylabel('Rate of Return (%)');
+      title(this.finput.symbol);
       grid on;
     endfunction
 
@@ -77,6 +113,28 @@ classdef Returns < handle
       this.returns = r;
     endfunction
 
+    function [r] = Stats(this)
+      fprintf('Time Period: [%s,%s]\n',datestr(this.returns(1).firstDay),datestr(this.returns(end).lastDay));
+      rts = [this.returns.rateOfReturn];
+      fprintf('Number of Samples: %d\n',numel(rts));
+      fprintf('Max. return: %.2f\n',max(rts));
+      fprintf('Min. return: %.2f\n',min(rts));
+      fprintf('Avg. return: %.2f\n',mean(rts));
+      fprintf('Std. Dev. of returns: %.2f\n',std(rts));
+      fprintf('Var. of returns: %.2f\n',var(rts));
+      tol = 0;
+      % returns > tolerance
+      ix = rts > tol;
+      rts_gt = rts(ix);
+      fprintf('Number of Samples > %.2f: %d\n',tol,sum(ix));
+      fprintf('Avg. return > %.2f: %.2f\n',tol,mean(rts_gt));
+      % returns <= tolerance
+      ix = rts <= tol;
+      rts_lte = rts(ix);
+      fprintf('Number of Samples <= %.2f: %d\n',tol,sum(ix));
+      fprintf('Avg. return <= %.2f: %.2f\n',tol,mean(rts_lte));
+    endfunction
+
     function [r] = YRL(this)
 
       % daynr of first day of first year in timestamp
@@ -102,7 +160,7 @@ classdef Returns < handle
         endDate = strcat(num2str(k),'-12-31');
         r(i).firstDay=datenum(startDate,'yyyy-mm-dd');
         r(i).lastDay=datenum(endDate,'yyyy-mm-dd');
-        r(i).rateOfReturn=this.CalcRateOfReturnDate(startDate,endDate);
+        r(i).rateOfReturn=this.CalcRateOfReturn(r(i).firstDay,r(i).lastDay);
         i=i+1;
       endfor
 
@@ -120,13 +178,6 @@ classdef Returns < handle
     function [r] = CalcRateOfReturn(this,dn1,dn2)
       a = this.GetPrice(dn1);
       b = this.GetPrice(dn2);
-      r = ((b-a)/a)*100;
-      r = round(r*100)/100; % round to nearest 2 decimal places
-    endfunction
-
-    function [r] = CalcRateOfReturnDate(this,startDate,endDate)
-      a = this.GetPriceDate(startDate);
-      b = this.GetPriceDate(endDate);
       r = ((b-a)/a)*100;
       r = round(r*100)/100; % round to nearest 2 decimal places
     endfunction

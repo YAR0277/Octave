@@ -1,19 +1,32 @@
-% function to show financial data raw value
-
-function [t,x] = showf(fileName,typeStr)
-  % fileName - file name
-  % typeStr - column of data [timestamp,open,low,high,close,volume]
+% showf(finput) - function to show financial data raw values
+function [t,x] = showf(finput)
+  % finput - instance of Finput
 
   pkg load io;
 
-  dataFolder = 'c:\users\drdav\data\financial'; % financial data folder
-  data=csv2cell(fullfile(dataFolder,fileName));
-  dateTimeColNr=1; % column 1 is Date/Time
-  dataRowNr=2; % row 1 is for the header
-  timeFormat='mm-dd-yyyy';
-  t=datenum(flip(data(dataRowNr:end,dateTimeColNr)),timeFormat);
-  typeIdx = find(strcmpi(typeStr,{'timestamp','open','low','high','close','volume'}));
-  x=flip(cell2mat(data(dataRowNr:end,typeIdx)));
+  if ~isa(finput, 'Finput')
+    return;
+  endif
+
+  data=csv2cell(fullfile(finput.dataFolder,finput.fileName));
+  timestampCol=1; % col 1 is for timestamp
+  firstDataRow=2; % row 1 is for header
+
+  % t data values
+  if finput.descendFlag
+    t=datenum(flip(data(firstDataRow:end,timestampCol)),finput.dateFormat);
+  else
+    t=datenum(data(firstDataRow:end,timestampCol),finput.dateFormat);
+  endif
+
+  % x data values
+  headings = strtrim(data(1,:)); % remove spaces
+  ixCol = find(strcmpi(finput.dataCol,headings));
+  if finput.descendFlag
+    x=flip(cell2mat(data(firstDataRow:end,ixCol)));
+  else
+    x=cell2mat(data(firstDataRow:end,ixCol));
+  endif
 endfunction
 
 
