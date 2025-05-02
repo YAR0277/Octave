@@ -51,6 +51,7 @@ classdef Returns < handle
     function [] = Plot(this)
 
       if isempty(this.returns)
+        fprintf('The returns structure is empty. Please calculate returns and try again.\n');
         return;
       endif
 
@@ -114,25 +115,30 @@ classdef Returns < handle
     endfunction
 
     function [r] = Stats(this)
+
+      if isempty(this.returns)
+        fprintf('The returns structure is empty. Please calculate returns and try again.\n');
+        return;
+      endif
+
       fprintf('Time Period: [%s,%s]\n',datestr(this.returns(1).firstDay),datestr(this.returns(end).lastDay));
       rts = [this.returns.rateOfReturn];
       fprintf('Number of Samples: %d\n',numel(rts));
-      fprintf('Max. return: %.2f\n',max(rts));
-      fprintf('Min. return: %.2f\n',min(rts));
-      fprintf('Avg. return: %.2f\n',mean(rts));
-      fprintf('Std. Dev. of returns: %.2f\n',std(rts));
-      fprintf('Var. of returns: %.2f\n',var(rts));
+      fprintf('Max. return: %.2f%%\n',max(rts));
+      fprintf('Min. return: %.2f%%\n',min(rts));
+      fprintf('Avg. return: %.2f%%\n',mean(rts));
+      fprintf('Volatility of returns: %.2f%%\n',std(rts)); % standard deviation = volatility
       tol = 0;
       % returns > tolerance
       ix = rts > tol;
       rts_gt = rts(ix);
       fprintf('Number of Samples > %.2f: %d\n',tol,sum(ix));
-      fprintf('Avg. return > %.2f: %.2f\n',tol,mean(rts_gt));
+      fprintf('Avg. return > %.2f: %.2f%%\n',tol,mean(rts_gt));
       % returns <= tolerance
       ix = rts <= tol;
       rts_lte = rts(ix);
       fprintf('Number of Samples <= %.2f: %d\n',tol,sum(ix));
-      fprintf('Avg. return <= %.2f: %.2f\n',tol,mean(rts_lte));
+      fprintf('Avg. return <= %.2f: %.2f%%\n',tol,mean(rts_lte));
     endfunction
 
     function [r] = YRL(this)
