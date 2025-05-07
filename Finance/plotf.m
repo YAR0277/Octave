@@ -12,7 +12,7 @@ function [] = plotf(finput)
 
   plot(t,x,'--.');
   datetick('x',finput.dateFormat,'keepticks');
-  [~,name,ext] = fileparts(finput.fileName);
+  [~,name,ext] = fileparts(finput.symbol);
   title(name);
   grid on;
 endfunction

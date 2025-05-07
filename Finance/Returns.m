@@ -74,15 +74,16 @@ classdef Returns < handle
       ix = x <= 0;
       x(ix) = arrayfun(@(x) x-0.5, x(ix)); % adjust position for neg returns
 
-      text(t,x,labels,'FontWeight','bold');
+      text(t,x,labels,'FontWeight','bold','FontSize',9);
 
       ax = gca;
       xticks = [this.returns.year];
       set(ax,"XTick",datenum(xticks,1,1));
-      datetick('x','YYYY','keepticks','keeplimits');
+      datetick('x','YY','keepticks','keeplimits');
 
       ylabel('Rate of Return (%)');
       title(this.finput.symbol);
+      xlim([this.GetDayNumber(this.returns(1).year) this.GetDayNumber(this.returns(end).year)]);
       grid on;
     endfunction
 
@@ -186,6 +187,12 @@ classdef Returns < handle
       b = this.GetPrice(dn2);
       r = ((b-a)/a)*100;
       r = round(r*100)/100; % round to nearest 2 decimal places
+    endfunction
+
+    function [r] = GetDayNumber(this,y)
+      yearStr = num2str(y);
+      dateStr = strcat(yearStr,'-01-01');
+      r = datenum(dateStr,'yyyy-mm-dd');
     endfunction
 
     function [r] = GetDayNr(this,q,y,position)
