@@ -1,18 +1,21 @@
-% class to compute rate of returns of financial data
 classdef Returns < handle
+  % class to compute rate of returns of financial data
 
   properties
-    A
-    finput
-    price
-    returns
-    timestamp
+    finput      % Reference to Finput class`
+    price       % x - prices of investment
+    returns     % rate of return structure
+    timestamp   % t - timestamp of prices
+  endproperties
+
+  properties (Access=private)
+    A           % months or quarters in a year matrix
   endproperties
 
   methods % Public
 
     function obj = Returns(finput)
-
+      % c'tor to create a Returns object, input is an Finput object.
       if ~isa(finput, 'Finput')
         return;
       endif
@@ -21,12 +24,72 @@ classdef Returns < handle
       [obj.timestamp,obj.price] = showf(finput);
     endfunction
 
-    function [r] = GetDate(this,daynr)
-      i = find( this.timestamp == daynr );
-      r = datestr(this.timestamp(i));
+    function [] = Bar(this)
+      % plots rate of returns
+      if isempty(this.returns)
+        fprintf('The returns structure is empty. Please calculate returns and try again.\n');
+        return;
+      endif
+
+      if isfield(this.returns,'month')
+        this.BarYTD();
+        return;
+      endif
+
+      figure;
+      if isfield(this.returns,'quarter')
+        % plot quarterly returns (QTR) at the end of the quarter, lastDay
+        bar([this.returns.lastDay],[this.returns.rateOfReturn]);
+      else
+        % plot annual returns (YRL) at the beginning of the year, firstDay
+        bar([this.returns.firstDay],[this.returns.rateOfReturn]);
+      endif
+
+      this.DoVolatility();
+
+      ax = gca;
+      xticks = [this.returns.year];
+      set(ax,"XTick",datenum(xticks,1,1));
+      datetick('x','YY','keepticks','keeplimits');
+
+      ylabel('Rate of Return (%)');
+      title(this.finput.symbol);
+      xlim([this.GetDayNumber(this.returns(1).year) this.GetDayNumber(this.returns(end).year)]);
+      grid on;
+
+      this.DoLabels(-2,1);
+
+    endfunction
+
+    function [] = BarYTD(this)
+      % plot monthly returns as bar plot
+
+      figure;
+      bar([this.returns.lastDay],[this.returns.rateOfReturn]); % at the end of each month, lastDay
+
+      numReturns = numel([this.returns.rateOfReturn]);
+
+      ax = gca;
+      xticks = [this.A(1:numReturns,2)]; % 2 = lastDay
+      set(ax,"XTick",xticks);
+      datetick('x','YY-mm','keepticks','keeplimits');
+
+      xlim([this.A(1,2) this.A(numReturns,2)]);
+
+      ylabel('Rate of Return (%)');
+      title(this.finput.symbol);
+      grid on;
+    endfunction
+
+    function [] = GetDateRange(this)
+      % prints date range of input data to console
+      sDate = this.GetDate(this.timestamp(1));
+      eDate = this.GetDate(this.timestamp(end));
+      fprintf('Date Range is [%s(%d), %s(%d)]\n',sDate,this.timestamp(1),eDate,this.timestamp(end));
     endfunction
 
     function [r] = GetPrice(this,daynr)
+      % returns price for a given day number
       i = find( this.timestamp == daynr );
       if ~isempty(i) % daynr is trading day
         r = this.price(i);
@@ -38,6 +101,7 @@ classdef Returns < handle
     endfunction
 
     function [r] = GetReturn(this,y,q)
+      % returns rate of return: GetReturn(1999), GetReturn(1999,3)
       if nargin == 2
         d1=datenum(strcat(num2str(y),'-01-01'),'yyyy-mm-dd');
         d2=datenum(strcat(num2str(y),'-12-31'),'yyyy-mm-dd');
@@ -49,12 +113,18 @@ classdef Returns < handle
     endfunction
 
     function [] = Plot(this)
-
+      % plots rate of returns
       if isempty(this.returns)
         fprintf('The returns structure is empty. Please calculate returns and try again.\n');
         return;
       endif
 
+      if isfield(this.returns,'month')
+        this.PlotYTD();
+        return;
+      endif
+
+      figure;
       if isfield(this.returns,'quarter')
         % plot quarterly returns (QTR) at the end of the quarter, lastDay
         stem([this.returns.lastDay],[this.returns.rateOfReturn]);
@@ -62,19 +132,6 @@ classdef Returns < handle
         % plot annual returns (YRL) at the beginning of the year, firstDay
         stem([this.returns.firstDay],[this.returns.rateOfReturn]);
       endif
-
-      % add labels
-      t = [this.returns.firstDay];
-      x = [this.returns.rateOfReturn];
-
-      labels = num2str(x(:));
-
-      ix = x > 0;
-      x(ix) = arrayfun(@(x) x+0.5, x(ix)); % adjust position for pos returns
-      ix = x <= 0;
-      x(ix) = arrayfun(@(x) x-0.5, x(ix)); % adjust position for neg returns
-
-      text(t,x,labels,'FontWeight','bold','FontSize',9);
 
       ax = gca;
       xticks = [this.returns.year];
@@ -85,10 +142,33 @@ classdef Returns < handle
       title(this.finput.symbol);
       xlim([this.GetDayNumber(this.returns(1).year) this.GetDayNumber(this.returns(end).year)]);
       grid on;
+
+      this.DoLabels(-1,2);
+
+    endfunction
+
+    function [] = PlotYTD(this)
+      % plot monthly returns as stem plot
+
+      figure;
+      stem([this.returns.lastDay],[this.returns.rateOfReturn]); % at the end of each month, lastDay
+
+      numReturns = numel([this.returns.rateOfReturn]);
+
+      ax = gca;
+      xticks = [this.A(1:numReturns,2)]; % 2 = lastDay
+      set(ax,"XTick",xticks);
+      datetick('x','YY-mm','keepticks','keeplimits');
+
+      xlim([this.A(1,2) this.A(numReturns,2)]);
+
+      ylabel('Rate of Return (%)');
+      title(this.finput.symbol);
+      grid on;
     endfunction
 
     function [r] = QTR(this)
-
+      % calculates quarterly rate of returns
       [q1,y1] = this.GetNextQtr(this.timestamp(1));
       [qN,yN] = this.GetPrevQtr(this.timestamp(end));
 
@@ -116,7 +196,7 @@ classdef Returns < handle
     endfunction
 
     function [r] = Stats(this)
-
+      % calculates statistics on returns
       if isempty(this.returns)
         fprintf('The returns structure is empty. Please calculate returns and try again.\n');
         return;
@@ -131,18 +211,22 @@ classdef Returns < handle
       fprintf('Volatility of returns: %.2f%%\n',std(rts)); % standard deviation = volatility
       tol = 0;
       % returns > tolerance
-      ix = rts > tol;
-      rts_gt = rts(ix);
-      fprintf('Number of Samples > %.2f: %d\n',tol,sum(ix));
-      fprintf('Avg. return > %.2f: %.2f%%\n',tol,mean(rts_gt));
+      ix = rts >= tol;
+      fprintf('Number of Returns >= %.2f: %d, Avg. %.f%%\n',tol,sum(ix),mean(rts(ix)));
       % returns <= tolerance
       ix = rts <= tol;
-      rts_lte = rts(ix);
-      fprintf('Number of Samples <= %.2f: %d\n',tol,sum(ix));
-      fprintf('Avg. return <= %.2f: %.2f%%\n',tol,mean(rts_lte));
+      fprintf('Number of Returns <= %.2f: %d, Avg. %.2f%%\n',tol,sum(ix),mean(rts(ix)));
+      % returns >= volatility
+      ix = rts >= std(rts);
+      fprintf('Number of Returns >= %.2f: %d, Avg. %.2f%%\n',std(rts),sum(ix),mean(rts(ix)));
+      % returns <= -volatility
+      ix = rts <= -std(rts);
+      fprintf('Number of Returns <= %.2f: %d, Avg. %.2f%%\n',-std(rts),sum(ix),mean(rts(ix)));
+
     endfunction
 
     function [r] = YRL(this)
+      % calculates yearly rate of returns
 
       % daynr of first day of first year in timestamp
       d1=datenum(strcat(datestr(this.timestamp(1),'yyyy'),'-01-01'),'yyyy-mm-dd');
@@ -175,13 +259,65 @@ classdef Returns < handle
     endfunction
 
     function [r] = YTD(this)
-      lastYear=str2num(datestr(this.timestamp(end),'yyyy'));
+      % calculates year to date rate of return
+      currYear = str2num(datestr(now,'yyyy'));
+      returnYear = [str2num(datestr(this.timestamp,'yyyy'))];
+      ix = returnYear == currYear;
+      numMonths = sum(ix);
+
+      if numMonths == 0
+        return;
+      endif
+
+      r = struct("year",0,"month",0,"firstDay",0,"lastDay",0,"rateOfReturn",0);
+      m = 1;
+      this.SetMonthYrMatrix(currYear);
+      do
+        r(m).year=currYear;
+        r(m).month=m;
+        r(m).firstDay=this.A(m,1);
+        r(m).lastDay=this.A(m,2);
+        r(m).rateOfReturn=this.CalcRateOfReturn(r(m).firstDay,r(m).lastDay);
+        m = m + 1;
+      until (m > numMonths)
+
       this.returns = r;
     endfunction
 
   endmethods % Public
 
   methods (Access = private)
+
+  function [] = DoLabels(this,dt,dx)
+      t = [this.returns.firstDay];
+      x = [this.returns.rateOfReturn];
+
+      labels = num2str(x(:));
+
+      t = arrayfun(@(t) t+dt, t(:)); % adjust t position
+
+      ix = x > 0;
+      x(ix) = arrayfun(@(x) x+dx, x(ix)); % adjust x position for pos returns
+      ix = x <= 0;
+      x(ix) = arrayfun(@(x) x-dx, x(ix)); % adjust x position for neg returns
+
+      text(t,x,labels,'FontWeight','bold','FontSize',9);
+
+    endfunction
+
+    function [] = DoVolatility(this)
+
+      rts = [this.returns.rateOfReturn];
+      vol = std(rts); % standard deviation = volatility
+      num = numel(rts);
+      tvals=arrayfun(@(s) this.GetDayNumber(s),[this.returns(:).year]);
+
+      hold on;
+      plot(tvals,(0+vol)*ones(num,1),'r--');
+      plot(tvals,(0-vol)*ones(num,1),'r--');
+      hold off;
+    endfunction
+
     function [r] = CalcRateOfReturn(this,dn1,dn2)
       a = this.GetPrice(dn1);
       b = this.GetPrice(dn2);
@@ -202,6 +338,11 @@ classdef Returns < handle
       elseif strcmpi (position,'last')
         r = this.A(q,2);
       endif
+    endfunction
+
+    function [r] = GetDate(this,daynr)
+      i = find( this.timestamp == daynr );
+      r = datestr(this.timestamp(i));
     endfunction
 
     function [q,y] = GetNextQtr(this,daynr)
@@ -246,6 +387,39 @@ classdef Returns < handle
           y=year;
         endif
       endif
+    endfunction
+
+    function [] = SetMonthYrMatrix(this,yr)
+      this.A = NaN(12,2);
+      this.A(1,1) = datenum(strcat(num2str(yr), '-01-01'),'yyyy-mm-dd');
+      this.A(1,2) = datenum(strcat(num2str(yr), '-01-31'),'yyyy-mm-dd');
+      if is_leap_year(yr)
+        this.A(2,1) = datenum(strcat(num2str(yr), '-02-01'),'yyyy-mm-dd');
+        this.A(2,2) = datenum(strcat(num2str(yr), '-02-29'),'yyyy-mm-dd');
+      else
+        this.A(2,1) = datenum(strcat(num2str(yr), '-02-01'),'yyyy-mm-dd');
+        this.A(2,2) = datenum(strcat(num2str(yr), '-02-28'),'yyyy-mm-dd');
+      endif
+      this.A(3,1) = datenum(strcat(num2str(yr), '-03-01'),'yyyy-mm-dd');
+      this.A(3,2) = datenum(strcat(num2str(yr), '-03-31'),'yyyy-mm-dd');
+      this.A(4,1) = datenum(strcat(num2str(yr), '-04-01'),'yyyy-mm-dd');
+      this.A(4,2) = datenum(strcat(num2str(yr), '-04-30'),'yyyy-mm-dd');
+      this.A(5,1) = datenum(strcat(num2str(yr), '-05-01'),'yyyy-mm-dd');
+      this.A(5,2) = datenum(strcat(num2str(yr), '-05-31'),'yyyy-mm-dd');
+      this.A(6,1) = datenum(strcat(num2str(yr), '-06-01'),'yyyy-mm-dd');
+      this.A(6,2) = datenum(strcat(num2str(yr), '-06-30'),'yyyy-mm-dd');
+      this.A(7,1) = datenum(strcat(num2str(yr), '-07-01'),'yyyy-mm-dd');
+      this.A(7,2) = datenum(strcat(num2str(yr), '-07-31'),'yyyy-mm-dd');
+      this.A(8,1) = datenum(strcat(num2str(yr), '-08-01'),'yyyy-mm-dd');
+      this.A(8,2) = datenum(strcat(num2str(yr), '-08-31'),'yyyy-mm-dd');
+      this.A(9,1) = datenum(strcat(num2str(yr), '-09-01'),'yyyy-mm-dd');
+      this.A(9,2) = datenum(strcat(num2str(yr), '-09-30'),'yyyy-mm-dd');
+      this.A(10,1) = datenum(strcat(num2str(yr), '-10-01'),'yyyy-mm-dd');
+      this.A(10,2) = datenum(strcat(num2str(yr), '-10-31'),'yyyy-mm-dd');
+      this.A(11,1) = datenum(strcat(num2str(yr), '-11-01'),'yyyy-mm-dd');
+      this.A(11,2) = datenum(strcat(num2str(yr), '-11-30'),'yyyy-mm-dd');
+      this.A(12,1) = datenum(strcat(num2str(yr), '-12-01'),'yyyy-mm-dd');
+      this.A(12,2) = datenum(strcat(num2str(yr), '-12-31'),'yyyy-mm-dd');
     endfunction
 
     function [] = SetQtrYrMatrix(this,yr)
