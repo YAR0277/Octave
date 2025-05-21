@@ -2,7 +2,7 @@ classdef Returns < handle
   % class to compute rate of returns of financial data
 
   properties
-    finput      % Reference to Finput class`
+    finput      % Reference to Finput class
     price       % x - prices of investment
     returns     % rate of return structure
     timestamp   % t - timestamp of prices
