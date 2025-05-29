@@ -6,10 +6,11 @@ classdef Returns < handle
     price       % x - prices of investment
     returns     % rate of return structure
     timestamp   % t - timestamp of prices
+    timestep    % time interval of price data {'day','week','month','quarter'}
   endproperties
 
   properties (Access=private)
-    A           % months or quarters in a year matrix
+    A           % days, weeks, months or quarters in a year matrix
   endproperties
 
   methods % Public
@@ -22,6 +23,7 @@ classdef Returns < handle
 
       obj.finput = finput;
       [obj.timestamp,obj.price] = showf(finput);
+      obj.timestep = obj.SetTimeStep(obj.timestamp);
     endfunction
 
     function [] = Bar(this)
@@ -259,7 +261,78 @@ classdef Returns < handle
     endfunction
 
     function [r] = YTD(this)
-      % calculates year to date rate of return
+      % calculates year to date rate of returns
+      switch this.timestep
+        case 'day'
+          r = this.CalcYtdDay();
+        case 'week'
+          r = this.CalcYtdWeek();
+        case 'month'
+          r = this.CalcYtdMonth();
+        case 'quarter'
+          r = this.CalcYtdQuarter();
+        otherwise
+      endswitch
+    endfunction
+
+  endmethods % Public
+
+  methods (Access = private)
+
+    function [r] = CalcYtdDay(this)
+      % calculates year to date rate of returns for timestep='day' data
+      currYear = str2num(datestr(now,'yyyy'));
+      returnYear = [str2num(datestr(this.timestamp,'yyyy'))];
+      ix = returnYear == currYear;
+      numDays = sum(ix);
+
+      if numDays == 0
+        return;
+      endif
+
+      r = struct("year",0,"day",0,"firstDay",0,"lastDay",0,"rateOfReturn",0);
+      i = 1;
+      this.SetDayYrMatrix(currYear);
+      do
+        r(i).year=currYear;
+        r(i).day=i;
+        r(i).firstDay=this.A(i,1);
+        r(i).lastDay=this.A(i,2);
+        r(i).rateOfReturn=this.CalcRateOfReturn(r(i).firstDay,r(i).lastDay);
+        i = i + 1;
+      until (i > numDays)
+
+      this.returns = r;
+    endfunction
+
+    function [r] = CalcYtdWeek(this)
+      % calculates year to date rate of returns for timestep='week' data
+      currYear = str2num(datestr(now,'yyyy'));
+      returnYear = [str2num(datestr(this.timestamp,'yyyy'))];
+      ix = returnYear == currYear;
+      numWeeks = sum(ix);
+
+      if numWeeks == 0
+        return;
+      endif
+
+      r = struct("year",0,"week",0,"firstDay",0,"lastDay",0,"rateOfReturn",0);
+      i = 1;
+      this.SetWeekYrMatrix(currYear);
+      do
+        r(i).year=currYear;
+        r(i).week=i;
+        r(i).firstDay=this.A(i,1);
+        r(i).lastDay=this.A(i,2);
+        r(i).rateOfReturn=this.CalcRateOfReturn(r(i).firstDay,r(i).lastDay);
+        i = i + 1;
+      until (i > numWeeks)
+
+      this.returns = r;
+    endfunction
+
+    function [r] = CalcYtdMonth(this)
+      % calculates year to date rate of returns for timestep='month' data
       currYear = str2num(datestr(now,'yyyy'));
       returnYear = [str2num(datestr(this.timestamp,'yyyy'))];
       ix = returnYear == currYear;
@@ -270,23 +343,44 @@ classdef Returns < handle
       endif
 
       r = struct("year",0,"month",0,"firstDay",0,"lastDay",0,"rateOfReturn",0);
-      m = 1;
+      i = 1;
       this.SetMonthYrMatrix(currYear);
       do
-        r(m).year=currYear;
-        r(m).month=m;
-        r(m).firstDay=this.A(m,1);
-        r(m).lastDay=this.A(m,2);
-        r(m).rateOfReturn=this.CalcRateOfReturn(r(m).firstDay,r(m).lastDay);
-        m = m + 1;
-      until (m > numMonths)
+        r(i).year=currYear;
+        r(i).month=i;
+        r(i).firstDay=this.A(i,1);
+        r(i).lastDay=this.A(i,2);
+        r(i).rateOfReturn=this.CalcRateOfReturn(r(i).firstDay,r(i).lastDay);
+        i = i + 1;
+      until (i > numMonths)
 
       this.returns = r;
     endfunction
 
-  endmethods % Public
+    function [r] = CalcYtdQuarter(this)
+      % calculates year to date rate of returns for timestep='quarter' data
+      currYear = str2num(datestr(now,'yyyy'));
+      returnYear = [str2num(datestr(this.timestamp,'yyyy'))];
+      ix = returnYear == currYear;
+      numQuarters = sum(ix);
 
-  methods (Access = private)
+      if numQuarters == 0
+        return;
+      endif
+      r = struct("year",0,"quarter",0,"firstDay",0,"lastDay",0,"rateOfReturn",0);
+      i = 1;
+      this.SetQtrYrMatrix(currYear);
+      do
+        r(i).year=currYear;
+        r(i).quarter=i;
+        r(i).firstDay=this.A(i,1);
+        r(i).lastDay=this.A(i,2);
+        r(i).rateOfReturn=this.CalcRateOfReturn(r(i).firstDay,r(i).lastDay);
+        i = i + 1;
+      until (i > numQuarters)
+
+      this.returns = r;
+    endfunction
 
   function [] = DoLabels(this,dt,dx)
       t = [this.returns.firstDay];
@@ -387,6 +481,48 @@ classdef Returns < handle
           y=year;
         endif
       endif
+    endfunction
+
+    function [r] = SetTimeStep(this,timestamp)
+        dt = diff(timestamp);
+        dd = mean(dt); % delta (in) days
+        if dd >= 1 && dd <=2
+          r = 'day';
+        elseif dd >= 6 && dd <= 7
+          r = 'week';
+        elseif dd >= 27 && dd <= 31
+          r = 'month';
+        elseif dd >= 89 && dd <= 91
+          r = 'quarter';
+        else
+          r = 'undefined';
+        endif
+    endfunction
+
+    function [] = SetDayYrMatrix(this,yr)
+      if is_leap_year(yr)
+        this.A = NaN(366+1,2);
+      else
+        this.A = NaN(365+1,2); % one needs 1 extra day to calculate return
+      endif
+
+      this.A(:,1) = datenum(yr,1,1)-1:datenum(yr,12,31); % -1 is the extra day
+      this.A(:,2) = this.A(:,1)+1;
+    endfunction
+
+    function [] = SetWeekYrMatrix(this,yr)
+      nrWeeksInYr = 52;
+      nrDaysInWeek = 7;
+      dnStart = datenum(yr,1,1);
+      this.A = NaN(52,2);
+      for i=1:nrWeeksInYr
+        if i==1
+          this.A(i,1) = dnStart;
+        else
+          this.A(i,1) = addtodate(dnStart, (i-1)*nrDaysInWeek,'days');
+        endif
+        this.A(i,2) = this.A(i,1) + (nrDaysInWeek-1);
+      endfor
     endfunction
 
     function [] = SetMonthYrMatrix(this,yr)
