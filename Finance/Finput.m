@@ -14,7 +14,7 @@ classdef Finput < handle
 
     function [obj] = Finput()
       obj.dataCol = 'close';
-      obj.dataFolder = 'c:\users\drdav\data\financial'; % financial data folder;
+      obj.dataFolder = 'c:\users\drdav\data\finance'; % financial data folder;
       obj.dateFormat = 'yyyy-mm-dd';
       obj.descendFlag = 0; % data is in ascending order: oldest -> newest
     endfunction
@@ -27,7 +27,6 @@ classdef Finput < handle
     function [] = SetFolder(this,type)
       % sets dataFolder property
       if ismember(type,{"bond","equity","etf","index"})
-        this.dataFolder = 'c:\users\drdav\data\financial';
         this.dataFolder = fullfile(this.dataFolder,type);
       end
     endfunction
