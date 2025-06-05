@@ -2,7 +2,8 @@ classdef Sinput < handle
   % Input structure for Random Sequence class
 
   properties
-    length        % length of random sequence
+    length        % length of random sample
+    height        % number of random samples
     prbSuccess    % probability of success in Bernoulli trials
     beta          % time constant of Markov process
     timestep      % time interval between samples in Markov process
@@ -14,11 +15,16 @@ classdef Sinput < handle
 
     function [obj] = Sinput()
       obj.length = 30;
+      obj.height = 100;
       obj.prbSuccess = 0.5;
       obj.beta = 1;
       obj.timestep = 0.1;
       obj.type = 'White';
       obj.var = 1;
+    endfunction
+
+    function [] = SetHeight(this,n)
+      this.height = n;
     endfunction
 
     function [] = SetLength(this,n)
