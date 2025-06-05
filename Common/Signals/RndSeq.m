@@ -6,6 +6,9 @@ classdef RndSeq < handle
   % [2] Introduction to Random Signals, R.Brown
   %
   properties
+    fcnNormRnd    % function normrnd(mu,sigma,[sz])
+    fcnBernRnd    % function binornd(1,p,[sz]), i.e. Bernoulli r.v.
+    fcnBinoRnd    % function binornd(n,p,[sz])
     sinput        % reference to Sinput class - the input structure for random sequences
     x             % a random sample of the random sequence
     X             % random sequence matrix
@@ -27,6 +30,9 @@ classdef RndSeq < handle
       endif
 
       obj.sinput = sinput;
+      obj.fcnNormRnd = @(m,s,n) normrnd(m,s,[1,n]);
+      obj.fcnBernRnd = @(p,n) binornd(1,p,[1,n]);
+      obj.fcnBinoRnd = @(m,p,n) binornd(m,p,[1,n]);
     endfunction
 
     function [] = GenSeq(this)
@@ -39,6 +45,12 @@ classdef RndSeq < handle
     endfunction
 
     function [] = PlotSeq(this)
+
+      if isempty(this.X)
+        fprintf('The random sequence is empty. Please generate a random sequence and try again.\n');
+        return;
+      endif
+
       % just do the first 20...
       figure;
       hold on;
@@ -124,11 +136,17 @@ classdef RndSeq < handle
       r = struct('mean',0,'variance',0);
       switch this.sinput.type
         case "RandomWalk" % [1], (P5.10)
-          r.mean = this.sinput.length*(this.sinput.prbSuccess - (1 - this.sinput.prbSuccess)); % n(p-q);
-          r.variance = 4*this.sinput.length*(this.sinput.prbSuccess*(1 - this.sinput.prbSuccess)); % 4npq
-        case "Wiener" % [2], p101-102
-          r.mean = 0; % (2.13.2)
-          r.variance = k; % (2.13.4)
+          r.mean = k*(this.sinput.prbSuccess - (1 - this.sinput.prbSuccess)); % k(p-q);
+          r.variance = 4*k*(this.sinput.prbSuccess*(1 - this.sinput.prbSuccess)); % 4kpq
+        case "Wiener" % [1], 5.7
+          r.mean = 0; % (5.62)
+          r.variance = (this.sinput.var)*k; % (5.63)
+        case "GaussMarkov"
+          r.mean = 0; % (??)
+          r.variance = 0; % ?? ()
+        case "White"
+          r.mean = 0;
+          r.variance = (this.sinput.var);
         otherwise
       endswitch
     endfunction
@@ -158,7 +176,7 @@ classdef RndSeq < handle
       % generates a Bernoulli sequence of length n with success probability p.
       n = this.sinput.length;
       p = this.sinput.prbSuccess;
-      r = binornd(1,p,1,n);
+      r = this.fcnBernRnd(p,n);
     endfunction
 
     function [r] = GetSampleRandomWalk(this)
@@ -167,7 +185,7 @@ classdef RndSeq < handle
         z(z==0) = z(z==0) - 1;
         % a random walk is such that X(0) = 0, so set the first one to be zero.
         n = this.sinput.length;
-        for i=1:n+1
+        for i=1:n
           if i==1
             r(i) = 0;
           else
@@ -176,23 +194,20 @@ classdef RndSeq < handle
         endfor
     endfunction
 
-    function [r] = GetSampleGaussMarkov(this)
+    function [x] = GetSampleGaussMarkov(this)
       % generates Gauss-Markov sequence of length N, spacing dt.
       n = this.sinput.length;
-      dt = this.sinput.timestep;
-      s2 = this.sinput.var;
-      beta = this.sinput.beta;
+      dt = this.sinput.timestep; % time interval between samples
+      s2 = this.sinput.var; % variance of the Markov process
+      beta = this.sinput.beta; % reciprocal time constant of the process
       a = s2*(1-exp(-2*beta*dt));
-
-      this.sinput.SetVar(sqrt(a)); % set the variance of the white sequence
-      W = this.GetSampleWhite();
-
-      r=zeros(1,n); % Gauss-Markov process
+      x = zeros(1,n);
+      w = this.fcnNormRnd(0,sqrt(a),n);
       for k=1:n;
         if (k==1)
-          r(k) = normrnd(0,s2);
+          x(k) = this.fcnNormRnd(0,sqrt(s2),1);
         else
-          r(k) = exp(-beta*dt)*r(k-1) + W(k);
+          x(k) = exp(-beta*dt)*x(k-1) + w(k);
         endif
       end
     endfunction
@@ -200,29 +215,27 @@ classdef RndSeq < handle
     function [r] = GetSampleWhite(this)
     % generates a Gaussian White sequence from N(0,s2).
       n = this.sinput.length;
-      fcn = @(m,s,n) normrnd(m,s,[1,n]);
-
       s2 = this.sinput.var;
-      r = fcn(0,s2,n); % white sequence N(0,s2)
+      r = this.fcnNormRnd(0,sqrt(s2),n); % white sequence N(0,s2)
     endfunction
 
     function [x] = GetSampleWiener(this)
       % generates Wiener sequence with variance s2.
       n = this.sinput.length;
-      r=zeros(1,n);
+      x = zeros(1,n);
       s2 = this.sinput.var;
-      w=normrnd(0,s2,[1,n]);
+      w = this.fcnNormRnd(0,sqrt(s2),n); % white sequence N(0,s2)
       for i=1:n
         if (i==1)
           x(i)=0; % Wiener sequence, x(0)=0.
         else
-          x(i) = x(i-1) + w(i);
+          x(i) = x(i-1) + w(i); % [2], (P2.35)
         endif
       endfor
     endfunction
 
     function [] = PlotSampleBernoulli(this,x)
-      stem(x);
+      plot(x,'--.');
       title('Sample - Bernoulli Process');
     endfunction
 
