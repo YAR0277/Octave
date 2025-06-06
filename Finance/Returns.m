@@ -204,26 +204,28 @@ classdef Returns < handle
         return;
       endif
 
+      fprintf('Symbol: %s\n',this.finput.symbol);
       fprintf('Time Period: [%s,%s]\n',datestr(this.returns(1).firstDay),datestr(this.returns(end).lastDay));
       rts = [this.returns.rateOfReturn];
       fprintf('Number of Samples: %d\n',numel(rts));
       fprintf('Max. return: %.2f%%\n',max(rts));
       fprintf('Min. return: %.2f%%\n',min(rts));
       fprintf('Avg. return: %.2f%%\n',mean(rts));
+      fprintf('Total return: %.2f%%, APR=%.2f%%\n',sum(rts),sum(rts)*(365/numel(rts)));
       fprintf('Volatility of returns: %.2f%%\n',std(rts)); % standard deviation = volatility
       tol = 0;
       % returns > tolerance
       ix = rts >= tol;
-      fprintf('Number of Returns >= %.2f: %d, Avg. %.f%%\n',tol,sum(ix),mean(rts(ix)));
+      fprintf('Number of Returns >= %.2f: %d (avg. return %.f%%)\n',tol,sum(ix),mean(rts(ix)));
       % returns <= tolerance
       ix = rts <= tol;
-      fprintf('Number of Returns <= %.2f: %d, Avg. %.2f%%\n',tol,sum(ix),mean(rts(ix)));
+      fprintf('Number of Returns <= %.2f: %d (avg. return %.2f%%)\n',tol,sum(ix),mean(rts(ix)));
       % returns >= volatility
       ix = rts >= std(rts);
-      fprintf('Number of Returns >= %.2f: %d, Avg. %.2f%%\n',std(rts),sum(ix),mean(rts(ix)));
+      fprintf('Number of Returns >= %.2f: %d (avg. return %.2f%%)\n',std(rts),sum(ix),mean(rts(ix)));
       % returns <= -volatility
       ix = rts <= -std(rts);
-      fprintf('Number of Returns <= %.2f: %d, Avg. %.2f%%\n',-std(rts),sum(ix),mean(rts(ix)));
+      fprintf('Number of Returns <= %.2f: %d (avg. return %.2f%%)\n',-std(rts),sum(ix),mean(rts(ix)));
 
     endfunction
 
@@ -500,13 +502,15 @@ classdef Returns < handle
     endfunction
 
     function [] = SetDayYrMatrix(this,yr)
-      if is_leap_year(yr)
-        this.A = NaN(366+1,2);
-      else
-        this.A = NaN(365+1,2); % one needs 1 extra day to calculate return
-      endif
 
-      this.A(:,1) = datenum(yr,1,1)-1:datenum(yr,12,31); % -1 is the extra day
+      n = numel(this.timestamp);
+      this.A = NaN(n+1,2); % 1 extra day to calculate return
+
+      i1 = find(this.timestamp >= datenum(yr,1,1), 1, 'first');
+      i2 = find(this.timestamp <= datenum(yr,12,31), 1, 'last');
+
+      this.A(1,1) = this.timestamp(i1)-1; % -1 is the extra day
+      this.A(2:end,1) = this.timestamp(i1:i2);
       this.A(:,2) = this.A(:,1)+1;
     endfunction
 
