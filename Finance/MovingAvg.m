@@ -7,6 +7,11 @@ classdef MovingAvg < handle
 
     function [r] = SMA(x,wlen)
       % calculates the Simple Moving Average
+      if wlen < 1
+        fprintf('error: window length(%d) must be at least 1. \n',wlen);
+        return;
+      endif
+
       try
         r = movmean(x,wlen);
       catch ME
@@ -72,6 +77,16 @@ classdef MovingAvg < handle
       n = size(x,2);
       if n < 1
         fprintf('error: input vector length(%d) must be at least 1. \n',n);
+        return;
+      endif
+
+      if isempty(alpha)
+        fprintf('error: smoothing parameter ''alpha'' undefined. It must be in [0,1].\n',alpha);
+        return;
+      endif
+
+      if alpha < 0 || alpha > 1
+        fprintf('error: smoothing parameter ''alpha'' is %.2f. It must be in [0,1].\n',alpha);
         return;
       endif
 

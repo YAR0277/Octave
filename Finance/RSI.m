@@ -4,7 +4,7 @@ classdef RSI < handle
   % https://www.investopedia.com/terms/r/rsi.asp
 
   properties
-    alpha     % smoothing parameter
+    alpha     % smoothing parameter: alpha -> 1 (less smoothing), alpha -> 0 (more smoothing)
     finput    % Reference to Finput class
     price     % x - prices of investment
     rsiType   % type of RSI = {"SMA","MMA","EMA","WMA"}
@@ -23,6 +23,8 @@ classdef RSI < handle
 
       obj.finput = finput;
       obj.rsiType = "SMA"; % default
+      obj.alpha = 0.1;
+      obj.wlen = 14;
       [obj.timestamp,obj.price] = showf(finput);
     endfunction
 
@@ -73,6 +75,12 @@ classdef RSI < handle
     endfunction
 
     function [] = PlotRSI(this,rsiType)
+
+      if nargin < 2
+        fprintf('call is ''PlotRSI(rsiType)'' where rsiType = {SMA,EMA,MMA,WMA}\n');
+        return;
+      endif
+
       figure;
       hold on;
       grid on;
