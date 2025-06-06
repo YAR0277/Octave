@@ -62,6 +62,8 @@ classdef RndSeq < handle
 
     function [x] = GetSample(this)
       switch this.sinput.type
+        case "Constant"
+          x = this.GetSampleConstant();
         case "Bernoulli"
           x = this.GetSampleBernoulli();
         case "RandomWalk"
@@ -80,6 +82,9 @@ classdef RndSeq < handle
     function [] = PlotSample(this)
       figure;
       switch this.sinput.type
+        case "Constant"
+          x = this.GetSampleConstant();
+          this.PlotSampleConstant(x);
         case "Bernoulli"
           x = this.GetSampleBernoulli();
           this.PlotSampleBernoulli(x);
@@ -135,6 +140,9 @@ classdef RndSeq < handle
     function [r] = TheoreticalStats(this,k)
       r = struct('mean',0,'variance',0);
       switch this.sinput.type
+        case "Constant" % [2], (Ex.2.5)
+          r.mean = 0;
+          r.variance = this.sinput.var;
         case "RandomWalk" % [1], (P5.10)
           r.mean = k*(this.sinput.prbSuccess - (1 - this.sinput.prbSuccess)); % k(p-q);
           r.variance = 4*k*(this.sinput.prbSuccess*(1 - this.sinput.prbSuccess)); % 4kpq
@@ -171,6 +179,13 @@ classdef RndSeq < handle
   endmethods % Public
 
   methods (Access = private)
+
+    function [r] = GetSampleConstant(this)
+      % generates a Constant sequence of length n.
+      n = this.sinput.length;
+      s2 = this.sinput.var;
+      r = ones(n,1)*this.fcnNormRnd(0,sqrt(s2),1);
+    endfunction
 
     function [r] = GetSampleBernoulli(this)
       % generates a Bernoulli sequence of length n with success probability p.
@@ -232,6 +247,11 @@ classdef RndSeq < handle
           x(i) = x(i-1) + w(i); % [2], (P2.35)
         endif
       endfor
+    endfunction
+
+    function [] = PlotSampleConstant(this,x)
+      plot(x,'--.');
+      title('Sample - Constant Process');
     endfunction
 
     function [] = PlotSampleBernoulli(this,x)

@@ -7,7 +7,7 @@ classdef Sinput < handle
     prbSuccess    % probability of success in Bernoulli trials
     beta          % time constant of Markov process
     timestep      % time interval between samples in Markov process
-    type          % type of random sequence {'Bernoulli','GaussMarkov','RandomWalk','White','Wiener'}
+    type          % type of random sequence {'Constant','Bernoulli','GaussMarkov','RandomWalk','White','Wiener'}
     var           % variance of sequence
   endproperties
 
@@ -48,7 +48,7 @@ classdef Sinput < handle
     endfunction
 
     function [] = SetType(this,type)
-      if ismember(type,{'Bernoulli','GaussMarkov','RandomWalk','White','Wiener'})
+      if ismember(type,{'Constant','Bernoulli','GaussMarkov','RandomWalk','White','Wiener'})
         this.type = type;
       end
     endfunction
