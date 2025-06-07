@@ -503,12 +503,11 @@ classdef Returns < handle
 
     function [] = SetDayYrMatrix(this,yr)
 
-      n = numel(this.timestamp);
-      this.A = NaN(n+1,2); % 1 extra day to calculate return
-
       i1 = find(this.timestamp >= datenum(yr,1,1), 1, 'first');
       i2 = find(this.timestamp <= datenum(yr,12,31), 1, 'last');
 
+      n = i2-i1+1;
+      this.A = NaN(n+1,2); % 1 extra day to calculate return
       this.A(1,1) = this.timestamp(i1)-1; % -1 is the extra day
       this.A(2:end,1) = this.timestamp(i1:i2);
       this.A(:,2) = this.A(:,1)+1;

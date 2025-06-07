@@ -12,11 +12,17 @@ classdef Finput < handle
 
   methods % Public
 
-    function [obj] = Finput()
+    function [obj] = Finput(varargin)
       obj.dataCol = 'close';
       obj.dataFolder = 'c:\users\drdav\data\finance'; % financial data folder;
       obj.dateFormat = 'yyyy-mm-dd';
       obj.descendFlag = 0; % data is in ascending order: oldest -> newest
+      obj.fileName = '';
+      obj.symbol = '';
+
+      if ~isempty(varargin)
+        obj.Load(varargin{1});
+      endif
     endfunction
 
     function [] = SetFile(this,fileName)
@@ -39,6 +45,38 @@ classdef Finput < handle
     function [] = ShowFiles(this)
       % shows all files in dataFolder
       dir(strcat(this.dataFolder,'\*.csv'))
+    endfunction
+
+    function [] = Load(this, fileName)
+      fid = fopen(fileName, 'r');
+      fin = textscan(fid,"%s %s %s %d %s %s", 'delimiter', '\n');
+      this.dataCol = cell2mat(fin{1});
+      this.dataFolder = cell2mat(fin{2});
+      this.dateFormat = cell2mat(fin{3});
+      this.descendFlag = fin{4};
+      this.fileName = cell2mat(fin{5});
+      this.symbol = cell2mat(fin{6});
+    endfunction
+
+    function [] = Save(this)
+      filename = strcat(this.symbol,".txt");
+      asStruct = this.ToStruct();
+      fid = fopen(filename, 'w+');
+      fprintf(fid,'%s\n',asStruct.dataCol);
+      fprintf(fid,'%s\n',asStruct.dataFolder);
+      fprintf(fid,'%s\n',asStruct.dateFormat);
+      fprintf(fid,'%d\n',asStruct.descendFlag);
+      fprintf(fid,'%s\n',asStruct.fileName);
+      fprintf(fid,'%s\n',asStruct.symbol);
+      fclose(fid);
+    endfunction
+
+    function [s] = ToStruct(this)
+      s = struct();
+      fields = fieldnames(this);
+      for i=1:length(fields)
+        s.(fields{i}) = getfield(this,fields{i});
+      endfor
     endfunction
   endmethods
 endclassdef
