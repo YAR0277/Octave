@@ -216,7 +216,7 @@ classdef Returns < handle
       tol = 0;
       % returns > tolerance
       ix = rts >= tol;
-      fprintf('Number of Returns >= %.2f: %d (avg. return %.f%%)\n',tol,sum(ix),mean(rts(ix)));
+      fprintf('Number of Returns >= %.2f: %d (avg. return %.2f%%)\n',tol,sum(ix),mean(rts(ix)));
       % returns <= tolerance
       ix = rts <= tol;
       fprintf('Number of Returns <= %.2f: %d (avg. return %.2f%%)\n',tol,sum(ix),mean(rts(ix)));
