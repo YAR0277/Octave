@@ -8,7 +8,7 @@ function [] = plotf(finput)
     return;
   endif
 
-  [t,x] = showf(finput);
+  [t,x] = readf(finput);
 
   plot(t,x,'--.');
   datetick('x',finput.dateFormat,'keepticks');

@@ -1,5 +1,5 @@
-% showf(finput) - function to show financial data raw values
-function [t,x,r] = showf(finput)
+% readf(finput) - function to read financial data using Finput
+function [t,x,r] = readf(finput)
   % finput - instance of Finput
 
   pkg load io;

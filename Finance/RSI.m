@@ -25,7 +25,7 @@ classdef RSI < handle
       obj.rsiType = "SMA"; % default
       obj.alpha = 0.1;
       obj.wlen = 14;
-      [obj.timestamp,obj.price] = showf(finput);
+      [obj.timestamp,obj.price] = readf(finput);
     endfunction
 
     function [r] = CalcRSI(this)

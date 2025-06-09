@@ -3,10 +3,12 @@ classdef Returns < handle
 
   properties
     finput      % Reference to Finput class
+    pctChange   % the rate of return
     price       % x - prices of investment
     returns     % rate of return structure
     timestamp   % t - timestamp of prices
     timestep    % time interval of price data {'day','week','month','quarter'}
+    usePctChangeFlag % use returns.rateOfReturn or pctChange
   endproperties
 
   properties (Access=private)
@@ -22,8 +24,9 @@ classdef Returns < handle
       endif
 
       obj.finput = finput;
-      [obj.timestamp,obj.price,~] = showf(finput);
+      [obj.timestamp,obj.price,obj.pctChange] = readf(finput);
       obj.timestep = obj.SetTimeStep(obj.timestamp);
+      obj.usePctChangeFlag = 1;
     endfunction
 
     function [] = Bar(this)
@@ -140,13 +143,50 @@ classdef Returns < handle
       set(ax,"XTick",datenum(xticks,1,1));
       datetick('x','YY','keepticks','keeplimits');
 
-      ylabel('Rate of Return (%)');
-      title(this.finput.symbol);
+      ylabel('Rate of Return (%)','FontSize',16);
+      title(this.finput.symbol,'FontSize',16);
       xlim([this.GetDayNumber(this.returns(1).year) this.GetDayNumber(this.returns(end).year)]);
       grid on;
 
       this.DoLabels(-1,2);
 
+    endfunction
+
+    function [] = PlotBar(this)
+      % plot returns as bar plot
+
+      figure;
+      [t,y] = this.GetReturnData();
+      bar(t,y);
+
+      [xticks,fmt] = this.GetTimeTicks(t);
+      ax = gca;
+      set(ax,"XTick",xticks);
+      datetick('x',fmt,'keepticks','keeplimits');
+      xlim([xticks(1) xticks(end)]);
+
+      ylabel('Rate of Return (%)');
+      title(this.finput.symbol);
+      grid on;
+    endfunction
+
+    function [] = PlotStem(this)
+      % plots returns as stem plot
+
+      figure;
+      [t,y] = this.GetReturnData();
+      stem(t,y);
+
+      [xticks,fmt] = this.GetTimeTicks(t);
+      ax = gca;
+      set(ax,"XTick",xticks);
+      datetick('x',fmt,'keepticks','keeplimits');
+      xlim([xticks(1) xticks(end)]);
+
+      ylabel('Rate of Return (%)','FontSize',16);
+      title(this.finput.symbol,'FontSize',16);
+      grid on;
+      grid minor;
     endfunction
 
     function [] = PlotYTD(this)
@@ -199,34 +239,11 @@ classdef Returns < handle
 
     function [r] = Stats(this)
       % calculates statistics on returns
-      if isempty(this.returns)
-        fprintf('The returns structure is empty. Please calculate returns and try again.\n');
-        return;
+      if this.usePctChangeFlag
+        this.DoStats(this.timestamp(1),this.timestamp(end),this.pctChange);
+      else
+        this.DoStats(this.returns(1).firstDay,this.returns(end).lastDay,[this.returns.rateOfReturn]);
       endif
-
-      fprintf('Symbol: %s\n',this.finput.symbol);
-      fprintf('Time Period: [%s,%s]\n',datestr(this.returns(1).firstDay),datestr(this.returns(end).lastDay));
-      rts = [this.returns.rateOfReturn];
-      fprintf('Number of Samples: %d\n',numel(rts));
-      fprintf('Max. return: %.2f%%\n',max(rts));
-      fprintf('Min. return: %.2f%%\n',min(rts));
-      fprintf('Avg. return: %.2f%%\n',mean(rts));
-      fprintf('Total return: %.2f%%, APR=%.2f%%\n',sum(rts),sum(rts)*(365/numel(rts)));
-      fprintf('Volatility of returns: %.2f%%\n',std(rts)); % standard deviation = volatility
-      tol = 0;
-      % returns > tolerance
-      ix = rts >= tol;
-      fprintf('Number of Returns >= %.2f: %d (avg. return %.2f%%)\n',tol,sum(ix),mean(rts(ix)));
-      % returns <= tolerance
-      ix = rts <= tol;
-      fprintf('Number of Returns <= %.2f: %d (avg. return %.2f%%)\n',tol,sum(ix),mean(rts(ix)));
-      % returns >= volatility
-      ix = rts >= std(rts);
-      fprintf('Number of Returns >= %.2f: %d (avg. return %.2f%%)\n',std(rts),sum(ix),mean(rts(ix)));
-      % returns <= -volatility
-      ix = rts <= -std(rts);
-      fprintf('Number of Returns <= %.2f: %d (avg. return %.2f%%)\n',-std(rts),sum(ix),mean(rts(ix)));
-
     endfunction
 
     function [r] = YRL(this)
@@ -403,15 +420,45 @@ classdef Returns < handle
 
     function [] = DoVolatility(this)
 
-      rts = [this.returns.rateOfReturn];
-      vol = std(rts); % standard deviation = volatility
-      num = numel(rts);
+      y = [this.returns.rateOfReturn];
+      vol = std(y); % standard deviation = volatility
+      num = numel(y);
       tvals=arrayfun(@(s) this.GetDayNumber(s),[this.returns(:).year]);
 
       hold on;
       plot(tvals,(0+vol)*ones(num,1),'r--');
       plot(tvals,(0-vol)*ones(num,1),'r--');
       hold off;
+    endfunction
+
+    function [r] = DoStats(this,t1,t2,y)
+      % calculates statistics on returns
+      if isempty(y)
+        fprintf('No return data available.\n');
+        return;
+      endif
+
+      fprintf('Symbol: %s\n',this.finput.symbol);
+      fprintf('Time Period: [%s,%s]\n',datestr(t1),datestr(t2));
+      fprintf('Number of Samples: %d\n',numel(y));
+      fprintf('Max. return: %.2f%%\n',max(y));
+      fprintf('Min. return: %.2f%%\n',min(y));
+      fprintf('Avg. return: %.2f%%\n',mean(y));
+      fprintf('Total return: %.2f%%, APR=%.2f%%\n',sum(y),sum(y)*(365/numel(y)));
+      fprintf('Volatility of returns: %.2f%%\n',std(y)); % standard deviation = volatility
+      tol = 0;
+      % returns > tolerance
+      ix = y >= tol;
+      fprintf('Number of Returns >= %.2f: %d (avg. return %.2f%%)\n',tol,sum(ix),mean(y(ix)));
+      % returns <= tolerance
+      ix = y <= tol;
+      fprintf('Number of Returns <= %.2f: %d (avg. return %.2f%%)\n',tol,sum(ix),mean(y(ix)));
+      % returns >= volatility
+      ix = y >= std(y);
+      fprintf('Number of Returns >= %.2f: %d (avg. return %.2f%%)\n',std(y),sum(ix),mean(y(ix)));
+      % returns <= -volatility
+      ix = y <= -std(y);
+      fprintf('Number of Returns <= %.2f: %d (avg. return %.2f%%)\n',-std(y),sum(ix),mean(y(ix)));
     endfunction
 
     function [r] = CalcRateOfReturn(this,dn1,dn2)
@@ -485,9 +532,18 @@ classdef Returns < handle
       endif
     endfunction
 
-    function [r,fmt] = GetTimeTicks(this)
+    function [t,y] = GetReturnData(this)
+      if this.usePctChangeFlag
+        t = this.timestamp;
+        y = this.pctChange;
+      else
+        t = [this.returns.lastDay]; % at the end of each month, lastDay
+        y = [this.returns.rateOfReturn];
+      endif
+    endfunction
+
+    function [r,fmt] = GetTimeTicks(this,t)
       % gets xticks and date format depending on timestep
-      numReturns = numel([this.returns.rateOfReturn]);
       switch this.timestep
         case 'day'
           dt = 10;
@@ -510,13 +566,13 @@ classdef Returns < handle
           r = this.CalcYtdQuarter();
         otherwise
       endswitch
-      r = [this.A(1:dt:numReturns,2)]; % 2 = lastDay
+      r = t(1:dt:end);
       % if there is enough room (szfmt), add the last return to the ticks,
       % otherwise replace the last tick with the last return.
-      if this.A(numReturns,2) - r(end) > szfmt
-        r(end+1) = this.A(numReturns,2);
+      if t(end) - r(end) > szfmt
+        r(end+1) = t(end);
       else
-        r(end) = this.A(numReturns,2);
+        r(end) = t(end);
       endif
     endfunction
 

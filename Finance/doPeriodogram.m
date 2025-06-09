@@ -39,7 +39,7 @@ function [x] = GetSignalCosine(N)
 endfunction
 
 function [x,n] = GetSignalFromFile(fname,ftype)
-  x = showf(fname,ftype);
+  x = readf(fname,ftype);
   n = numel(x);
   if mod(n,2) ~= 0
     n = n-1;

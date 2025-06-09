@@ -1,5 +1,5 @@
 classdef Finput < handle
-  % Input structure for financial functions plotf, showf and classes Returns
+  % Input structure for financial functions plotf, readf and classes Returns
 
   properties
     dataCol
