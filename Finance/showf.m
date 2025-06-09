@@ -1,5 +1,5 @@
 % showf(finput) - function to show financial data raw values
-function [t,x] = showf(finput)
+function [t,x,r] = showf(finput)
   % finput - instance of Finput
 
   pkg load io;
@@ -26,6 +26,20 @@ function [t,x] = showf(finput)
     x=flip(cell2mat(data(firstDataRow:end,ixCol)));
   else
     x=cell2mat(data(firstDataRow:end,ixCol));
+  endif
+
+  % returns
+  ixCol = 6; % Date,Open,High,Low,Close,% Change,% Change vs Average,Volume
+
+  % fill empties with 0
+  ix = find(cellfun(@isempty,data(firstDataRow:end,ixCol)));
+  ix = ix + (firstDataRow-1); % account for header row
+  data(ix,ixCol) = 0;
+
+  if finput.descendFlag
+    r=flip(cell2mat(data(firstDataRow:end,ixCol)));
+  else
+    r=cell2mat(data(firstDataRow:end,ixCol));
   endif
 endfunction
 

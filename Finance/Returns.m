@@ -22,7 +22,7 @@ classdef Returns < handle
       endif
 
       obj.finput = finput;
-      [obj.timestamp,obj.price] = showf(finput);
+      [obj.timestamp,obj.price,~] = showf(finput);
       obj.timestep = obj.SetTimeStep(obj.timestamp);
     endfunction
 
@@ -157,15 +157,15 @@ classdef Returns < handle
 
       numReturns = numel([this.returns.rateOfReturn]);
 
+      [xticks,fmt] = this.GetTimeTicks();
       ax = gca;
-      xticks = [this.A(1:numReturns,2)]; % 2 = lastDay
       set(ax,"XTick",xticks);
-      datetick('x','YY-mm','keepticks','keeplimits');
+      datetick('x',fmt,'keepticks','keeplimits');
 
       xlim([this.A(1,2) this.A(numReturns,2)]);
 
-      ylabel('Rate of Return (%)');
-      title(this.finput.symbol);
+      ylabel('Rate of Return (%)','FontSize',16);
+      title(this.finput.symbol,'FontSize',16);
       grid on;
     endfunction
 
@@ -482,6 +482,41 @@ classdef Returns < handle
           q=i-1;
           y=year;
         endif
+      endif
+    endfunction
+
+    function [r,fmt] = GetTimeTicks(this)
+      % gets xticks and date format depending on timestep
+      numReturns = numel([this.returns.rateOfReturn]);
+      switch this.timestep
+        case 'day'
+          dt = 10;
+          fmt = 'YY-mm-dd';
+          szfmt = 8;
+        case 'week'
+          dt = 10;
+          fmt = 'YY-mm-dd';
+          szfmt = 8;
+          r = this.CalcYtdWeek();
+        case 'month'
+          dt = 10;
+          fmt = 'YY-mm';
+          szfmt = 6;
+          r = this.CalcYtdMonth();
+        case 'quarter'
+          dt = 10;
+          fmt = 'YY-mm';
+          szfmt = 6;
+          r = this.CalcYtdQuarter();
+        otherwise
+      endswitch
+      r = [this.A(1:dt:numReturns,2)]; % 2 = lastDay
+      % if there is enough room (szfmt), add the last return to the ticks,
+      % otherwise replace the last tick with the last return.
+      if this.A(numReturns,2) - r(end) > szfmt
+        r(end+1) = this.A(numReturns,2);
+      else
+        r(end) = this.A(numReturns,2);
       endif
     endfunction
 
