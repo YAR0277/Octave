@@ -5,6 +5,7 @@ classdef RSI < handle
 
   properties
     alpha     % smoothing parameter: alpha -> 1 (less smoothing), alpha -> 0 (more smoothing)
+    data      % struct of input data
     finput    % Reference to Finput class
     price     % x - prices of investment
     rsiType   % type of RSI = {"SMA","MMA","EMA","WMA"}
@@ -22,10 +23,12 @@ classdef RSI < handle
       endif
 
       obj.finput = finput;
+      obj.data = readf(finput);
       obj.rsiType = "SMA"; % default
       obj.alpha = 0.1;
       obj.wlen = 14;
-      [obj.timestamp,obj.price] = readf(finput);
+      obj.timestamp = obj.data.Date;
+      obj.price = obj.data.(finput.dataCol);
     endfunction
 
     function [r] = CalcRSI(this)
@@ -90,9 +93,9 @@ classdef RSI < handle
       ylim([0 100]);
       this.AddGuideLines(70,30);
       this.AddRectgangle(numel(this.price),70,30);
-      ylabel('RSI');
-      legend(rsiType);
-      title(this.finput.symbol);
+      ylabel('RSI','FontSize',14);
+      legend(rsiType,'FontSize',12);
+      title(this.finput.symbol,'FontSize',16);
       hold off;
     endfunction
 
@@ -134,10 +137,10 @@ classdef RSI < handle
       n=xlim(2)-xlim(1)+1;
       dx=100;dy=5;
 
-      plot([xlim(1):xlim(2)],ones(1,n)*high,'--','color','red','linewidth',0.1);
+      plot([xlim(1):xlim(2)],ones(1,n)*high,'--','color','red','LineWidth',1.0);
       text(xlim(1)+dx,high+dy,'Overbought > 70');
 
-      plot([xlim(1):xlim(2)],ones(1,n)*low,'--','color','red','linewidth',0.1);
+      plot([xlim(1):xlim(2)],ones(1,n)*low,'--','color','red','LineWidth',1.0);
       text(xlim(1)+dx,low-dy,'Oversold < 30');
     endfunction
 
@@ -156,7 +159,7 @@ classdef RSI < handle
 
       x=this.CalcRSI();
       t=this.timestamp(2:end);
-      plot(t,x,'--.');
+      plot(t,x,'--.','MarkerSize',10,'LineWidth',1.0);
     endfunction
 
     function [] = AddRectgangle(~,n,high,low)

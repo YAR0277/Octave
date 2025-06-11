@@ -13,7 +13,7 @@ classdef Finput < handle
   methods % Public
 
     function [obj] = Finput(varargin)
-      obj.dataCol = 'close';
+      obj.dataCol = 'Close'; % 'Open','High','Low','Close','pctChange','pctChangeAvg','Volume'
       obj.dataFolder = 'c:\users\drdav\data\finance'; % financial data folder;
       obj.dateFormat = 'yyyy-mm-dd';
       obj.descendFlag = 0; % data is in ascending order: oldest -> newest

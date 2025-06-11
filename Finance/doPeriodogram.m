@@ -4,7 +4,7 @@ function [f,P] = doPeriodogram(x,n)
   addpath(genpath('../Common'));
 
 % Ex. data from file
-##  [x,n]=GetSignalFromFile('DJIND.csv','close');
+##  [x,n]=GetSignalFromFile('DJIND.csv','Close');
 
 % Ex. generated data
 ##  N=500;
@@ -38,8 +38,9 @@ function [x] = GetSignalCosine(N)
   x=A*cos(2*pi*omega*t + phi) + A*cos(2*pi*2*omega*t + phi);
 endfunction
 
-function [x,n] = GetSignalFromFile(fname,ftype)
-  x = readf(fname,ftype);
+function [x,n] = GetSignalFromFile(finput)
+  s = readf(finput);
+  x = s.(finput.dataCol);
   n = numel(x);
   if mod(n,2) ~= 0
     n = n-1;

@@ -1,0 +1,70 @@
+classdef Futil < handle
+  % utilities for Finance folder
+
+  methods (Static = true) % Public
+
+    function [r] = GetDateNum(this,y)
+      yearStr = num2str(y);
+      dateStr = strcat(yearStr,'-01-01');
+      r = datenum(dateStr,'yyyy-mm-dd');
+    endfunction
+
+    function [r] = GetDateStr(this,daynr)
+      i = find( this.timestamp == daynr );
+      r = datestr(this.timestamp(i));
+    endfunction
+
+    function [r,fmt] = GetDateTicks(t)
+      % gets xticks and date format depending on timestep
+      timestep = Futil.GetTimeStep(t);
+      switch timestep
+        case 'day'
+          dt = 10;
+          fmt = 'YY-mm-dd';
+          szfmt = 8;
+        case 'week'
+          dt = 10;
+          fmt = 'YY-mm-dd';
+          szfmt = 8;
+        case 'month'
+          dt = 10;
+          fmt = 'YY-mm';
+          szfmt = 6;
+        case 'quarter'
+          dt = 10;
+          fmt = 'YY-mm';
+          szfmt = 6;
+        otherwise
+      endswitch
+      r = t(1:dt:end);
+      % if there is enough room (szfmt), add the last return to the ticks,
+      % otherwise replace the last tick with the last return.
+      if t(end) - r(end) > szfmt
+        r(end+1) = t(end);
+      else
+        r(end) = t(end);
+      endif
+    endfunction
+
+    function [r] = GetTimeStep(timestamp)
+        dt = diff(timestamp);
+        dd = mean(dt); % delta (in) days
+        if dd >= 1 && dd <=2
+          r = 'day';
+        elseif dd >= 6 && dd <= 7
+          r = 'week';
+        elseif dd >= 27 && dd <= 31
+          r = 'month';
+        elseif dd >= 89 && dd <= 91
+          r = 'quarter';
+        else
+          r = 'undefined';
+        endif
+    endfunction
+
+    function [r] = Round(r)
+      r = round(r.*100)./100; % round to nearest 2 decimal places
+    endfunction
+
+  endmethods
+endclassdef
