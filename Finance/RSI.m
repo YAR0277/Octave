@@ -69,33 +69,41 @@ classdef RSI < handle
       datetick('x','YY','keepticks');
       ylim([0 100]);
       ylabel('RSI');
-      title('Comparison of Relative Strength Indices');
+      title('Comparison of Relative Strength Indices','FontSize', Futil.TitleFontSize);
       this.AddGuideLines(70,30);
       this.AddRectgangle(numel(this.price),70,30);
       grid on;
-      legend('SMA','EMA','MMA','WMA');
+      legend({'SMA','EMA','MMA','WMA'},'FontSize',Futil.LegendFontSize);
       hold off;
     endfunction
 
-    function [] = PlotRSI(this,rsiType)
-
-      if nargin < 2
-        fprintf('call is ''PlotRSI(rsiType)'' where rsiType = {SMA,EMA,MMA,WMA}\n');
-        return;
-      endif
-
+    function [] = Plot(this)
       figure;
+      this.Subplot();
+      title(this.finput.symbol,'FontSize',16);
+    endfunction
+
+    function [] = Subplot(this)
+
+      x=this.CalcRSI();
+      t=this.timestamp(2:end);
+      plot(t,x,'--.','MarkerSize',Futil.PlotMarkerSize,'LineWidth',Futil.PlotLineWidth);
       hold on;
-      grid on;
-      grid minor;
-      this.DoPlotRSI(rsiType);
-      datetick('x','YY','keepticks');
+
+      [xticks,fmt] = Futil.GetDateTicks(this.timestamp);
+      ax = gca;
+      set(ax,"XTick",xticks);
+      datetick('x',fmt,'keepticks','keeplimits');
+      xlim([xticks(1) xticks(end)]);
+
       ylim([0 100]);
       this.AddGuideLines(70,30);
       this.AddRectgangle(numel(this.price),70,30);
-      ylabel('RSI','FontSize',14);
-      legend(rsiType,'FontSize',12);
-      title(this.finput.symbol,'FontSize',16);
+      ylabel('RSI','FontSize',Futil.YLabelFontSize);
+      legend(this.rsiType,'FontSize',Futil.LegendFontSize);
+
+      grid on;
+      grid minor;
       hold off;
     endfunction
 
@@ -137,10 +145,10 @@ classdef RSI < handle
       n=xlim(2)-xlim(1)+1;
       dx=100;dy=5;
 
-      plot([xlim(1):xlim(2)],ones(1,n)*high,'--','color','red','LineWidth',1.0);
+      plot([xlim(1):xlim(2)],ones(1,n)*high,'--','color','red','LineWidth',Futil.PlotLineWidth);
       text(xlim(1)+dx,high+dy,'Overbought > 70');
 
-      plot([xlim(1):xlim(2)],ones(1,n)*low,'--','color','red','LineWidth',1.0);
+      plot([xlim(1):xlim(2)],ones(1,n)*low,'--','color','red','LineWidth',Futil.PlotLineWidth);
       text(xlim(1)+dx,low-dy,'Oversold < 30');
     endfunction
 
@@ -151,15 +159,6 @@ classdef RSI < handle
       x=this.CalcRS();
       t=this.timestamp(2:end);
       plot(t,x,'--.');
-    endfunction
-
-    function [] = DoPlotRSI(this,rsiType)
-
-      this.SetType(rsiType);
-
-      x=this.CalcRSI();
-      t=this.timestamp(2:end);
-      plot(t,x,'--.','MarkerSize',10,'LineWidth',1.0);
     endfunction
 
     function [] = AddRectgangle(~,n,high,low)

@@ -1,6 +1,14 @@
 classdef Futil < handle
   % utilities for Finance folder
 
+  properties (Constant)
+    YLabelFontSize = 14;
+    TitleFontSize = 16;
+    LegendFontSize = 12;
+    PlotMarkerSize = 10;
+    PlotLineWidth = 1.0;
+  endproperties
+
   methods (Static = true) % Public
 
     function [r] = GetDateNum(this,y)
@@ -55,7 +63,7 @@ classdef Futil < handle
           r = 'week';
         elseif dd >= 27 && dd <= 31
           r = 'month';
-        elseif dd >= 89 && dd <= 91
+        elseif dd >= 89 && dd <= 92
           r = 'quarter';
         else
           r = 'undefined';

@@ -28,7 +28,7 @@ classdef Returns < handle
       obj.timestamp = obj.data.Date;
       obj.timestep = Futil.GetTimeStep(obj.timestamp);
       obj.flgPctChange = 1;
-      obj.flgStemPlot = 1;
+      obj.flgStemPlot = 0;
     endfunction
 
     function [] = Calc(this)

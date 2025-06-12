@@ -8,10 +8,14 @@ function [] = plotf(finput)
     return;
   endif
 
-  [s] = readf(finput);
+  s = readf(finput);
+  t = s.Date;
+  x = s.(finput.dataCol);
 
-  figure;
-  plot(s.Date,s.(finput.dataCol),'--.');
+  rsi = RSI(finput);
+
+  subplot(2,1,1);
+  plot(t(2:end),x(2:end),'--.','MarkerSize',Futil.PlotMarkerSize,'LineWidth',Futil.PlotLineWidth);
 
   [xticks,fmt] = Futil.GetDateTicks(s.Date);
   ax = gca;
@@ -19,12 +23,16 @@ function [] = plotf(finput)
   datetick('x',fmt,'keepticks','keeplimits');
   xlim([xticks(1) xticks(end)]);
 
+  legend(finput.dataCol,'FontSize',Futil.LegendFontSize);
+  ylabel(GetLabelY(finput), 'FontSize', Futil.YLabelFontSize);
+  title(finput.symbol, 'FontSize', Futil.TitleFontSize);
 
-  legend(finput.dataCol);
-  ylabel(GetLabelY(finput), 'FontSize', 16);
-  title(finput.symbol, 'FontSize', 16);
   grid on;
   grid minor;
+
+  subplot(2,1,2);
+  rsi.Subplot();
+
 endfunction
 % Ref.: search string "octave read in datatime from csv"
 %                     "octave plot with datestr"

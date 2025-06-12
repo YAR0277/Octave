@@ -11,17 +11,17 @@ function [] = comparePrice(finput)
   figure;
   hold on;
 
-  finput.SetFile('2025-06-06-fidelity-FDD-d.csv');
+  finput.SetFile('2025-06-11-fidelity-BKLC-w.csv');
   [s] = readf(finput);
-  plot(s.Date,s.(finput.dataCol),'--.','MarkerSize',10,'LineWidth',1.0);
+  plot(s.Date,s.(finput.dataCol),'--.','MarkerSize',Futil.PlotMarkerSize,'LineWidth',Futil.PlotLineWidth);
 
-  finput.SetFile('2025-06-09-fidelity-FDD-w.csv');
+  finput.SetFile('2025-06-11-fidelity-BKLC-m.csv');
   [s] = readf(finput);
-  plot(s.Date,s.(finput.dataCol),'--.','MarkerSize',10,'LineWidth',1.0);
+  plot(s.Date,s.(finput.dataCol),'--.','MarkerSize',Futil.PlotMarkerSize,'LineWidth',Futil.PlotLineWidth);
 
-  finput.SetFile('2025-06-09-fidelity-FDD-m.csv');
+  finput.SetFile('2025-06-11-fidelity-BKLC-q.csv');
   [s] = readf(finput);
-  plot(s.Date,s.(finput.dataCol),'--.','MarkerSize',10,'LineWidth',1.0);
+  plot(s.Date,s.(finput.dataCol),'--.','MarkerSize',Futil.PlotMarkerSize,'LineWidth',Futil.PlotLineWidth);
 
   hold off;
 
@@ -31,9 +31,9 @@ function [] = comparePrice(finput)
   datetick('x',fmt,'keepticks','keeplimits');
   xlim([xticks(1) xticks(end)]);
 
-  legend({'day','week','month'},'FontSize',14);
-  ylabel('Price ($)', 'FontSize', 16);
-  title(finput.symbol, 'FontSize', 16);
+  legend({'week','month','quarter'},'FontSize',Futil.LegendFontSize);
+  ylabel('Price ($)', 'FontSize', Futil.YLabelFontSize);
+  title(finput.symbol, 'FontSize', Futil.TitleFontSize);
   grid on;
   grid minor;
 endfunction
