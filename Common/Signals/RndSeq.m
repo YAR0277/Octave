@@ -29,6 +29,8 @@ classdef RndSeq < handle
         return;
       endif
 
+      pkg load statistics;
+
       obj.sinput = sinput;
       obj.fcnNormRnd = @(m,s,n) normrnd(m,s,[1,n]);
       obj.fcnBernRnd = @(p,n) binornd(1,p,[1,n]);
@@ -58,6 +60,8 @@ classdef RndSeq < handle
         plot(this.X(i,:),'--.');
       endfor
       hold off;
+      grid on;
+      grid minor;
     endfunction
 
     function [x] = GetSample(this)
