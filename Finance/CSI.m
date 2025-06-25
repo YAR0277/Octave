@@ -16,9 +16,9 @@ classdef CSI < handle
 
   methods % Public
 
-    function obj = CSI(finput)
+    function obj = CSI(finput,refInput)
       % c'tor to create an CSI object, input is an Finput object.
-      if ~isa(finput, 'Finput')
+      if ~isa(finput, 'Finput') || ~isa(refInput, 'Finput')
         return;
       endif
 
@@ -26,6 +26,7 @@ classdef CSI < handle
       obj.data = readf(finput);
       obj.timestamp = obj.data.Date;
       obj.price = obj.data.(finput.dataCol);
+      obj.AddReference(refInput);
     endfunction
 
     function [] = AddReference(this,finput)
@@ -57,6 +58,7 @@ classdef CSI < handle
 
       fprintf('Symbol: %s\n',this.finput.symbol);
       fprintf('Time Period: [%s,%s]\n',datestr(this.refTimestamp(1)),datestr(this.refTimestamp(end)));
+      fprintf('Time Step: %s\n',Futil.GetTimeStep(this.timestamp));
       fprintf('Number of Samples: %s(%d), %s(%d)\n',this.finput.symbol,numel(x),this.refSymbol,numel(y));
 
       if numel(dx) ~= numel(dy)
@@ -65,16 +67,16 @@ classdef CSI < handle
       endif
 
       s = sum(u & uref) / sum(uref);
-      fprintf('Prob(%s Up|%s Up): %.2f\n',this.finput.symbol,this.refSymbol,s);
+      fprintf('Prob(%s Up | %s Up): %.2f\n',this.finput.symbol,this.refSymbol,s);
 
       s = sum(d & uref) / sum(uref);
-      fprintf('Prob(%s Down|%s Up): %.2f\n',this.finput.symbol,this.refSymbol,s);
+      fprintf('Prob(%s Down | %s Up): %.2f\n',this.finput.symbol,this.refSymbol,s);
 
       s = sum(u & dref) / sum(dref);
-      fprintf('Prob(%s Up|%s Down): %.2f\n',this.finput.symbol,this.refSymbol,s);
+      fprintf('Prob(%s Up | %s Down): %.2f\n',this.finput.symbol,this.refSymbol,s);
 
       s = sum(d & dref) / sum(dref);
-      fprintf('Prob(%s Down|%s Down): %.2f\n',this.finput.symbol,this.refSymbol,s);
+      fprintf('Prob(%s Down | %s Down): %.2f\n',this.finput.symbol,this.refSymbol,s);
 
     endfunction
 

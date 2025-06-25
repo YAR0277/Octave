@@ -11,6 +11,22 @@ classdef Futil < handle
 
   methods (Static = true) % Public
 
+    function [r] = GetAPR(t,y)
+      timestep = Futil.GetTimeStep(t);
+      r = mean(y);
+      switch timestep
+        case 'day'
+          r = r*(365);
+        case 'week'
+          r = r*(52);
+        case 'month'
+          r = r*(12);
+        case 'quarter'
+          r = r*(4);
+        otherwise
+      endswitch
+    endfunction
+
     function [r] = GetDateNum(this,y)
       yearStr = num2str(y);
       dateStr = strcat(yearStr,'-01-01');

@@ -152,28 +152,31 @@ classdef Returns < handle
 
       fprintf('Symbol: %s\n',this.finput.symbol);
       fprintf('Time Period: [%s,%s]\n',datestr(t1),datestr(t2));
-      fprintf('Number of Samples: %d\n',numel(y));
-      fprintf('Max. return: %.2f%%\n',max(y));
-      fprintf('Min. return: %.2f%%\n',min(y));
-      fprintf('Avg. return: %.2f%%\n',mean(y));
-      fprintf('Total return: %.2f%%, APR=%.2f%%\n',sum(y),sum(y)*(365/numel(y)));
-      fprintf('Volatility of returns: %.2f%%\n',std(y)); % standard deviation = volatility
+      fprintf('Time Step: %s\n',this.timestep);
+      price = this.data.(this.finput.dataCol);
+      fprintf('Price: at last timestamp: %.2f\n',price(end));
+      fprintf('Price: upswing potential (Max. price - Last price): %.2f\n',max(price)-price(end));
+      fprintf('Returns: number of samples: %d\n',numel(y));
+      fprintf('Returns: range: [%.2f%%,%.2f%%]\n',min(y),max(y));
+      fprintf('Returns: avg.: %.2f%%\n',mean(y));
+      fprintf('Returns: total: %.2f%%, APR=%.2f%%\n',sum(y),Futil.GetAPR(this.timestamp,y));
+      fprintf('Returns: volatility: %.2f%%\n',std(y)); % standard deviation = volatility
       tol = 0;
       % returns > tolerance
       ix = y >= tol;
-      fprintf('Number of Returns >= %.2f: %d (pct. of total %.2f%%, avg. return %.2f%%)\n',...
+      fprintf('Returns: >= %.2f: %d (pct. %.2f%%, avg. %.2f%%)\n',...
         tol,sum(ix),Futil.Round(100*(sum(ix)/numel(y))),mean(y(ix)));
       % returns <= tolerance
       ix = y <= tol;
-      fprintf('Number of Returns <= %.2f: %d (pct. of total %.2f%%, avg. return %.2f%%)\n',...
+      fprintf('Returns: <= %.2f: %d (pct. %.2f%%, avg. %.2f%%)\n',...
         tol,sum(ix),Futil.Round(100*(sum(ix)/numel(y))),mean(y(ix)));
       % returns >= volatility
       ix = y >= std(y);
-      fprintf('Number of Returns >= %.2f: %d (pct. of total %.2f%%, avg. return %.2f%%)\n',...
+      fprintf('Returns: >= %.2f: %d (pct. %.2f%%, avg. %.2f%%)\n',...
         std(y),sum(ix),Futil.Round(100*(sum(ix)/numel(y))),mean(y(ix)));
       % returns <= -volatility
       ix = y <= -std(y);
-      fprintf('Number of Returns <= %.2f: %d (pct. of total %.2f%%, avg. return %.2f%%)\n',...
+      fprintf('Returns: <= %.2f: %d (pct. %.2f%%, avg. %.2f%%)\n',...
         -std(y),sum(ix),Futil.Round(100*(sum(ix)/numel(y))),mean(y(ix)));
     endfunction
 
