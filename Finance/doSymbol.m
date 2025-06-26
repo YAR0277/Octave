@@ -6,6 +6,8 @@ function [] = doSymbol(symbol)
   r.Plot;
   c = CSI(fday,fref);
   c.Stats
+  b = BB(fweek);
+  b.Plot;
 
   plotf(fweek);
 
