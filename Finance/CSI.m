@@ -57,26 +57,21 @@ classdef CSI < handle
       dref(dy >= 0) = 0;
 
       fprintf('Symbol: %s\n',this.finput.symbol);
-      fprintf('Time Period: [%s,%s]\n',datestr(this.refTimestamp(1)),datestr(this.refTimestamp(end)));
-      fprintf('Time Step: %s\n',Futil.GetTimeStep(this.timestamp));
-      fprintf('Number of Samples: %s(%d), %s(%d)\n',this.finput.symbol,numel(x),this.refSymbol,numel(y));
+      fprintf('Time Period: [%s,%s], Time Step: %s, Nr. Samples: %s(%d), %s(%d)\n',...
+        datestr(this.refTimestamp(1)),datestr(this.refTimestamp(end)),...
+        Futil.GetTimeStep(this.timestamp),...
+        this.finput.symbol,numel(x),this.refSymbol,numel(y));
 
       if numel(dx) ~= numel(dy)
         fprintf('Unequal sizes: dx=%d, dy=%d\n',numel(dx),numel(dy));
         return;
       endif
 
-      s = sum(u & uref) / sum(uref);
-      fprintf('Prob(%s Up | %s Up): %.2f\n',this.finput.symbol,this.refSymbol,s);
-
-      s = sum(d & uref) / sum(uref);
-      fprintf('Prob(%s Down | %s Up): %.2f\n',this.finput.symbol,this.refSymbol,s);
-
-      s = sum(u & dref) / sum(dref);
-      fprintf('Prob(%s Up | %s Down): %.2f\n',this.finput.symbol,this.refSymbol,s);
-
-      s = sum(d & dref) / sum(dref);
-      fprintf('Prob(%s Down | %s Down): %.2f\n',this.finput.symbol,this.refSymbol,s);
+      s1 = sum(u & uref) / sum(uref);
+      s2 = sum(d & uref) / sum(uref);
+      s3 = sum(u & dref) / sum(dref);
+      s4 = sum(d & dref) / sum(dref);
+      fprintf('Prob(Up|Up)=%.2f, Prob(Dn|Up)=%.2f, Prob(Up|Dn)=%.2f, Prob(Dn|Dn)=%.2f\n',s1,s2,s3,s4);
 
     endfunction
 

@@ -1,5 +1,6 @@
 classdef Futil < handle
   % utilities for Finance folder
+  % https://www.mathworks.com/matlabcentral/answers/182131-percentile-of-a-value-based-on-array-of-data
 
   properties (Constant)
     YLabelFontSize = 14;
@@ -10,6 +11,15 @@ classdef Futil < handle
   endproperties
 
   methods (Static = true) % Public
+
+    function [r] = CalcPercentile(data,value)
+      data = data(:)';
+      value = value(:);
+
+      nless = sum(data < value, 2);
+      nequal = sum(data == value, 2);
+      r = 100*( (nless + 0.5.*nequal) / length(data) );
+    endfunction
 
     function [r] = GetAPR(t,y)
       timestep = Futil.GetTimeStep(t);

@@ -14,6 +14,7 @@ function [] = plotf(finput)
 
   rsi = RSI(finput);
 
+  figure;
   subplot(2,1,1);
   plot(t(2:end),x(2:end),'--.','MarkerSize',Futil.PlotMarkerSize,'LineWidth',Futil.PlotLineWidth);
 
