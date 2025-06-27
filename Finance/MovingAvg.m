@@ -68,30 +68,35 @@ classdef MovingAvg < handle
         fprintf('error: window length(%d) must be at least 1. \n',wlen);
         return;
       endif
-      r = MovingAvg.EMA(x,alpha);
+      r = MovingAvg.EMA(x,wlen,alpha);
     endfunction
 
-    function [r] = EMA(x,alpha)
+    function [r] = EMA(varargin)
       % calculates the Exponential Moving Average
-      % https://en.wikipedia.org/wiki/Exponential_smoothing#
-      n = size(x,2);
+      % https://www.investopedia.com/ask/answers/122314/what-exponential-moving-average-ema-formula-and-how-ema-calculated.asp
+
+      switch nargin
+        case 2
+          x = varargin{1};
+          wlen = varargin{2};
+          alpha = (2 / (wlen + 1)); % smoothing factor
+        case 3
+          x = varargin{1};
+          wlen = varargin{2};
+          alpha = varargin{3};
+        otherwise
+          fprintf('error: invalid number of arguments %d. \n',nargin);
+          return;
+      endswitch
+
+      n = length(x);
       if n < 1
         fprintf('error: input vector length(%d) must be at least 1. \n',n);
         return;
       endif
 
-      if isempty(alpha)
-        fprintf('error: smoothing parameter ''alpha'' undefined. It must be in [0,1].\n',alpha);
-        return;
-      endif
-
-      if alpha < 0 || alpha > 1
-        fprintf('error: smoothing parameter ''alpha'' is %.2f. It must be in [0,1].\n',alpha);
-        return;
-      endif
-
       try
-        r = zeros(1,n);
+        r = MovingAvg.SMA(x,wlen);
         for i=1:n
           if i==1
             r(i) = x(i);

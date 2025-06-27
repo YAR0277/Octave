@@ -48,7 +48,7 @@ classdef RSI < handle
 
       switch this.rsiType
         case "EMA"
-          r = MovingAvg.EMA(u,this.alpha)./MovingAvg.EMA(d,this.alpha);
+          r = MovingAvg.EMA(u,this.wlen,this.alpha)./MovingAvg.EMA(d,this.wlen,this.alpha);
         case "MMA"
           r = MovingAvg.MMA(u,this.wlen)./MovingAvg.MMA(d,this.wlen);
         case "SMA"

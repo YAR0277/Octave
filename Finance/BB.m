@@ -35,7 +35,7 @@ classdef BB < handle
       % calculates the moving average according to moving average type
       switch this.maType
         case "EMA"
-          r = MovingAvg.EMA(x,this.alpha);
+          r = MovingAvg.EMA(x,this.wlen,this.alpha);
         case "MMA"
           r = MovingAvg.MMA(x,this.wlen);
         case "SMA"

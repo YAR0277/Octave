@@ -53,7 +53,7 @@ classdef Futil < handle
       timestep = Futil.GetTimeStep(t);
       switch timestep
         case 'day'
-          dt = 10;
+          dt = 15;
           fmt = 'YY-mm-dd';
           szfmt = 8;
         case 'week'
