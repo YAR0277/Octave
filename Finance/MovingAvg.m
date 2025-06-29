@@ -8,8 +8,11 @@ classdef MovingAvg < handle
     function [r] = SMA(x,wlen)
       % calculates the Simple Moving Average
       if wlen < 1
-        fprintf('error: window length(%d) must be at least 1. \n',wlen);
-        return;
+        error('window length(%d) must be at least 1.',wlen);
+      endif
+
+      if wlen > length(x)
+        error('window length(%d) must be shorter than length of input vector (%d).',wlen,length(x));
       endif
 
       try

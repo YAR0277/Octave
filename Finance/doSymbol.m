@@ -8,6 +8,8 @@ function [] = doSymbol(symbol)
   c.Stats
   b = BB(fweek);
   b.Plot;
+  m = MACD(fday);
+  m.Plot;
 
   plotf(fweek);
 
