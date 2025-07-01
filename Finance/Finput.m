@@ -58,8 +58,8 @@ classdef Finput < handle
       this.symbol = cell2mat(fin{6});
     endfunction
 
-    function [] = Save(this)
-      filename = strcat(this.symbol,".txt");
+    function [] = Save(this,fname)
+      filename = fullfile('Input',strcat(fname,".txt"));
       asStruct = this.ToStruct();
       fid = fopen(filename, 'w+');
       fprintf(fid,'%s\n',asStruct.dataCol);

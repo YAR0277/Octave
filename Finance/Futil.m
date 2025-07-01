@@ -96,6 +96,10 @@ classdef Futil < handle
         endif
     endfunction
 
+    function [r] = RemoveTrend(x)
+      r = diff(x);
+    endfunction
+
     function [r] = Round(r)
       r = round(r.*100)./100; % round to nearest 2 decimal places
     endfunction

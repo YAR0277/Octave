@@ -154,13 +154,6 @@ classdef Returns < handle
 
       fprintf('Symbol: %s\n',this.finput.symbol);
       fprintf('Time Period: [%s,%s], Time Step: %s, Nr. Samples: %d\n',datestr(t1),datestr(t2),this.timestep,numel(y));
-      price = this.data.(this.finput.dataCol);
-      fprintf('Price: range: [%.2f,%.2f], mean: %.2f, std. dev.: %.2f\n',min(price),max(price),mean(price),std(price));
-      fprintf('Price: last: %.2f (z-score %.2f), buy %.2f\n',price(end),(price(end)-mean(price))/std(price),mean(price)-std(price));
-      fprintf('Price: upswing potential (max. price - last price): %.2f\n',max(price)-price(end));
-      fprintf('Price: downswing potential (last price - min. price): %.2f\n',price(end)-min(price));
-      vol = this.volume;
-      fprintf('Volume: range: [%d,%d], last value (%d), percentile (%.2f%%)\n',min(vol),max(vol),vol(end),Futil.CalcPercentile(vol,vol(end)));
       fprintf('Returns: range: [%.2f%%,%.2f%%], mean: %.2f%%, std. dev.: %.2f%%\n',min(y),max(y),mean(y),std(y));
       fprintf('Returns: total: %.2f%%, APR=%.2f%%\n',sum(y),Futil.GetAPR(this.timestamp,y));
       tol = 0;

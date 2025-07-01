@@ -1,6 +1,9 @@
 function [] = doSymbol(symbol)
 
   [fday,fweek,fref] = GetFinput(symbol);
+  p = Price(fday);
+  p.Stats
+  p.Plot;
   r = Returns(fweek);
   r.Stats
   r.Plot;
