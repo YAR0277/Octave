@@ -13,6 +13,8 @@ function [] = doSymbol(symbol)
   b.Plot;
   m = MACD(fday);
   m.Plot;
+  s = StoOsc(fday);
+  s.Plot;
 
   plotf(fweek);
 
