@@ -18,9 +18,8 @@ classdef MovingAvg < handle
       try
         r = movmean(x,wlen);
       catch ME
-        fprintf('error: %s at file(%s), name(%s), line(%d), column(%d)\n',...
+        error('%s at file(%s), name(%s), line(%d), column(%d)\n',...
           ME.message,ME.stack(end).file,ME.stack(end).name,ME.stack(end).line,ME.stack(end).column);
-        return;
       end_try_catch
     endfunction
 
@@ -30,8 +29,7 @@ classdef MovingAvg < handle
       n = size(x,2);
       wgtLen = size(w,2);
       if wgtLen~=wndLen
-        fprintf('error: window length(%d) not equal to weighting vector length(%d). \n',wndLen,wgtLen);
-        return;
+        error('window length(%d) not equal to weighting vector length(%d). \n',wndLen,wgtLen);
       endif
 
       try
@@ -58,9 +56,8 @@ classdef MovingAvg < handle
           r(i) = (sum(x(ix1:ix2).*w(wix1:wix2)) / sum(w(wix1:wix2)));
         endfor
       catch ME
-          fprintf('error: %s at file(%s), name(%s), line(%d), column(%d)\n',...
+          error('%s at file(%s), name(%s), line(%d), column(%d)\n',...
             ME.message,ME.stack(end).file,ME.stack(end).name,ME.stack(end).line,ME.stack(end).column);
-          return;
       end_try_catch
     endfunction
 
@@ -68,8 +65,7 @@ classdef MovingAvg < handle
       % calculates the Modified Moving Average = EMA with alpha = 1/wlen
       alpha = 1/wlen;
       if wlen < 1
-        fprintf('error: window length(%d) must be at least 1. \n',wlen);
-        return;
+        error('window length(%d) must be at least 1. \n',wlen);
       endif
       r = MovingAvg.EMA(x,wlen,alpha);
     endfunction
@@ -88,14 +84,12 @@ classdef MovingAvg < handle
           wlen = varargin{2};
           alpha = varargin{3};
         otherwise
-          fprintf('error: invalid number of arguments %d. \n',nargin);
-          return;
+          error('invalid number of arguments %d. \n',nargin);
       endswitch
 
       n = length(x);
       if n < 1
-        fprintf('error: input vector length(%d) must be at least 1. \n',n);
-        return;
+        error('input vector length(%d) must be at least 1. \n',n);
       endif
 
       try
@@ -108,9 +102,8 @@ classdef MovingAvg < handle
           endif
         endfor
       catch ME
-          fprintf('error: %s at file(%s), name(%s), line(%d), column(%d)\n',...
+          error('%s at file(%s), name(%s), line(%d), column(%d)\n',...
             ME.message,ME.stack(end).file,ME.stack(end).name,ME.stack(end).line,ME.stack(end).column);
-          return;
       end_try_catch
     endfunction
 

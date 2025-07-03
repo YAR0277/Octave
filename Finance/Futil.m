@@ -69,6 +69,7 @@ classdef Futil < handle
           fmt = 'YY-mm';
           szfmt = 6;
         otherwise
+          error('invalid number timestep: %s. \n',timestep);
       endswitch
       r = t(1:dt:end);
       % if there is enough room (szfmt), add the last return to the ticks,
@@ -81,6 +82,11 @@ classdef Futil < handle
     endfunction
 
     function [r] = GetTimeStep(timestamp)
+
+        if length(timestamp) < 2
+          error('invalid number of timestamps: %d. \n',length(timestamp));
+        endif
+
         dt = diff(timestamp);
         dd = mean(dt); % delta (in) days
         if dd >= 1 && dd <=2
@@ -92,7 +98,7 @@ classdef Futil < handle
         elseif dd >= 89 && dd <= 92
           r = 'quarter';
         else
-          r = 'undefined';
+          error('invalid delta timestamp: %.2f. \n',dd);
         endif
     endfunction
 
