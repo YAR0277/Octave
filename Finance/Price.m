@@ -48,11 +48,17 @@ classdef Price < handle
       t2 = this.timestamp(end);
       fprintf('Time Period: [%s,%s], Time Step: %s, Nr. Samples: %d\n',datestr(t1),datestr(t2),this.timestep,numel(price));
       fprintf('Price: range: [%.2f,%.2f]\n',min(price),max(price));
-      fprintf('Price: last: %.2f (z-score %.2f)\n',price(end),(price(end)-mean(price))/std(price));
+      fprintf('Price: last (LP): %.2f (z-score %.2f)\n',price(end),(price(end)-mean(price))/std(price));
       fprintf('Price: upswing potential (max. price - last price): %.2f\n',max(price)-price(end));
       fprintf('Price: downswing potential (last price - min. price): %.2f\n',price(end)-min(price));
       prDetrend = Futil.RemoveTrend(price);
-      fprintf('Detrend Price: range: [%.2f,%.2f], mean (%.2f), std.dev. (%.2f)\n',min(prDetrend),max(prDetrend),mean(prDetrend),std(prDetrend));
+      pctLP = Futil.Round(100*(2*std(prDetrend)/price(end)));
+      fprintf('Detrend Price: range: [%.2f,%.2f], mean (%.2f), 1σ (%.2f), 2σ (%.2f), 2σ of LP (%.2f%%)\n',...
+        min(prDetrend),max(prDetrend),mean(prDetrend),std(prDetrend),2*std(prDetrend),pctLP);
+      n = numel(prDetrend);
+      n1 = sum(prDetrend > mean(prDetrend) + std(prDetrend) | prDetrend < mean(prDetrend) - std(prDetrend));
+      n2 = sum(prDetrend > mean(prDetrend) + 2*std(prDetrend) | prDetrend < mean(prDetrend) - 2*std(prDetrend));
+      fprintf('Detrend Price: N > [-σ,σ] (%d, %.2f%%), N > [-2σ,2σ] (%d, %.2f%%)\n',n1,100*(n1/n),n2,100*(n2/n));
       vol = this.volume;
       fprintf('Volume: range: [%d,%d], last value (%d), percentile (%.2f%%)\n',min(vol),max(vol),vol(end),Futil.CalcPercentile(vol,vol(end)));
     endfunction
@@ -60,6 +66,26 @@ classdef Price < handle
   endmethods % Public
 
   methods (Access = private)
+
+    function [] = AddStdDevLines(this,x)
+      xlim = get(gca(),'xlim');
+      n=xlim(2)-xlim(1)+1;
+      dx=20;dy=0.5;
+
+      m = mean(x);
+      plot([xlim(1):xlim(2)],ones(1,n)*m,'--','color',[0,0.5,0]);%,'LineWidth',Futil.PlotLineWidth);
+      text(xlim(1)+dx,m+0.5,sprintf('m=%.2f',m),'color',[0,0.5,0]);
+
+      plot([xlim(1):xlim(2)],ones(1,n)*(m + std(x)),'--','color','red');%,'LineWidth',Futil.PlotLineWidth);
+      text(xlim(1)+dx,(m + std(x))+dy,sprintf('m+1σ=%.2f',m+std(x)),'color','red');
+      plot([xlim(1):xlim(2)],ones(1,n)*(m + 2*std(x)),'--','color','red');%,'LineWidth',Futil.PlotLineWidth);
+      text(xlim(1)+dx,(m + 2*std(x))+dy,sprintf('m+2σ=%.2f',m+2*std(x)),'color','red');
+
+      plot([xlim(1):xlim(2)],ones(1,n)*(m - std(x)),'--','color','red');%,'LineWidth',Futil.PlotLineWidth);
+      text(xlim(1)+dx,(m - std(x))-dy,sprintf('m-1σ=%.2f',m-std(x)),'color','red');
+      plot([xlim(1):xlim(2)],ones(1,n)*(m - 2*std(x)),'--','color','red');%,'LineWidth',Futil.PlotLineWidth);
+      text(xlim(1)+dx,(m - 2*std(x))-dy,sprintf('m-2σ=%.2f',m-2*std(x)),'color','red');
+    endfunction
 
     function [] = DoPlot(this)
 
@@ -79,11 +105,14 @@ classdef Price < handle
 
       grid on;
       grid minor;
-      hold off;
+##      hold off;
 
       subplot(2,1,2);
       prDetrend = Futil.RemoveTrend(price);
       plot(t(2:end),prDetrend,'--.','MarkerSize',Futil.PlotMarkerSize,'LineWidth',Futil.PlotLineWidth);
+
+      hold on;
+      this.AddStdDevLines(prDetrend);
 
       ax = gca;
       set(ax,"XTick",xticks);
