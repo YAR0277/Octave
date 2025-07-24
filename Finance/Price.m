@@ -48,13 +48,21 @@ classdef Price < handle
       t2 = this.timestamp(end);
       fprintf('Time Period: [%s,%s], Time Step: %s, Nr. Samples: %d\n',datestr(t1),datestr(t2),this.timestep,numel(price));
       fprintf('Price: range: [%.2f,%.2f]\n',min(price),max(price));
-      fprintf('Price: last (LP): %.2f (z-score %.2f)\n',price(end),(price(end)-mean(price))/std(price));
+      fprintf('Price: last (LP): %.2f, last δP: %.2f\n',price(end),price(end)-price(end-1));
       fprintf('Price: upswing potential (max. price - last price): %.2f\n',max(price)-price(end));
       fprintf('Price: downswing potential (last price - min. price): %.2f\n',price(end)-min(price));
+
+      dp = diff(price);
+      id = dp < 0;
+      iu = dp > 0;
+      iz = dp == 0;
+      fprintf('Price: mean(δP<0): %.2f (%d), min(δP<0): %.2f, mean(δP>0): %.2f (%d), max(δP>0): %.2f, num(δP =0) (%d) \n',mean(dp(id)),sum(id),min(dp(id)),mean(dp(iu)),sum(iu),max(dp(iu)),sum(iz));
+
       prDetrend = Futil.RemoveTrend(price);
       pctLP = Futil.Round(100*(2*std(prDetrend)/price(end)));
       fprintf('Detrend Price: range: [%.2f,%.2f], mean (%.2f), 1σ (%.2f), 2σ (%.2f), 2σ of LP (%.2f%%)\n',...
         min(prDetrend),max(prDetrend),mean(prDetrend),std(prDetrend),2*std(prDetrend),pctLP);
+      fprintf('Detrend Price: last: %.2f (z-score %.2f)\n',prDetrend(end),(prDetrend(end)-mean(prDetrend))/std(prDetrend));
       n = numel(prDetrend);
       n1 = sum(prDetrend > mean(prDetrend) + std(prDetrend) | prDetrend < mean(prDetrend) - std(prDetrend));
       n2 = sum(prDetrend > mean(prDetrend) + 2*std(prDetrend) | prDetrend < mean(prDetrend) - 2*std(prDetrend));

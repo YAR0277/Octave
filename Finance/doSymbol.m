@@ -1,23 +1,33 @@
-function [] = doSymbol(symbol)
+function [] = doSymbol(varargin)
+  switch nargin
+    case 1
+      symbol = varargin{1};
+      bShowPlot = 0;
+    case 2
+      symbol = varargin{1};
+      bShowPlot = varargin{2};
+    otherwise
+      error('invalid number of arguments %d. \n',nargin);
+  endswitch
 
   [fday,fweek,fref] = GetFinput(symbol);
   p = Price(fday);
   p.Stats
-  p.Plot;
   r = Returns(fweek);
   r.Stats
-  r.Plot;
   c = CSI(fday,fref);
   c.Stats
-  b = BB(fweek);
-  b.Plot;
-  m = MACD(fday);
-  m.Plot;
-  s = StoOsc(fday);
-  s.Plot;
-
-  plotf(fweek);
-
+  if bShowPlot
+    p.Plot;
+    r.Plot;
+    b = BB(fweek);
+    b.Plot;
+    m = MACD(fday);
+    m.Plot;
+    s = StoOsc(fday);
+    s.Plot;
+    plotf(fweek);
+  endif
 endfunction
 
 function [fday,fweek,fref] = GetFinput(symbol)
