@@ -21,6 +21,12 @@ classdef Futil < handle
       r = 100*( (nless + 0.5.*nequal) / length(data) );
     endfunction
 
+    function [p,e_var,r,p_var,fit_var] = DoLinearRegression(x,y)
+      % https://octave.sourceforge.io/optim/function/LinearRegression.html
+      pkg load optim;
+
+    endfunction
+
     function [r] = GetAPR(t,y)
       timestep = Futil.GetTimeStep(t);
       r = mean(y);
