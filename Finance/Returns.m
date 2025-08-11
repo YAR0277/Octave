@@ -7,7 +7,7 @@ classdef Returns < handle
     returns       % rate of return
     timestamp     % t - timestamp of prices
     timestep      % time interval of price data {'day','week','month','quarter'}
-    flgStemPlot   % stem plot flag: 1='stem' plot (default), otherwise 'bar' plot
+    flgPlotType   % 1='stem', 2='bar', 3='line'
     flgPctChange  % pctChange flag: 1=use pctChange (default), otherwise calc rate of return
     volume        % volume data
   endproperties
@@ -29,7 +29,7 @@ classdef Returns < handle
       obj.timestamp = obj.data.Date;
       obj.timestep = Futil.GetTimeStep(obj.timestamp);
       obj.flgPctChange = 1;
-      obj.flgStemPlot = 0;
+      obj.flgPlotType = 2;
       obj.volume = obj.data.Volume;
     endfunction
 
@@ -46,6 +46,17 @@ classdef Returns < handle
 
     endfunction
 
+    function [t,y] = GetReturnData(this)
+      if this.flgPctChange
+        t = this.data.Date; %this.timestamp;
+        y = this.data.pctChange; %this.pctChange;
+      else
+        this.Calc(); % calculate returns just in case they haven't been calculated
+        t = this.timestamp(1:end-1); % n price values => n-1 returns
+        y = this.returns;
+      endif
+    endfunction
+
     function [] = PlotBar(this)
       % plot returns as bar plot
 
@@ -57,6 +68,29 @@ classdef Returns < handle
 
       figure;
       bar(t,y);
+
+      [xticks,fmt] = Futil.GetDateTicks(t); %this.GetTimeTicks(t);
+      ax = gca;
+      set(ax,"XTick",xticks);
+      datetick('x',fmt,'keepticks','keeplimits');
+      xlim([xticks(1) xticks(end)]);
+
+      ylabel('Rate of Return (%)','FontSize',16);
+      title(this.finput.symbol,'FontSize',16);
+      grid on;
+    endfunction
+
+    function [] = PlotLine(this)
+      % plot returns as line plot
+
+      [t,y] = this.GetReturnData();
+      if length(t) < Futil.MinLengthReturns || length(y) < Futil.MinLengthReturns
+        fprintf('Length of return data (l.t. %d) insufficient to plot.\n',Futil.MinLengthReturns);
+        return;
+      endif
+
+      figure;
+      plot(t,y,'--.','MarkerSize',Futil.PlotMarkerSize,'LineWidth',Futil.PlotLineWidth);
 
       [xticks,fmt] = Futil.GetDateTicks(t); %this.GetTimeTicks(t);
       ax = gca;
@@ -95,11 +129,16 @@ classdef Returns < handle
 
     function [r] = Plot(this)
       % calculates statistics on returns
-      if this.flgStemPlot
-        this.PlotStem();
-      else
-        this.PlotBar();
-      endif
+      switch this.flgPlotType
+        case 1
+          this.PlotStem();
+        case 2
+          this.PlotBar();
+        case 3
+          this.PlotLine();
+        otherwise
+          this.PlotBar();
+      endswitch
     endfunction
 
     function [r] = Stats(this)
@@ -170,17 +209,5 @@ classdef Returns < handle
         std(y),sum(ix1),Futil.Round(100*(sum(ix1)/numel(y))),mean(y(ix1)),...
                sum(ix2),Futil.Round(100*(sum(ix2)/numel(y))),mean(y(ix2)));
     endfunction
-
-    function [t,y] = GetReturnData(this)
-      if this.flgPctChange
-        t = this.data.Date; %this.timestamp;
-        y = this.data.pctChange; %this.pctChange;
-      else
-        this.Calc(); % calculate returns just in case they haven't been calculated
-        t = this.timestamp(1:end-1); % n price values => n-1 returns
-        y = this.returns;
-      endif
-    endfunction
-
   endmethods % Private
 endclassdef

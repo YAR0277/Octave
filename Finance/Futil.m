@@ -3,6 +3,8 @@ classdef Futil < handle
   % https://www.mathworks.com/matlabcentral/answers/182131-percentile-of-a-value-based-on-array-of-data
 
   properties (Constant)
+    MinLengthReturns = 3;
+    MaxNumXTicks = 8;
     YLabelFontSize = 14;
     TitleFontSize = 16;
     LegendFontSize = 12;
@@ -54,6 +56,22 @@ classdef Futil < handle
       r = datestr(this.timestamp(i));
     endfunction
 
+    function [r] = GetDateToday()
+      r = datestr(now(),'yyyy-mm-dd');
+    endfunction
+
+    function [r] = GetDayToday()
+      s = Futil.GetDateToday();
+      r = datenum(s,'yyyy-mm-dd');
+    endfunction
+
+    function [r] = GetDay(date)
+      y = str2num(datestr(date,'yyyy'));
+      m = str2num(datestr(date,'mm'));
+      d = str2num(datestr(date,'dd'));
+      r = datenum(y,m,d);
+    endfunction
+
     function [r,fmt] = GetDateTicks(t)
       % gets xticks and date format depending on timestep
       timestep = Futil.GetTimeStep(t);
@@ -77,7 +95,11 @@ classdef Futil < handle
         otherwise
           error('invalid number timestep: %s. \n',timestep);
       endswitch
-      r = t(1:dt:end);
+      if length(t) > Futil.MaxNumXTicks
+        r = t(1:dt:end);
+      else
+        r = t(1:1:end);
+      endif
       % if there is enough room (szfmt), add the last return to the ticks,
       % otherwise replace the last tick with the last return.
       if t(end) - r(end) > szfmt
