@@ -37,7 +37,7 @@ classdef RndSeq < handle
       obj.fcnBinoRnd = @(m,p,n) binornd(m,p,[1,n]);
     endfunction
 
-    function [] = GenSeq(this)
+    function [] = GenerateSequence(this)
       this.X = zeros(this.sinput.height,this.sinput.length);
       tic
       for i=1:this.sinput.height
@@ -46,11 +46,10 @@ classdef RndSeq < handle
       toc
     endfunction
 
-    function [] = PlotSeq(this)
+    function [] = Plot(this)
 
       if isempty(this.X)
-        fprintf('The random sequence is empty. Please generate a random sequence and try again.\n');
-        return;
+        this.GenerateSequence(); % generate the sequence
       endif
 
       % just do the first 20...
@@ -84,43 +83,46 @@ classdef RndSeq < handle
     endfunction
 
     function [] = PlotSample(this)
+
+      if isempty(this.x)
+        this.GenerateSample();
+      endif
+
       figure;
       switch this.sinput.type
         case "Constant"
-          x = this.GetSampleConstant();
-          this.PlotSampleConstant(x);
+          this.PlotSampleConstant(this.x);
         case "Bernoulli"
-          x = this.GetSampleBernoulli();
-          this.PlotSampleBernoulli(x);
+          this.PlotSampleBernoulli(this.x);
         case "RandomWalk"
-          x = this.GetSampleRandomWalk();
-          this.PlotSampleRandomWalk(x);
+          this.PlotSampleRandomWalk(this.x);
         case "GaussMarkov"
-          x = this.GetSampleGaussMarkov();
-          this.PlotSampleGaussMarkov(x);
+          this.PlotSampleGaussMarkov(this.x);
         case "White"
-          x = this.GetSampleWhite();
-          this.PlotSampleWhite(x);
+          this.PlotSampleWhite(this.x);
         case "Wiener"
-          x = this.GetSampleWiener();
-          this.PlotSampleWiener(x);
+          this.PlotSampleWiener(this.x);
         otherwise
       endswitch
-      this.x = x; % update random sample
     endfunction
 
-    function [r] = ProcessStats(this,k)
+    function [r] = Stats(this,k)
       % calculates statistics of random process
-      if isempty(this.X)
-        fprintf('The random sequence is empty. Please generate a random sequence and try again.\n');
+
+      if nargin ~= 2
+        fmt = ['call: Stats(k) where k = time index.','\n'];
+        fprintf(fmt);
         return;
+      endif
+
+      if isempty(this.X)
+        this.GenerateSequence(); % generate the sequence
       endif
 
       ts = this.TheoreticalStats(k);
 
       fprintf('Number of Sequences: %d\n',size(this.X,1));
-      fprintf('Sequence Max.: %.2f\n',max(this.X(:,k)));
-      fprintf('Sequence Min.: %.2f\n',min(this.X(:,k)));
+      fprintf('Sequence Range: [%.2f,%.2f]\n',min(this.X(:,k)),max(this.X(:,k)));
       fprintf('Sequence Mean: Actual (%.2f), Theoretical (%.2f)\n',mean(this.X(:,k)),ts.mean);
       fprintf('Sequence Std. Dev.: Actual (%.2f), Theoretical (%.2f)\n',std(this.X(:,k)),sqrt(ts.variance));
       fprintf('Sequence Var.: Actual (%.2f), Theoretical (%.2f)\n',var(this.X(:,k)),ts.variance);
@@ -129,19 +131,24 @@ classdef RndSeq < handle
     function [r] = SampleStats(this)
       % calculates statistics of a random sequence sample
       if isempty(this.x)
-        fprintf('The random sample is empty. Please generate a sample and try again.\n');
-        return;
+        this.GenerateSample();
       endif
 
       fprintf('Number of Samples: %d\n',numel(this.x));
-      fprintf('Sample Max.: %.2f\n',max(this.x));
-      fprintf('Sample Min.: %.2f\n',min(this.x));
+      fprintf('Sample Range: [%.2f,%.2f]\n',min(this.x),max(this.x));
       fprintf('Sample Mean: %.2f\n',mean(this.x));
       fprintf('Sample Std. Dev.: %.2f\n',std(this.x));
       fprintf('Sample Var.: %.2f\n',var(this.x));
     endfunction
 
     function [r] = TheoreticalStats(this,k)
+
+      if nargin ~= 2
+        fmt = ['call: TheoreticalStats(k) where k = time index.','\n'];
+        fprintf(fmt);
+        return;
+      endif
+
       r = struct('mean',0,'variance',0);
       switch this.sinput.type
         case "Constant" % [2], (Ex.2.5)
@@ -183,6 +190,25 @@ classdef RndSeq < handle
   endmethods % Public
 
   methods (Access = private)
+
+    function [] = GenerateSample(this)
+        switch this.sinput.type
+          case "Constant"
+            x = this.GetSampleConstant();
+          case "Bernoulli"
+            x = this.GetSampleBernoulli();
+          case "RandomWalk"
+            x = this.GetSampleRandomWalk();
+          case "GaussMarkov"
+            x = this.GetSampleGaussMarkov();
+          case "White"
+            x = this.GetSampleWhite();
+          case "Wiener"
+            x = this.GetSampleWiener();
+          otherwise
+        endswitch
+        this.x = x; % update random sample
+    endfunction
 
     function [r] = GetSampleConstant(this)
       % generates a Constant sequence of length n.
@@ -255,36 +281,36 @@ classdef RndSeq < handle
 
     function [] = PlotSampleConstant(this,x)
       plot(x,'--.');
-      title('Sample - Constant Process');
+      title('Sample from Constant Process');
     endfunction
 
     function [] = PlotSampleBernoulli(this,x)
       plot(x,'--.');
-      title('Sample - Bernoulli Process');
+      title('Sample from Bernoulli Process');
     endfunction
 
     function [] = PlotSampleRandomWalk(this,x)
       plot(x,'--.');
-      title('Sample - Random Walk Sequence');
+      title('Sample from Random Walk Sequence');
       grid on;
       grid minor;
     endfunction
 
     function [] = PlotSampleGaussMarkov(this,x)
       plot(x,'.');
-      title('Sample - Gauss-Markov Sequence');
+      title('Sample from Gauss-Markov Sequence');
       grid on;
     endfunction
 
     function [] = PlotSampleWhite(this,x)
       plot(x,'.');
-      title('Sample - Gaussian White Noise Sequence');
+      title('Sample from Gaussian White Noise Sequence');
       grid on;
     endfunction
 
     function [] = PlotSampleWiener(this,x)
       plot(x,'.');
-      title('Sample - Wiener Sequence');
+      title('Sample from Wiener Sequence');
       grid on;
     endfunction
 
