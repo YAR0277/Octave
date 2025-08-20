@@ -98,7 +98,7 @@ classdef Returns < handle
       datetick('x',fmt,'keepticks','keeplimits');
       xlim([xticks(1) xticks(end)]);
 
-      ylabel('Rate of Return (%)','FontSize',16);
+      ylabel('Rate of Return(%)','FontSize',14);
       title(this.finput.symbol,'FontSize',16);
       grid on;
     endfunction

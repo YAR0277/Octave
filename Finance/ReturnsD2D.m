@@ -29,6 +29,7 @@ classdef ReturnsD2D < Returns
       for i=1:n-1
         y(i) = Futil.Round(((x(end)-x(i)) / x(i))*100);
       endfor
+      this.returns = y; % store return data in returns
 
       % there is no return value for the last timestamp,
       % since that would calculate the return with itself.
