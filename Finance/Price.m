@@ -46,27 +46,35 @@ classdef Price < handle
       fprintf('Symbol: %s\n',this.finput.symbol);
       t1 = this.timestamp(1);
       t2 = this.timestamp(end);
-      fprintf('Time Period: [%s,%s], Time Step: %s, Nr. Samples: %d\n',datestr(t1),datestr(t2),this.timestep,numel(price));
+      fprintf('Time Period: [%s,%s], Time Step: (%s), Nr. (%d)\n',datestr(t1),datestr(t2),this.timestep,numel(price));
       fprintf('Price: range: [%.2f,%.2f]\n',min(price),max(price));
-      fprintf('Price: last (LP): %.2f, last δP: %.2f\n',price(end),price(end)-price(end-1));
-      fprintf('Price: upswing potential (max. price - last price): %.2f\n',max(price)-price(end));
-      fprintf('Price: downswing potential (last price - min. price): %.2f\n',price(end)-min(price));
+      fprintf('Price: last: %.2f, δP: %.2f\n',price(end),price(end)-price(end-1));
+      fprintf('Price: last: max.-last (below ceiling): %.2f\n',max(price)-price(end));
+      fprintf('Price: last: last-min. (above floor): %.2f\n',price(end)-min(price));
 
       dp = diff(price);
       id = dp < 0;
       iu = dp > 0;
       iz = dp == 0;
-      fprintf('Price: mean(δP<0): %.2f (%d), min(δP<0): %.2f, mean(δP>0): %.2f (%d), max(δP>0): %.2f, num(δP =0) (%d) \n',mean(dp(id)),sum(id),min(dp(id)),mean(dp(iu)),sum(iu),max(dp(iu)),sum(iz));
+      fprintf('Price δP<0: Nr. (%d), mean: %.2f, range: [%.2f,%.2f] \n',sum(id),mean(dp(id)),min(dp(id)),max(dp(id)));
+      fprintf('Price δP>0: Nr. (%d), mean: %.2f, range: [%.2f,%.2f] \n',sum(iu),mean(dp(iu)),min(dp(iu)),max(dp(iu)));
+      fprintf('Price δP=0: num(δP =0) (%d) \n',sum(iz));
+
+      [~,p] = Sutil.GetSignal(this.timestamp,price);
+      fprintf('Price Interp: slope of linear interpolation %.2f \n',p(1));
+
+      prExtrap = interp1(this.timestamp,price,datenum(date()),"extrap");
+      fprintf('Price Extrap: (%s) %.2f \n',date(),prExtrap);
 
       prDetrend = Futil.RemoveTrend(price);
       pctLP = Futil.Round(100*(2*std(prDetrend)/price(end)));
-      fprintf('Detrend Price: range: [%.2f,%.2f], mean (%.2f), 1σ (%.2f), 2σ (%.2f), 2σ of LP (%.2f%%)\n',...
+      fprintf('Price detrend: range: [%.2f,%.2f], mean (%.2f), 1σ (%.2f), 2σ (%.2f), 2σ of LP (%.2f%%)\n',...
         min(prDetrend),max(prDetrend),mean(prDetrend),std(prDetrend),2*std(prDetrend),pctLP);
-      fprintf('Detrend Price: last: %.2f (z-score %.2f)\n',prDetrend(end),(prDetrend(end)-mean(prDetrend))/std(prDetrend));
+      fprintf('Price detrend: last: %.2f (z-score %.2f)\n',prDetrend(end),(prDetrend(end)-mean(prDetrend))/std(prDetrend));
       n = numel(prDetrend);
       n1 = sum(prDetrend > mean(prDetrend) + std(prDetrend) | prDetrend < mean(prDetrend) - std(prDetrend));
       n2 = sum(prDetrend > mean(prDetrend) + 2*std(prDetrend) | prDetrend < mean(prDetrend) - 2*std(prDetrend));
-      fprintf('Detrend Price: N > [-σ,σ] (%d, %.2f%%), N > [-2σ,2σ] (%d, %.2f%%)\n',n1,100*(n1/n),n2,100*(n2/n));
+      fprintf('Price detrend: N > [-σ,σ] (%d, %.2f%%), N > [-2σ,2σ] (%d, %.2f%%)\n',n1,100*(n1/n),n2,100*(n2/n));
       vol = this.volume;
       fprintf('Volume: range: [%d,%d], last value (%d), percentile (%.2f%%)\n',min(vol),max(vol),vol(end),Futil.CalcPercentile(vol,vol(end)));
     endfunction
@@ -103,6 +111,10 @@ classdef Price < handle
       subplot(2,1,1);
       plot(t(2:end),price(2:end),'--.','MarkerSize',Futil.PlotMarkerSize,'LineWidth',Futil.PlotLineWidth);
 
+      hold on;
+      s = Sutil.GetSignal(t,price);
+      plot(t(2:end),s(2:end),'--','Color',[1,0,0],'MarkerSize',Futil.PlotMarkerSize,'LineWidth',Futil.PlotLineWidth);
+
       [xticks,fmt] = Futil.GetDateTicks(this.timestamp);
       ax = gca;
       set(ax,"XTick",xticks);
@@ -113,7 +125,7 @@ classdef Price < handle
 
       grid on;
       grid minor;
-##      hold off;
+      hold off;
 
       subplot(2,1,2);
       prDetrend = Futil.RemoveTrend(price);

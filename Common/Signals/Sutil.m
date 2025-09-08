@@ -27,7 +27,9 @@ classdef Sutil < handle
       r = std(n);
     endfunction
 
-    function [r,s] = GetSignal(t,x)
+    function [r,p] = GetSignal(t,x)
+      % p(x) coefficients of a polynomial of degree n that minimizes the least-squares-error of the fit to the points [x(:),y(:)]
+      % s is a structure containing: 'yf' - the values of the polynomial for each value of x. etc.
       [p,s] = polyfit(t,x,1);
       r = s.yf;
     endfunction
