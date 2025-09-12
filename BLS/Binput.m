@@ -5,7 +5,7 @@ classdef Binput < handle
     COL_IDX_ID = 1;
     COL_IDX_CATEGORY = 2;
     COL_IDX_SEASONALITY = 3;
-    COL_IDX_TYPE = 4;
+    COL_IDX_UNIT = 4;
     COL_IDX_TITLE = 5;
     ROW_IDX_FIRSTDATA = 2;
   endproperties
@@ -54,8 +54,14 @@ classdef Binput < handle
 
       rowIdx = this.GetRowIdx(Binput.COL_IDX_ID,this.id(1,:));
 
-      label_str = this.dataDefinitionTable(rowIdx,Binput.COL_IDX_TYPE);
+      label_str = this.dataDefinitionTable(rowIdx,Binput.COL_IDX_UNIT);
       ylabel(label_str,'FontSize',Butil.YLabelFontSize);
+
+      if strcmp(label_str,'thousands') == 1 % set yticklabels
+        yticks = get(ax,"YTick");
+        ticklabels = arrayfun(@(x) strcat(num2str(x),'k'), yticks/1000, "UniformOutput", false);
+        yticklabels(ticklabels);
+      endif
 
       title_str = this.dataDefinitionTable(rowIdx,Binput.COL_IDX_TITLE);
       title(title_str,'FontSize',Butil.TitleFontSize);
@@ -85,10 +91,12 @@ classdef Binput < handle
     endfunction
 
     function [] = SetDataDefinitionTable(this)
-      this.dataDefinitionTable = {'id','category','seasonality','type','title'};
-      this.dataDefinitionTable(end+1,:)={'APU0000708111', 'inflation',    'not adjusted', '(per dozen)',  'Eggs, grade A, large, per doz. in U.S. city average'};
-      this.dataDefinitionTable(end+1,:)={'CES0000000001', 'employment',   'adjusted',     '(thousands)',  'All employees, thousands, total nonfarm, seasonally adjusted'};
-      this.dataDefinitionTable(end+1,:)={'LNU04000000',   'unemployment', 'not adjusted', '(percent)',    'Unemployment Rate'};
+      this.dataDefinitionTable = {'id','category','seasonality','unit','title'};
+      this.dataDefinitionTable(end+1,:)={'APU0000708111', 'inflation',    'not adjusted', 'per dozen',  'Eggs, grade A, large, per doz. in U.S. city average'};
+      this.dataDefinitionTable(end+1,:)={'CEU0000000001', 'employment',   'not adjusted', 'thousands',  'All employees, thousands, total nonfarm, not seasonally adjusted'};
+      this.dataDefinitionTable(end+1,:)={'CES0000000001', 'employment',   'adjusted',     'thousands',  'All employees, thousands, total nonfarm, seasonally adjusted'};
+      this.dataDefinitionTable(end+1,:)={'LNU04000000',   'unemployment', 'not adjusted', 'percent',    'Unemployment Rate'};
+      this.dataDefinitionTable(end+1,:)={'LNS14000000',   'unemployment', 'adjusted',     'percent',    'Unemployment Rate'};
     endfunction
 
     function [] = SetFileName(this,id)

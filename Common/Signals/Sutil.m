@@ -10,6 +10,25 @@ classdef Sutil < handle
 
   methods (Static = true) % Public
 
+    function [r2] = CoefficientOfDetermination(x,x_hat)
+      % https://en.wikipedia.org/wiki/Coefficient_of_determination
+      % goodness of fit is when this statistic is close to 1,
+      % then UnexplainedVariation/TotalVariation is close to 0.
+      r2 = 1 - ( sum((x - x_hat).^2) / sum((x - mean(x)).^2) ); % 1 - UnexplainedVariation/TotalVariation
+    endfunction
+
+    function [r] = UnexplainedVariation(x,x_hat)
+      r = sum((x - x_hat).^2);
+    endfunction
+
+    function [r] = ExplainedVariation(x,x_hat)
+      r = sum((x_hat - mean(x)).^2);
+    endfunction
+
+    function [r] = TotalVariation(x,x_hat)
+      r = sum((x - mean(x)).^2);
+    endfunction
+
     function [p,e_var,r,p_var,fit_var] = DoLinearRegression(x,y)
       % https://octave.sourceforge.io/optim/function/LinearRegression.html
       pkg load optim;
@@ -42,6 +61,40 @@ classdef Sutil < handle
     function [r] = GetResidual(t,x)
       s = Sutil.GetSignal(t,x);
       r = abs(x-s);
+    endfunction
+
+    function [r,p] = GetTrendPoly(t,x,n)
+      % https://octave.sourceforge.io/octave/function/polyfit.html
+      [p,s] = polyfit(t,x,n);
+      r = s.yf;
+    endfunction
+
+    function [x_hat,b_hat] = GetTrendLogistic(t,x,b0)
+      % https://octave.sourceforge.io/optim/function/nlinfit.html
+      model = @(b, t) (b(3) ./ (1 + b(2) * exp (- b(1) * t)));
+      [b_hat, R, J, covb, mse] = nlinfit (t, x, model, b0);
+      x_hat = model(b_hat,t);
+    endfunction
+
+    function [x_hat,b_hat] = GetTrendMitscherlich(t,x,b0)
+      % https://octave.sourceforge.io/optim/function/nlinfit.html
+      model = @(b, t) (b(1) + b(2) * exp (b(3) * t));
+      [b_hat, R, J, covb, mse] = nlinfit (t, x, model, b0);
+      x_hat = model(b_hat,t);
+    endfunction
+
+    function [x_hat,b_hat] = GetTrendGompertz(t,x,b0)
+      % https://octave.sourceforge.io/optim/function/nlinfit.html
+      model = @(b, t) exp (b(1) + b(2)*b(3).^t);
+      [b_hat, R, J, covb, mse] = nlinfit (t, x, model, b0);
+      x_hat = model(b_hat,t);
+    endfunction
+
+    function [x_hat,b_hat,R] = GetTrendAllometric(t,x,b0)
+      % https://octave.sourceforge.io/optim/function/nlinfit.html
+      model = @(b, t) (b(2)*t.^b(1));
+      [b_hat, R, J, covb, mse] = nlinfit (t, x, model, b0);
+      x_hat = model(b_hat,t);
     endfunction
 
     function [] = Plot(t,x)
