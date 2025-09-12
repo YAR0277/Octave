@@ -60,6 +60,7 @@ classdef Price < handle
       fprintf('Price δP>0: Nr. (%d), mean: %.2f, range: [%.2f,%.2f] \n',sum(iu),mean(dp(iu)),min(dp(iu)),max(dp(iu)));
       fprintf('Price δP=0: num(δP =0) (%d) \n',sum(iz));
 
+      addpath(genpath('..'));
       [~,p] = Sutil.GetSignal(this.timestamp,price);
       fprintf('Price Interp: slope of linear interpolation %.2f \n',p(1));
 

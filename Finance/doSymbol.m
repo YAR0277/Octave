@@ -31,9 +31,9 @@ function [] = doSymbol(varargin)
 endfunction
 
 function [fday,fweek,fref] = GetFinput(symbol)
-  fday  = Finput(strcat('Input\',strcat(symbol,'-d.txt')));
-  fweek = Finput(strcat('Input\',strcat(symbol,'-w.txt')));
-  fref  = Finput('Input\DJI-d.txt');
+  fday  = Finput(fullfile('Input',strcat(symbol,'-d.txt')));
+  fweek = Finput(fullfile('Input',strcat(symbol,'-w.txt')));
+  fref  = Finput(fullfile('Input','DJI-d.txt'));
 endfunction
 
 

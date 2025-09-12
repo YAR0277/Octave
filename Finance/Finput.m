@@ -14,7 +14,7 @@ classdef Finput < handle
 
     function [obj] = Finput(varargin)
       obj.dataCol = 'Close'; % 'Open','High','Low','Close','pctChange','pctChangeAvg','Volume'
-      obj.dataFolder = 'c:\users\drdav\data\finance'; % financial data folder;
+      obj.dataFolder = '../../../data/finance'; % financial data folder;
       obj.dateFormat = 'yyyy-mm-dd';
       obj.descendFlag = 0; % data is in ascending order: oldest -> newest
       obj.fileName = '';
@@ -44,7 +44,7 @@ classdef Finput < handle
 
     function [] = ShowFiles(this)
       % shows all files in dataFolder
-      dir(strcat(this.dataFolder,'\*.csv'))
+      dir(fullfile(this.dataFolder,'*.csv'))
     endfunction
 
     function [] = Load(this, fileName)

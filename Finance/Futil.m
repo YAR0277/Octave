@@ -116,8 +116,8 @@ classdef Futil < handle
         endif
 
         dt = diff(timestamp);
-        dd = mean(dt); % delta (in) days
-        if dd >= 1 && dd <=2
+        dd = mode(dt); % delta (in) days
+        if dd >= 1 && dd <2
           r = 'day';
         elseif dd >= 6 && dd <= 7
           r = 'week';
