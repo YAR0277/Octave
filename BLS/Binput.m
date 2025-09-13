@@ -24,16 +24,29 @@ classdef Binput < handle
 
   methods % Public
 
-    function [obj] = Binput(id)
-      obj.dataFolder = 'c:\users\drdav\data\bls'; % BLS root data folder;
+    function [obj] = Binput(varargin)
+      obj.dataFolder = '../../../data/bls'; % BLS root data folder;
       obj.SetDataDefinitionTable();
 
-      if obj.GetRowIdx(Binput.COL_IDX_ID,id)
-        obj.SetFileName(id);
-        obj.SetFolder(id);
-        obj.Load();
+      if nargin == 1
+        obj.LoadId(varargin{1});
       endif
-      obj.SetTimestamp();
+    endfunction
+
+    function [] = LoadId(this,id)
+      if this.GetRowIdx(Binput.COL_IDX_ID,id)
+        this.SetFileName(id);
+        this.SetFolder(id);
+        this.Load();
+        this.SetTimestamp();
+      else
+        fprintf('id (%s) does not exist in data definition table. \n',id);
+      endif
+    endfunction
+
+    function [ids] = ShowIds(this)
+      % shows all Ids
+      ids = unique(this.dataDefinitionTable(2:end,Binput.COL_IDX_ID));
     endfunction
 
     function [] = Plot(this)
@@ -83,11 +96,25 @@ classdef Binput < handle
       fprintf('Min: %s, %.2f\n',datestr(this.timestamp(i_min),'mmm yyyy'),v_min);
       fprintf('Max: %s, %.2f\n',datestr(this.timestamp(i_max),'mmm yyyy'),v_max);
     endfunction
+  endmethods
+
+  methods (Access = private)
 
     function [r] = GetRowIdx(this,colIdx,val)
       vals = this.dataDefinitionTable(Binput.ROW_IDX_FIRSTDATA:end,colIdx);
       [~,r] = ismember(val,vals);
       r = r + 1; % add 1 for header
+    endfunction
+
+    function [] = Load(this)
+      fileName = fullfile(this.dataFolder,this.fileName);
+      fid = fopen(fileName{:}, 'r');
+      fin = textscan(fid,"%s %d %s %s %f", 'Delimiter', ',', 'HeaderLines', 1);
+      this.id = cell2mat(fin{1});
+      this.year = fin{2};
+      this.period = cell2mat(fin{3});
+      this.label = cell2mat(fin{4});
+      this.value = fin{5};
     endfunction
 
     function [] = SetDataDefinitionTable(this)
@@ -114,17 +141,5 @@ classdef Binput < handle
     function [] = SetTimestamp(this)
       this.timestamp = datenum(this.label,'yyyy mmm');
     endfunction
-
-    function [] = Load(this)
-      fileName = fullfile(this.dataFolder,this.fileName);
-      fid = fopen(fileName{:}, 'r');
-      fin = textscan(fid,"%s %d %s %s %f", 'Delimiter', ',', 'HeaderLines', 1);
-      this.id = cell2mat(fin{1});
-      this.year = fin{2};
-      this.period = cell2mat(fin{3});
-      this.label = cell2mat(fin{4});
-      this.value = fin{5};
-    endfunction
-
   endmethods
 endclassdef

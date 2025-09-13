@@ -47,6 +47,15 @@ classdef Finput < handle
       dir(fullfile(this.dataFolder,'*.csv'))
     endfunction
 
+    function [r] = ShowFolders(this)
+      % shows all files in dataFolder
+      % https://stackoverflow.com/questions/8748976/list-the-subfolders-in-a-folder-matlab-only-subfolders-not-files
+      folders=dir(this.dataFolder);
+      idx=[folders(:).isdir];
+      r = {folders(idx).name}';
+      r(ismember(r,{'.','..'})) = [];
+    endfunction
+
     function [] = Load(this, fileName)
       fid = fopen(fileName, 'r');
       fin = textscan(fid,"%s %s %s %d %s %s", 'delimiter', '\n');
