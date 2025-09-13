@@ -44,9 +44,18 @@ classdef Binput < handle
       endif
     endfunction
 
-    function [ids] = ShowIds(this)
-      % shows all Ids
+    function [] = ShowData(this)
+      % shows {id,category,title} from data definition table
       ids = unique(this.dataDefinitionTable(2:end,Binput.COL_IDX_ID));
+      categories = this.dataDefinitionTable(2:end,Binput.COL_IDX_CATEGORY);
+      titles = this.dataDefinitionTable(2:end,Binput.COL_IDX_TITLE);
+
+      % https://github.com/apjanke/octave-tablicious/blob/main/README.md
+      % pkg install https://github.com/apjanke/octave-tablicious/releases/download/v0.4.5/tablicious-0.4.5.tar.gz
+      % pkg load tablicious
+      T = table(ids,categories,titles);
+      % https://wiki.octave.org/Function_tableprint#Usage
+      prettyprint(T);
     endfunction
 
     function [] = Plot(this)
