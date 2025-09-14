@@ -27,7 +27,7 @@ classdef Returns < handle
       obj.finput = finput;
       obj.data = readf(finput);
       obj.timestamp = obj.data.Date;
-      obj.timestep = Futil.GetTimeStep(obj.timestamp);
+      obj.timestep = Util.GetTimeStep(obj.timestamp);
       obj.flgPctChange = 1;
       obj.flgPlotType = 2;
       obj.volume = obj.data.Volume;
@@ -42,7 +42,7 @@ classdef Returns < handle
       endif
 
       dp = diff(price);
-      this.returns = Futil.Round(( dp./ price(1:end-1) )*100); % as a percent, rounded to 2 decimal places
+      this.returns = Util.Round(( dp./ price(1:end-1) )*100); % as a percent, rounded to 2 decimal places
 
     endfunction
 
@@ -69,7 +69,7 @@ classdef Returns < handle
       figure;
       bar(t,y);
 
-      [xticks,fmt] = Futil.GetDateTicks(t); %this.GetTimeTicks(t);
+      [xticks,fmt] = Util.GetDateTicks(t); %this.GetTimeTicks(t);
       ax = gca;
       set(ax,"XTick",xticks);
       datetick('x',fmt,'keepticks','keeplimits');
@@ -84,15 +84,15 @@ classdef Returns < handle
       % plot returns as line plot
 
       [t,y] = this.GetReturnData();
-      if length(t) < Futil.MinLengthReturns || length(y) < Futil.MinLengthReturns
-        fprintf('Length of return data (l.t. %d) insufficient to plot.\n',Futil.MinLengthReturns);
+      if length(t) < Constant.MinLengthReturns || length(y) < Constant.MinLengthReturns
+        fprintf('Length of return data (l.t. %d) insufficient to plot.\n',Constant.MinLengthReturns);
         return;
       endif
 
       figure;
-      plot(t,y,'--.','MarkerSize',Futil.PlotMarkerSize,'LineWidth',Futil.PlotLineWidth);
+      plot(t,y,'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
 
-      [xticks,fmt] = Futil.GetDateTicks(t); %this.GetTimeTicks(t);
+      [xticks,fmt] = Util.GetDateTicks(t); %this.GetTimeTicks(t);
       ax = gca;
       set(ax,"XTick",xticks);
       datetick('x',fmt,'keepticks','keeplimits');
@@ -115,7 +115,7 @@ classdef Returns < handle
       figure;
       stem(t,y);
 
-      [xticks,fmt] = Futil.GetDateTicks(t); %this.GetTimeTicks(t);
+      [xticks,fmt] = Util.GetDateTicks(t); %this.GetTimeTicks(t);
       ax = gca;
       set(ax,"XTick",xticks);
       datetick('x',fmt,'keepticks','keeplimits');
@@ -176,7 +176,7 @@ classdef Returns < handle
       y = [this.returns.rateOfReturn];
       vol = std(y); % standard deviation = volatility
       num = numel(y);
-      tvals=arrayfun(@(s) Futil.GetDateNum(s),[this.returns(:).year]);
+      tvals=arrayfun(@(s) Util.GetDateNum(s),[this.returns(:).year]);
 
       hold on;
       plot(tvals,(0+vol)*ones(num,1),'r--');
@@ -194,20 +194,20 @@ classdef Returns < handle
       fprintf('Symbol: %s\n',this.finput.symbol);
       fprintf('Time Period: [%s,%s], Time Step: %s, Nr. Samples: %d\n',datestr(t1),datestr(t2),this.timestep,numel(y));
       fprintf('Returns: range: [%.2f%%,%.2f%%], mean: %.2f%%, std. dev.: %.2f%%\n',min(y),max(y),mean(y),std(y));
-      fprintf('Returns: total: %.2f%%, APR=%.2f%%\n',sum(y),Futil.GetAPR(this.timestamp,y));
+      fprintf('Returns: total: %.2f%%, APR=%.2f%%\n',sum(y),Util.GetAPR(this.timestamp,y));
       tol = 0;
       % returns gt, ls tolerance
       ix1 = y >= tol;
       ix2 = y <= tol;
       fprintf('Returns: gt vs. lt %.2f: %d (pct. %.2f%%, mean %.2f%%) vs. %d (pct. %.2f%%, mean %.2f%%)\n',...
-        tol,sum(ix1),Futil.Round(100*(sum(ix1)/numel(y))),mean(y(ix1)),...
-            sum(ix2),Futil.Round(100*(sum(ix2)/numel(y))),mean(y(ix2)));
+        tol,sum(ix1),Util.Round(100*(sum(ix1)/numel(y))),mean(y(ix1)),...
+            sum(ix2),Util.Round(100*(sum(ix2)/numel(y))),mean(y(ix2)));
       % returns gt, ls volatility
       ix1 = y >= std(y);
       ix2 = y <= -std(y);
       fprintf('Returns: gt vs. lt %.2f: %d (pct. %.2f%%, mean %.2f%%) vs. %d (pct. %.2f%%, avg. %.2f%%)\n',...
-        std(y),sum(ix1),Futil.Round(100*(sum(ix1)/numel(y))),mean(y(ix1)),...
-               sum(ix2),Futil.Round(100*(sum(ix2)/numel(y))),mean(y(ix2)));
+        std(y),sum(ix1),Util.Round(100*(sum(ix1)/numel(y))),mean(y(ix1)),...
+               sum(ix2),Util.Round(100*(sum(ix2)/numel(y))),mean(y(ix2)));
     endfunction
   endmethods % Private
 endclassdef

@@ -25,6 +25,9 @@ classdef Binput < handle
   methods % Public
 
     function [obj] = Binput(varargin)
+
+      pkg load tablicious;
+
       obj.dataFolder = '../../../data/bls'; % BLS root data folder;
       obj.SetDataDefinitionTable();
 
@@ -66,9 +69,9 @@ classdef Binput < handle
       endif
 
       figure;
-      plot(this.timestamp,this.value,'--.','MarkerSize',Butil.PlotMarkerSize,'LineWidth',Butil.PlotLineWidth);
+      plot(this.timestamp,this.value,'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
 
-      [xticks,fmt] = Butil.GetDateTicks(this.timestamp); %this.GetTimeTicks(t);
+      [xticks,fmt] = Util.GetDateTicks(this.timestamp); %this.GetTimeTicks(t);
       ax = gca;
       set(ax,"XTick",xticks);
       datetick('x','mmm yy','keepticks','keeplimits');
@@ -77,7 +80,7 @@ classdef Binput < handle
       rowIdx = this.GetRowIdx(Binput.COL_IDX_ID,this.id(1,:));
 
       label_str = this.dataDefinitionTable(rowIdx,Binput.COL_IDX_UNIT);
-      ylabel(label_str,'FontSize',Butil.YLabelFontSize);
+      ylabel(label_str,'FontSize',Constant.YLabelFontSize);
 
       if strcmp(label_str,'thousands') == 1 % set yticklabels
         yticks = get(ax,"YTick");
@@ -86,14 +89,14 @@ classdef Binput < handle
       endif
 
       title_str = this.dataDefinitionTable(rowIdx,Binput.COL_IDX_TITLE);
-      title(title_str,'FontSize',Butil.TitleFontSize);
+      title(title_str,'FontSize',Constant.TitleFontSize);
       grid on;
 
     endfunction
 
     function [] = Stats(this)
       % calculates statistics
-      timestep = Butil.GetTimeStep(this.timestamp);
+      timestep = Util.GetTimeStep(this.timestamp);
       d1 = datestr(this.timestamp(1));
       d2 = datestr(this.timestamp(end));
       y = this.value;

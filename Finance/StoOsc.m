@@ -49,7 +49,7 @@ classdef StoOsc < handle
         p = this.price(i);
         l = min(this.low(i-n:i));
         h = max(this.high(i-n:i));
-        oscFast(i) = Futil.Round(100*((p-l)/(h-l)));
+        oscFast(i) = Util.Round(100*((p-l)/(h-l)));
       endfor
       oscFast(isnan(oscFast)) = []; % clean up
       oscSlow = MovingAvg.SMA(oscFast,this.wndLengthSlow);
@@ -68,25 +68,25 @@ classdef StoOsc < handle
       [oscSlow,oscFast] = this.CalcSO();
 
       subplot(2,1,1);
-      plot(t(this.numPeriods+1:end),this.price(this.numPeriods+1:end),'--.','MarkerSize',Futil.PlotMarkerSize,'LineWidth',Futil.PlotLineWidth);
+      plot(t(this.numPeriods+1:end),this.price(this.numPeriods+1:end),'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
 
-      [xticks,fmt] = Futil.GetDateTicks(this.timestamp);
+      [xticks,fmt] = Util.GetDateTicks(this.timestamp);
       ax = gca;
       set(ax,"XTick",xticks);
       datetick('x',fmt,'keepticks','keeplimits');
       xlim([xticks(1) xticks(end)]);
 
-      ylabel('Price','FontSize',Futil.YLabelFontSize);
+      ylabel('Price','FontSize',Constant.YLabelFontSize);
 
       grid on;
       grid minor;
       hold off;
 
       subplot(2,1,2);
-      plot(t(this.numPeriods+1:end),oscFast,'-.','color','blue','MarkerSize',Futil.PlotMarkerSize,'LineWidth',Futil.PlotLineWidth);
+      plot(t(this.numPeriods+1:end),oscFast,'-.','color','blue','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
 
       hold on;
-      plot(t(this.numPeriods+1:end),oscSlow,'-','color',[1,0.5,0],'MarkerSize',Futil.PlotMarkerSize,'LineWidth',Futil.PlotLineWidth);
+      plot(t(this.numPeriods+1:end),oscSlow,'-','color',[1,0.5,0],'MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
       this.AddGuideLines(80,20);
 
       ax = gca;
@@ -94,7 +94,7 @@ classdef StoOsc < handle
       datetick('x',fmt,'keepticks','keeplimits');
       xlim([xticks(1) xticks(end)]);
 
-      ylabel('Stochastic Oscillator','FontSize',Futil.YLabelFontSize);
+      ylabel('Stochastic Oscillator','FontSize',Constant.YLabelFontSize);
       legend('%K','%D');
 
       grid on;
@@ -110,10 +110,10 @@ classdef StoOsc < handle
       n=xlim(2)-xlim(1)+1;
       dx=20;dy=5;
 
-      plot([xlim(1):xlim(2)],ones(1,n)*high,'--','color',[0.5,0.5,0.5],'LineWidth',Futil.PlotLineWidth);
+      plot([xlim(1):xlim(2)],ones(1,n)*high,'--','color',[0.5,0.5,0.5],'LineWidth',Constant.PlotLineWidth);
       text(xlim(1)+dx,high+dy,'Overbought > 80');
 
-      plot([xlim(1):xlim(2)],ones(1,n)*low,'--','color',[0.5,0.5,0.5],'LineWidth',Futil.PlotLineWidth);
+      plot([xlim(1):xlim(2)],ones(1,n)*low,'--','color',[0.5,0.5,0.5],'LineWidth',Constant.PlotLineWidth);
       text(xlim(1)+dx,low-dy,'Oversold < 20');
     endfunction
   endmethods

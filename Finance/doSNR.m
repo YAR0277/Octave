@@ -1,16 +1,16 @@
 function [] = doSNR()
 
-  addpath('c:/Users/drdav/Projects/Octave/Common/Signals');
+  addpath(genpath('../Common/Signals'));
 
-  finput = Finput('Input\DJI-m.txt');
+  finput = Finput(fullfile('Input','DJI-m.txt'));
   monthly = Process(finput);
   Print(monthly);
 
-  finput = Finput('Input\DJI-w.txt');
+  finput = Finput(fullfile('Input','DJI-w.txt'));
   weekly = Process(finput);
   Print(weekly);
 
-  finput = Finput('Input\DJI-d.txt');
+  finput = Finput(fullfile('Input','DJI-d.txt'));
   daily = Process(finput);
   Print(daily);
 
@@ -21,10 +21,10 @@ endfunction
 function [] = Plot(data1,data2,legendStr)
   figure;
   hold on;
-  plot(data1.t,data1.noise,'--.','Color',[1,0,1],'MarkerSize',Futil.PlotMarkerSize,'LineWidth',Futil.PlotLineWidth);
-  plot(data2.t,data2.noise,'--.','Color',[.5,.5,.5],'MarkerSize',Futil.PlotMarkerSize,'LineWidth',Futil.PlotLineWidth);
+  plot(data1.t,data1.noise,'--.','Color',[1,0,1],'MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+  plot(data2.t,data2.noise,'--.','Color',[.5,.5,.5],'MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
 
-  [xticks,fmt] = Futil.GetDateTicks(data1.t); %this.GetTimeTicks(t);
+  [xticks,fmt] = Util.GetDateTicks(data1.t); %this.GetTimeTicks(t);
   ax = gca;
   set(ax,"XTick",xticks);
   datetick('x',fmt,'keepticks','keeplimits');

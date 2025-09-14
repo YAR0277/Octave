@@ -59,19 +59,19 @@ classdef BB < handle
       t=this.timestamp;
 
       subplot(2,1,1);
-      plot(t,this.price,'--.','MarkerSize',Futil.PlotMarkerSize,'LineWidth',Futil.PlotLineWidth);
+      plot(t,this.price,'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
 
       hold on;
       [lower,upper] = this.AddBandLines(t,x);
 
-      [xticks,fmt] = Futil.GetDateTicks(this.timestamp);
+      [xticks,fmt] = Util.GetDateTicks(this.timestamp);
       ax = gca;
       set(ax,"XTick",xticks);
       datetick('x',fmt,'keepticks','keeplimits');
       xlim([xticks(1) xticks(end)]);
 
-      ylabel('Bollinger Bands','FontSize',Futil.YLabelFontSize);
-      legend(this.maType,'FontSize',Futil.LegendFontSize);
+      ylabel('Bollinger Bands','FontSize',Constant.YLabelFontSize);
+      legend(this.maType,'FontSize',Constant.LegendFontSize);
 
       grid on;
       grid minor;
@@ -79,7 +79,7 @@ classdef BB < handle
 
       subplot(2,1,2);
       pctB = ((this.price - lower) ./ (upper - lower) );
-      plot(t,pctB,'--.','MarkerSize',Futil.PlotMarkerSize,'LineWidth',Futil.PlotLineWidth);
+      plot(t,pctB,'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
 
       hold on;
       this.AddMidLine(0.5);
@@ -89,7 +89,7 @@ classdef BB < handle
       datetick('x',fmt,'keepticks','keeplimits');
       xlim([xticks(1) xticks(end)]);
 
-      ylabel('%b','FontSize',Futil.YLabelFontSize);
+      ylabel('%b','FontSize',Constant.YLabelFontSize);
 
       grid on;
       grid minor;
@@ -122,14 +122,14 @@ classdef BB < handle
       lower = x - sig;
       upper = x + sig;
 
-      plot(t,lower,'--','color','green','LineWidth',Futil.PlotLineWidth);
-      plot(t,upper,'--','color','red','LineWidth',Futil.PlotLineWidth);
+      plot(t,lower,'--','color','green','LineWidth',Constant.PlotLineWidth);
+      plot(t,upper,'--','color','red','LineWidth',Constant.PlotLineWidth);
     endfunction
 
     function [] = AddMidLine(this,y)
       xlim = get(gca(),'xlim');
       n=xlim(2)-xlim(1)+1;
-      plot([xlim(1):xlim(2)],ones(1,n)*y,'--','color','red','LineWidth',Futil.PlotLineWidth);
+      plot([xlim(1):xlim(2)],ones(1,n)*y,'--','color','red','LineWidth',Constant.PlotLineWidth);
     endfunction
   endmethods
 endclassdef

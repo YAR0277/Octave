@@ -51,19 +51,19 @@ classdef MACD < handle
       [signal,macd,fast,slow] = this.CalcMACD(this.price);
 
       subplot(2,1,1);
-      plot(t,this.price,'--.','MarkerSize',Futil.PlotMarkerSize,'LineWidth',Futil.PlotLineWidth);
+      plot(t,this.price,'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
 
       hold on;
-      plot(t,fast,'-','color','magenta','MarkerSize',Futil.PlotMarkerSize,'LineWidth',Futil.PlotLineWidth);
-      plot(t,slow,'-','color',[0.65,0.16,0.16],'MarkerSize',Futil.PlotMarkerSize,'LineWidth',Futil.PlotLineWidth);
+      plot(t,fast,'-','color','magenta','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+      plot(t,slow,'-','color',[0.65,0.16,0.16],'MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
 
-      [xticks,fmt] = Futil.GetDateTicks(this.timestamp);
+      [xticks,fmt] = Util.GetDateTicks(this.timestamp);
       ax = gca;
       set(ax,"XTick",xticks);
       datetick('x',fmt,'keepticks','keeplimits');
       xlim([xticks(1) xticks(end)]);
 
-      ylabel('Price','FontSize',Futil.YLabelFontSize);
+      ylabel('Price','FontSize',Constant.YLabelFontSize);
       legend('price','fast','slow','location','northwest');
 
       grid on;
@@ -71,10 +71,10 @@ classdef MACD < handle
       hold off;
 
       subplot(2,1,2);
-      plot(t,signal,'-','color','red','MarkerSize',Futil.PlotMarkerSize,'LineWidth',Futil.PlotLineWidth);
+      plot(t,signal,'-','color','red','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
 
       hold on;
-      plot(t,macd,'-','color','blue','MarkerSize',Futil.PlotMarkerSize,'LineWidth',Futil.PlotLineWidth);
+      plot(t,macd,'-','color','blue','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
       this.AddMidLine(0.0);
 
       ax = gca;
@@ -82,7 +82,7 @@ classdef MACD < handle
       datetick('x',fmt,'keepticks','keeplimits');
       xlim([xticks(1) xticks(end)]);
 
-      ylabel('MACD','FontSize',Futil.YLabelFontSize);
+      ylabel('MACD','FontSize',Constant.YLabelFontSize);
       legend('signal','macd','location','northwest');
 
       grid on;
@@ -96,7 +96,7 @@ classdef MACD < handle
     function [] = AddMidLine(this,y)
       xlim = get(gca(),'xlim');
       n=xlim(2)-xlim(1)+1;
-      plot([xlim(1):xlim(2)],ones(1,n)*y,'--','color',[0.5,0.5,0.5],'LineWidth',Futil.PlotLineWidth);
+      plot([xlim(1):xlim(2)],ones(1,n)*y,'--','color',[0.5,0.5,0.5],'LineWidth',Constant.PlotLineWidth);
     endfunction
   endmethods
 endclassdef

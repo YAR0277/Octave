@@ -1,4 +1,4 @@
-classdef Sutil < handle
+classdef Sutil < Util
   % utilities for Signals folder
   % https://www.gaussianwaves.com/2013/12/power-and-energy-of-a-signal/
   % https://www.mathworks.com/matlabcentral/answers/2018831-determining-signal-to-noise-ratio
@@ -102,11 +102,11 @@ classdef Sutil < handle
       n = Sutil.GetNoise(t,x);
       figure;
       hold on;
-      plot(t,x,'--.','Color','k','MarkerSize',Futil.PlotMarkerSize);
-      plot(t,s,'--.','Color','b','MarkerSize',Futil.PlotMarkerSize);
-      plot(t,n,'--.','Color','r','MarkerSize',Futil.PlotMarkerSize);
+      plot(t,x,'--.','Color','k','MarkerSize',Constant.PlotMarkerSize);
+      plot(t,s,'--.','Color','b','MarkerSize',Constant.PlotMarkerSize);
+      plot(t,n,'--.','Color','r','MarkerSize',Constant.PlotMarkerSize);
 
-      [xticks,fmt] = Futil.GetDateTicks(t); %this.GetTimeTicks(t);
+      [xticks,fmt] = Util.GetDateTicks(t); %this.GetTimeTicks(t);
       ax = gca;
       set(ax,"XTick",xticks);
       datetick('x',fmt,'keepticks','keeplimits');
@@ -125,10 +125,6 @@ classdef Sutil < handle
     function [r] = RMS(x)
     % https://en.wikipedia.org/wiki/Root_mean_square
       r = sqrt(Sutil.Power(x));
-    endfunction
-
-    function [r] = Round(r)
-      r = round(r.*100)./100; % round to nearest 2 decimal places
     endfunction
 
     function [r] = SNR(t,x)

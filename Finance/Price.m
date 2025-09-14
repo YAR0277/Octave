@@ -20,7 +20,7 @@ classdef Price < handle
       obj.finput = finput;
       obj.data = readf(finput);
       obj.timestamp = obj.data.Date;
-      obj.timestep = Futil.GetTimeStep(obj.timestamp);
+      obj.timestep = Util.GetTimeStep(obj.timestamp);
       obj.volume = obj.data.Volume;
     endfunction
 
@@ -67,8 +67,8 @@ classdef Price < handle
       prExtrap = interp1(this.timestamp,price,datenum(date()),"extrap");
       fprintf('Price Extrap: (%s) %.2f \n',date(),prExtrap);
 
-      prDetrend = Futil.RemoveTrend(price);
-      pctLP = Futil.Round(100*(2*std(prDetrend)/price(end)));
+      prDetrend = Util.RemoveTrend(price);
+      pctLP = Util.Round(100*(2*std(prDetrend)/price(end)));
       fprintf('Price detrend: range: [%.2f,%.2f], mean (%.2f), 1σ (%.2f), 2σ (%.2f), 2σ of LP (%.2f%%)\n',...
         min(prDetrend),max(prDetrend),mean(prDetrend),std(prDetrend),2*std(prDetrend),pctLP);
       fprintf('Price detrend: last: %.2f (z-score %.2f)\n',prDetrend(end),(prDetrend(end)-mean(prDetrend))/std(prDetrend));
@@ -77,7 +77,7 @@ classdef Price < handle
       n2 = sum(prDetrend > mean(prDetrend) + 2*std(prDetrend) | prDetrend < mean(prDetrend) - 2*std(prDetrend));
       fprintf('Price detrend: N > [-σ,σ] (%d, %.2f%%), N > [-2σ,2σ] (%d, %.2f%%)\n',n1,100*(n1/n),n2,100*(n2/n));
       vol = this.volume;
-      fprintf('Volume: range: [%d,%d], last value (%d), percentile (%.2f%%)\n',min(vol),max(vol),vol(end),Futil.CalcPercentile(vol,vol(end)));
+      fprintf('Volume: range: [%d,%d], last value (%d), percentile (%.2f%%)\n',min(vol),max(vol),vol(end),Util.CalcPercentile(vol,vol(end)));
     endfunction
 
   endmethods % Public
@@ -90,17 +90,17 @@ classdef Price < handle
       dx=20;dy=0.5;
 
       m = mean(x);
-      plot([xlim(1):xlim(2)],ones(1,n)*m,'--','color',[0,0.5,0]);%,'LineWidth',Futil.PlotLineWidth);
+      plot([xlim(1):xlim(2)],ones(1,n)*m,'--','color',[0,0.5,0]);%,'LineWidth',Constant.PlotLineWidth);
       text(xlim(1)+dx,m+0.5,sprintf('m=%.2f',m),'color',[0,0.5,0]);
 
-      plot([xlim(1):xlim(2)],ones(1,n)*(m + std(x)),'--','color','red');%,'LineWidth',Futil.PlotLineWidth);
+      plot([xlim(1):xlim(2)],ones(1,n)*(m + std(x)),'--','color','red');%,'LineWidth',Constant.PlotLineWidth);
       text(xlim(1)+dx,(m + std(x))+dy,sprintf('m+1σ=%.2f',m+std(x)),'color','red');
-      plot([xlim(1):xlim(2)],ones(1,n)*(m + 2*std(x)),'--','color','red');%,'LineWidth',Futil.PlotLineWidth);
+      plot([xlim(1):xlim(2)],ones(1,n)*(m + 2*std(x)),'--','color','red');%,'LineWidth',Constant.PlotLineWidth);
       text(xlim(1)+dx,(m + 2*std(x))+dy,sprintf('m+2σ=%.2f',m+2*std(x)),'color','red');
 
-      plot([xlim(1):xlim(2)],ones(1,n)*(m - std(x)),'--','color','red');%,'LineWidth',Futil.PlotLineWidth);
+      plot([xlim(1):xlim(2)],ones(1,n)*(m - std(x)),'--','color','red');%,'LineWidth',Constant.PlotLineWidth);
       text(xlim(1)+dx,(m - std(x))-dy,sprintf('m-1σ=%.2f',m-std(x)),'color','red');
-      plot([xlim(1):xlim(2)],ones(1,n)*(m - 2*std(x)),'--','color','red');%,'LineWidth',Futil.PlotLineWidth);
+      plot([xlim(1):xlim(2)],ones(1,n)*(m - 2*std(x)),'--','color','red');%,'LineWidth',Constant.PlotLineWidth);
       text(xlim(1)+dx,(m - 2*std(x))-dy,sprintf('m-2σ=%.2f',m-2*std(x)),'color','red');
     endfunction
 
@@ -110,27 +110,27 @@ classdef Price < handle
       price = this.GetPrices();
 
       subplot(2,1,1);
-      plot(t(2:end),price(2:end),'--.','MarkerSize',Futil.PlotMarkerSize,'LineWidth',Futil.PlotLineWidth);
+      plot(t(2:end),price(2:end),'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
 
       hold on;
       s = Sutil.GetSignal(t,price);
-      plot(t(2:end),s(2:end),'--','Color',[1,0,0],'MarkerSize',Futil.PlotMarkerSize,'LineWidth',Futil.PlotLineWidth);
+      plot(t(2:end),s(2:end),'--','Color',[1,0,0],'MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
 
-      [xticks,fmt] = Futil.GetDateTicks(this.timestamp);
+      [xticks,fmt] = Util.GetDateTicks(this.timestamp);
       ax = gca;
       set(ax,"XTick",xticks);
       datetick('x',fmt,'keepticks','keeplimits');
       xlim([xticks(1) xticks(end)]);
 
-      ylabel('Price','FontSize',Futil.YLabelFontSize);
+      ylabel('Price','FontSize',Constant.YLabelFontSize);
 
       grid on;
       grid minor;
       hold off;
 
       subplot(2,1,2);
-      prDetrend = Futil.RemoveTrend(price);
-      plot(t(2:end),prDetrend,'--.','MarkerSize',Futil.PlotMarkerSize,'LineWidth',Futil.PlotLineWidth);
+      prDetrend = Util.RemoveTrend(price);
+      plot(t(2:end),prDetrend,'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
 
       hold on;
       this.AddStdDevLines(prDetrend);
@@ -140,7 +140,7 @@ classdef Price < handle
       datetick('x',fmt,'keepticks','keeplimits');
       xlim([xticks(1) xticks(end)]);
 
-      ylabel('Price-Detrend','FontSize',Futil.YLabelFontSize);
+      ylabel('Price-Detrend','FontSize',Constant.YLabelFontSize);
 
       grid on;
       grid minor;

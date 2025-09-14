@@ -1,20 +1,20 @@
 ## Copyright (C) 2022 YAR0277
-## 
+##
 ## This program is free software: you can redistribute it and/or modify it
 ## under the terms of the GNU General Public License as published by
 ## the Free Software Foundation, either version 3 of the License, or
 ## (at your option) any later version.
-## 
+##
 ## This program is distributed in the hope that it will be useful, but
 ## WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
-## 
+##
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see
 ## <https://www.gnu.org/licenses/>.
 
-## -*- texinfo -*- 
+## -*- texinfo -*-
 ## @deftypefn {} {@var{retval} =} StaticConstant (@var{input1}, @var{input2})
 ##
 ## @seealso{}
@@ -29,8 +29,14 @@ classdef Constant
     a = 6378137;    % semi-major axis
     b = 6356752.3142; % semi-minor axis
   endproperties
-  methods
-##    function Constant(~)
-##    end
-  endmethods
+
+  properties (Constant)
+    MinLengthReturns = 3;
+    MaxNumXTicks = 8;
+    YLabelFontSize = 14;
+    TitleFontSize = 16;
+    LegendFontSize = 12;
+    PlotMarkerSize = 10;
+    PlotLineWidth = 1.0;
+  endproperties
 endclassdef

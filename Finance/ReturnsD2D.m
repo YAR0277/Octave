@@ -13,7 +13,7 @@ classdef ReturnsD2D < Returns
       obj = obj@Returns(finput);
       obj.flgPlotType = 3;
       obj.startDay = obj.timestamp(1);
-      obj.endDay = Futil.GetDayToday();
+      obj.endDay = Util.GetDayToday();
     endfunction
 
     function [t,y] = GetReturnData(this)
@@ -27,7 +27,7 @@ classdef ReturnsD2D < Returns
       n = length(t);
       y = zeros(n-1,1); % there is 1 less return than the number of timestamps
       for i=1:n-1
-        y(i) = Futil.Round(((x(end)-x(i)) / x(i))*100);
+        y(i) = Util.Round(((x(end)-x(i)) / x(i))*100);
       endfor
       this.returns = y; % store return data in returns
 
@@ -37,11 +37,11 @@ classdef ReturnsD2D < Returns
     endfunction
 
     function [this] = SetEndDay(this,date)
-      this.endDay = Futil.GetDay(date);
+      this.endDay = Util.GetDay(date);
     endfunction
 
     function [this] = SetStartDay(this,date)
-      this.startDay = Futil.GetDay(date);
+      this.startDay = Util.GetDay(date);
     endfunction
 
   endmethods % Public

@@ -16,17 +16,17 @@ function [] = plotf(finput)
 
   figure;
   subplot(2,1,1);
-  plot(t(2:end),x(2:end),'--.','MarkerSize',Futil.PlotMarkerSize,'LineWidth',Futil.PlotLineWidth);
+  plot(t(2:end),x(2:end),'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
 
-  [xticks,fmt] = Futil.GetDateTicks(s.Date);
+  [xticks,fmt] = Util.GetDateTicks(s.Date);
   ax = gca;
   set(ax,"XTick",xticks);
   datetick('x',fmt,'keepticks','keeplimits');
   xlim([xticks(1) xticks(end)]);
 
-  legend(finput.dataCol,'FontSize',Futil.LegendFontSize);
-  ylabel(GetLabelY(finput), 'FontSize', Futil.YLabelFontSize);
-  title(finput.symbol, 'FontSize', Futil.TitleFontSize);
+  legend(finput.dataCol,'FontSize',Constant.LegendFontSize);
+  ylabel(GetLabelY(finput), 'FontSize', Constant.YLabelFontSize);
+  title(finput.symbol, 'FontSize', Constant.TitleFontSize);
 
   grid on;
   grid minor;
