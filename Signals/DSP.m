@@ -1,8 +1,10 @@
-% References
-% [1] Intro to Random Signals, Brown & Hwang
-% [2] Digital Signal Processing, Steven W. Smith
 classdef DSP
-
+  % Digital Signal Processing
+  %
+  % References:
+  % [1] Intro to Random Signals, Brown & Hwang
+  % [2] Digital Signal Processing, Steven W. Smith
+  %
   methods (Static = true)
 
     function [r] = CalcAutoCorrelationFcn(X,lags,N)

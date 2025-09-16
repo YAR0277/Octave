@@ -30,19 +30,27 @@ classdef MACD < handle
       obj.wndLengthSignal = 9;
     endfunction
 
+    function [] = Plot(this)
+      figure;
+      this.Subplot();
+      ## https://stackoverflow.com/questions/67171470/easy-waybuiltin-function-to-put-main-title-in-plot-in-octave
+      S = axes('visible','off','title',this.finput.symbol,'FontSize',16);
+    endfunction
+  endmethods %Public
+
+  methods (Access = private)
+    function [] = AddMidLine(this,y)
+      xlim = get(gca(),'xlim');
+      n=xlim(2)-xlim(1)+1;
+      plot([xlim(1):xlim(2)],ones(1,n)*y,'--','color',[0.5,0.5,0.5],'LineWidth',Constant.PlotLineWidth);
+    endfunction
+
     function [r,macd,fast,slow] = CalcMACD(this,x)
       % calculates the moving average convergence divergence
       fast = MovingAvg.EMA(x,this.wndLengthFast);
       slow = MovingAvg.EMA(x,this.wndLengthSlow);
       macd = fast - slow; % macd line
       r = MovingAvg.EMA(macd,this.wndLengthSignal); % signal line
-    endfunction
-
-    function [] = Plot(this)
-      figure;
-      this.Subplot();
-      ## https://stackoverflow.com/questions/67171470/easy-waybuiltin-function-to-put-main-title-in-plot-in-octave
-      S = axes('visible','off','title',this.finput.symbol,'FontSize',16);
     endfunction
 
     function [] = Subplot(this)
@@ -88,15 +96,6 @@ classdef MACD < handle
       grid on;
       grid minor;
       hold off;
-
-    endfunction
-  endmethods %Public
-
-  methods (Access = private)
-    function [] = AddMidLine(this,y)
-      xlim = get(gca(),'xlim');
-      n=xlim(2)-xlim(1)+1;
-      plot([xlim(1):xlim(2)],ones(1,n)*y,'--','color',[0.5,0.5,0.5],'LineWidth',Constant.PlotLineWidth);
     endfunction
   endmethods
 endclassdef

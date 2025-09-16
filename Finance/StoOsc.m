@@ -33,6 +33,28 @@ classdef StoOsc < handle
       obj.numPeriods = 14;
     endfunction
 
+    function [] = Plot(this)
+      figure;
+      this.Subplot();
+      ## https://stackoverflow.com/questions/67171470/easy-waybuiltin-function-to-put-main-title-in-plot-in-octave
+      S = axes('visible','off','title',this.finput.symbol,'FontSize',16);
+    endfunction
+
+  endmethods %Public
+
+  methods (Access = private)
+    function [] = AddGuideLines(this,high,low)
+      xlim = get(gca(),'xlim');
+      n=xlim(2)-xlim(1)+1;
+      dx=20;dy=5;
+
+      plot([xlim(1):xlim(2)],ones(1,n)*high,'--','color',[0.5,0.5,0.5],'LineWidth',Constant.PlotLineWidth);
+      text(xlim(1)+dx,high+dy,'Overbought > 80');
+
+      plot([xlim(1):xlim(2)],ones(1,n)*low,'--','color',[0.5,0.5,0.5],'LineWidth',Constant.PlotLineWidth);
+      text(xlim(1)+dx,low-dy,'Oversold < 20');
+    endfunction
+
     function [oscSlow,oscFast] = CalcSO(this)
       % calculates the moving average convergence divergence
       len = length(this.price);
@@ -53,13 +75,6 @@ classdef StoOsc < handle
       endfor
       oscFast(isnan(oscFast)) = []; % clean up
       oscSlow = MovingAvg.SMA(oscFast,this.wndLengthSlow);
-    endfunction
-
-    function [] = Plot(this)
-      figure;
-      this.Subplot();
-      ## https://stackoverflow.com/questions/67171470/easy-waybuiltin-function-to-put-main-title-in-plot-in-octave
-      S = axes('visible','off','title',this.finput.symbol,'FontSize',16);
     endfunction
 
     function [] = Subplot(this)
@@ -100,21 +115,6 @@ classdef StoOsc < handle
       grid on;
       grid minor;
       hold off;
-
-    endfunction
-  endmethods %Public
-
-  methods (Access = private)
-    function [] = AddGuideLines(this,high,low)
-      xlim = get(gca(),'xlim');
-      n=xlim(2)-xlim(1)+1;
-      dx=20;dy=5;
-
-      plot([xlim(1):xlim(2)],ones(1,n)*high,'--','color',[0.5,0.5,0.5],'LineWidth',Constant.PlotLineWidth);
-      text(xlim(1)+dx,high+dy,'Overbought > 80');
-
-      plot([xlim(1):xlim(2)],ones(1,n)*low,'--','color',[0.5,0.5,0.5],'LineWidth',Constant.PlotLineWidth);
-      text(xlim(1)+dx,low-dy,'Oversold < 20');
     endfunction
   endmethods
 endclassdef

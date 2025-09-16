@@ -27,51 +27,27 @@ classdef RSI < handle
       obj.rsiType = "SMA"; % default
       obj.alpha = 0.1;
       obj.wlen = 14;
+      obj.w = 1:14;
       obj.timestamp = obj.data.Date;
       obj.price = obj.data.(finput.dataCol);
-    endfunction
-
-    function [r] = CalcRSI(this)
-      % calculates the Relative Strength Index with window length wlen.
-      r = 100 - (100 ./ (1 + this.CalcRS()));
-    endfunction
-
-    function [r] = CalcRS(this)
-      % calculates the Relative Strength with window length wlen.
-      dx = diff(this.price);
-
-      u(dx  > 0) = dx(dx > 0);
-      u(dx <= 0) = 0;
-
-      d(dx  < 0) = -dx(dx < 0);
-      d(dx >= 0) = 0;
-
-      switch this.rsiType
-        case "EMA"
-          r = MovingAvg.EMA(u,this.wlen,this.alpha)./MovingAvg.EMA(d,this.wlen,this.alpha);
-        case "MMA"
-          r = MovingAvg.MMA(u,this.wlen)./MovingAvg.MMA(d,this.wlen);
-        case "SMA"
-          r = MovingAvg.SMA(u,this.wlen)./MovingAvg.SMA(d,this.wlen);
-        case "WMA"
-          r = MovingAvg.WMA(u,this.w,this.wlen)./MovingAvg.WMA(d,this.w,this.wlen);
-        otherwise
-      endswitch
     endfunction
 
     function [] = Compare(this)
       figure;
       hold on;
-      this.DoPlotRSI("SMA");
-      this.DoPlotRSI("EMA");
-      this.DoPlotRSI("MMA");
-      this.DoPlotRSI("WMA");
+      this.SetType("SMA");
+      this.Subplot();
+      this.SetType("EMA");
+      this.Subplot();
+      this.SetType("MMA");
+      this.Subplot();
+      this.SetType("WMA");
+      this.Subplot();
       datetick('x','YY','keepticks');
       ylim([0 100]);
       ylabel('RSI');
       title('Comparison of Relative Strength Indices','FontSize', Constant.TitleFontSize);
       this.AddGuideLines(70,30);
-      this.AddRectgangle(numel(this.price),70,30);
       grid on;
       legend({'SMA','EMA','MMA','WMA'},'FontSize',Constant.LegendFontSize);
       hold off;
@@ -79,16 +55,8 @@ classdef RSI < handle
 
     function [] = Plot(this)
       figure;
-      this.Subplot();
-      title(this.finput.symbol,'FontSize',16);
-    endfunction
-
-    function [] = Subplot(this)
-
-      x=this.CalcRSI();
-      t=this.timestamp(2:end);
-      plot(t,x,'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
       hold on;
+      this.Subplot();
 
       [xticks,fmt] = Util.GetDateTicks(this.timestamp);
       ax = gca;
@@ -98,25 +66,11 @@ classdef RSI < handle
 
       ylim([0 100]);
       this.AddGuideLines(70,30);
-      this.AddRectgangle(numel(this.price),70,30);
       ylabel('RSI','FontSize',Constant.YLabelFontSize);
       legend(this.rsiType,'FontSize',Constant.LegendFontSize);
-
+      title(this.finput.symbol,'FontSize',16);
       grid on;
       grid minor;
-      hold off;
-    endfunction
-
-    function [] = PlotRS(this,rsiType)
-      figure;
-      hold on;
-      grid on;
-      grid minor;
-      this.DoPlotRS(rsiType);
-      datetick('x','YY','keepticks');
-      ylabel('RS');
-      legend(rsiType);
-      title(this.finput.symbol);
       hold off;
     endfunction
 
@@ -152,18 +106,38 @@ classdef RSI < handle
       text(xlim(1)+dx,low-dy,'Oversold < 30');
     endfunction
 
-    function [] = DoPlotRS(this,rsiType)
+    function [r] = CalcRSI(this)
+      % calculates the Relative Strength Index with window length wlen.
+      r = 100 - (100 ./ (1 + this.CalcRS()));
+    endfunction
 
-      this.SetType(rsiType);
+    function [r] = CalcRS(this)
+      % calculates the Relative Strength with window length wlen.
+      dx = diff(this.price);
 
-      x=this.CalcRS();
+      u(dx  > 0) = dx(dx > 0);
+      u(dx <= 0) = 0;
+
+      d(dx  < 0) = -dx(dx < 0);
+      d(dx >= 0) = 0;
+
+      switch this.rsiType
+        case "EMA"
+          r = MovingAvg.EMA(u,this.wlen,this.alpha)./MovingAvg.EMA(d,this.wlen,this.alpha);
+        case "MMA"
+          r = MovingAvg.MMA(u,this.wlen)./MovingAvg.MMA(d,this.wlen);
+        case "SMA"
+          r = MovingAvg.SMA(u,this.wlen)./MovingAvg.SMA(d,this.wlen);
+        case "WMA"
+          r = MovingAvg.WMA(u,this.w,this.wlen)./MovingAvg.WMA(d,this.w,this.wlen);
+        otherwise
+      endswitch
+    endfunction
+
+    function [] = Subplot(this)
+      x=this.CalcRSI();
       t=this.timestamp(2:end);
-      plot(t,x,'--.');
+      plot(t,x,'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
     endfunction
-
-    function [] = AddRectgangle(~,n,high,low)
-##      rectangle('Position',[0,low,n,high-low],'FaceColor','lightgray','EdgeColor','none');
-    endfunction
-
   endmethods
 endclassdef

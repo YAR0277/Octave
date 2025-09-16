@@ -79,7 +79,9 @@ classdef Finput < handle
       fprintf(fid,'%s\n',asStruct.symbol);
       fclose(fid);
     endfunction
+  endmethods %Public
 
+  methods (Access = private)
     function [s] = ToStruct(this)
       s = struct();
       fields = fieldnames(this);

@@ -12,8 +12,6 @@ function [] = plotf(finput)
   t = s.Date;
   x = s.(finput.dataCol);
 
-  rsi = RSI(finput);
-
   figure;
   subplot(2,1,1);
   plot(t(2:end),x(2:end),'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
@@ -32,7 +30,8 @@ function [] = plotf(finput)
   grid minor;
 
   subplot(2,1,2);
-  rsi.Subplot();
+  r = Returns(finput);
+  r.Subplot();
 
 endfunction
 % Ref.: search string "octave read in datatime from csv"
