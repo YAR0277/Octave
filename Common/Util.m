@@ -102,6 +102,13 @@ classdef Util < handle
       endif
     endfunction
 
+    function [r,p] = GetSignal(t,x)
+      % p(x) coefficients of a polynomial of degree n that minimizes the least-squares-error of the fit to the points [x(:),y(:)]
+      % s is a structure containing: 'yf' - the values of the polynomial for each value of x. etc.
+      [p,s] = polyfit(t,x,1);
+      r = s.yf;
+    endfunction
+
     function [r] = GetTimeStep(timestamp)
 
         if length(timestamp) < 2
@@ -114,7 +121,7 @@ classdef Util < handle
           r = 'day';
         elseif dd >= 6 && dd <= 7
           r = 'week';
-        elseif dd >= 27 && dd <= 31
+        elseif dd >= 27 && dd <= 32
           r = 'month';
         elseif dd >= 89 && dd <= 92
           r = 'quarter';

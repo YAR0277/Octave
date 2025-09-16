@@ -113,8 +113,8 @@ classdef Price < handle
       plot(t(2:end),price(2:end),'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
 
       hold on;
-      s = Sutil.GetSignal(t,price);
-      plot(t(2:end),s(2:end),'--','Color',[1,0,0],'MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+      s = Util.GetSignal(t,price);
+      plot(t(2:end),s(2:end),'--','Color',Color.Red,'MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
 
       [xticks,fmt] = Util.GetDateTicks(this.timestamp);
       ax = gca;

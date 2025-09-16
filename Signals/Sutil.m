@@ -35,7 +35,7 @@ classdef Sutil < Util
     endfunction
 
     function [r] = GetNoise(t,x)
-      s = Sutil.GetSignal(t,x);
+      s = Util.GetSignal(t,x);
       r = abs(x-s);
     endfunction
 
@@ -46,20 +46,13 @@ classdef Sutil < Util
       r = std(n);
     endfunction
 
-    function [r,p] = GetSignal(t,x)
-      % p(x) coefficients of a polynomial of degree n that minimizes the least-squares-error of the fit to the points [x(:),y(:)]
-      % s is a structure containing: 'yf' - the values of the polynomial for each value of x. etc.
-      [p,s] = polyfit(t,x,1);
-      r = s.yf;
-    endfunction
-
     function [r] = GetSignalPower(t,x)
-      s = Sutil.GetSignal(t,x);
+      s = Util.GetSignal(t,x);
       r = Sutil.Power(s);
     endfunction
 
     function [r] = GetResidual(t,x)
-      s = Sutil.GetSignal(t,x);
+      s = Util.GetSignal(t,x);
       r = abs(x-s);
     endfunction
 
@@ -98,13 +91,13 @@ classdef Sutil < Util
     endfunction
 
     function [] = Plot(t,x)
-      s = Sutil.GetSignal(t,x);
+      s = Util.GetSignal(t,x);
       n = Sutil.GetNoise(t,x);
       figure;
       hold on;
-      plot(t,x,'--.','Color','k','MarkerSize',Constant.PlotMarkerSize);
-      plot(t,s,'--.','Color','b','MarkerSize',Constant.PlotMarkerSize);
-      plot(t,n,'--.','Color','r','MarkerSize',Constant.PlotMarkerSize);
+      plot(t,x,'--.','Color',Color.Black,'MarkerSize',Constant.PlotMarkerSize);
+      plot(t,s,'--.','Color',Color.Blue,'MarkerSize',Constant.PlotMarkerSize);
+      plot(t,n,'--.','Color',Color.Red,'MarkerSize',Constant.PlotMarkerSize);
 
       [xticks,fmt] = Util.GetDateTicks(t); %this.GetTimeTicks(t);
       ax = gca;

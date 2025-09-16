@@ -1,6 +1,7 @@
 function [] = doSNR()
 
-  addpath(genpath('../Common/Signals'));
+  addpath(genpath('../Common/'));
+  addpath(genpath('../Signals/'));
 
   finput = Finput(fullfile('Input','DJI-m.txt'));
   monthly = Process(finput);
@@ -21,8 +22,8 @@ endfunction
 function [] = Plot(data1,data2,legendStr)
   figure;
   hold on;
-  plot(data1.t,data1.noise,'--.','Color',[1,0,1],'MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
-  plot(data2.t,data2.noise,'--.','Color',[.5,.5,.5],'MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+  plot(data1.t,data1.noise,'--.','Color',Color.Magenta,'MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+  plot(data2.t,data2.noise,'--.','Color',Color.Grey,'MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
 
   [xticks,fmt] = Util.GetDateTicks(data1.t); %this.GetTimeTicks(t);
   ax = gca;
@@ -44,7 +45,7 @@ function [result] = Process(finput)
   r.GetReturnData(); % fills returns
   t = r.timestamp;
   x = r.data.Close;
-  [result.signal,result.s] = Sutil.GetSignal(t,x);
+  [result.signal,result.s] = Util.GetSignal(t,x);
   result.noise  = Sutil.GetNoise(t,x);
   result.snr    = Sutil.SNR(t,x);
   result.ps     = Sutil.GetSignalPower(t,x);
@@ -56,7 +57,7 @@ endfunction
 
 function [] = Print(result)
   fprintf('SNR=%.2f dB, Noise=%.2f, Norm of residual=%.2f\n',...
-    result.snr,result.pn,result.s.normr);
+    result.snr,result.pn,norm(result.resid));
 endfunction
 
 
