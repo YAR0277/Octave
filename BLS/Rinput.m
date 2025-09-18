@@ -1,35 +1,36 @@
-classdef Binput < handle
-  % Input structure for BLS data
+classdef Rinput < handle
+  % Input structure for FRED recession data
 
   properties (Constant)
+    COL_IDX_OBSERVATION_DATE = 1;
+    COL_IDX_VALUE = 2;
     COL_IDX_ID = 1;
     COL_IDX_CATEGORY = 2;
     COL_IDX_SEASONALITY = 3;
     COL_IDX_UNIT = 4;
     COL_IDX_TITLE = 5;
-    ROW_IDX_FIRSTDATA = 2;
   endproperties
 
   properties
-    id
-    year
-    period
-    label
-    value
-    timestamp
-    fileName
     dataFolder
     dataDefinitionTable
+    fileName
+    flagRecession
+    id
+    observationDate
+    timestamp
+    value
   endproperties
 
   methods % Public
 
-    function [obj] = Binput(varargin)
+    function [obj] = Rinput(varargin)
 
       pkg load tablicious;
 
-      obj.dataFolder = '../../../data/bls'; % BLS root data folder;
+      obj.dataFolder = '../../../data/fred'; % FRED root data folder;
       obj.SetDataDefinitionTable();
+      obj.flagRecession = 1;
 
       if nargin == 1
         obj.LoadId(varargin{1});
@@ -38,6 +39,7 @@ classdef Binput < handle
 
     function [] = LoadId(this,id)
       if this.GetRowIdx(Binput.COL_IDX_ID,id)
+        this.id = id;
         this.SetFileName(id);
         this.SetFolder(id);
         this.Load();
@@ -61,6 +63,40 @@ classdef Binput < handle
       prettyprint(T);
     endfunction
 
+    function [] = AddRecession(this,ax,hgt)
+
+      recessionClass=Rinput('JHDUSRGDPBR');
+      recessionTimeStamp = recessionClass.timestamp;
+      found = 0;
+
+      [ia,ib,lengths] = recessionClass.GetOnes();
+      for i=1:length(ia)
+        if ( recessionTimeStamp(ia(i)) >= this.timestamp(1) && recessionTimeStamp(ia(i)) < this.timestamp(end) )
+          rectangle(ax,'Position',[recessionTimeStamp(ia(i)) 0 lengths(i) hgt],'FaceColor',Color.LightGrey, 'EdgeColor',Color.LightGrey);
+          found = 1;
+        endif
+      endfor
+
+      if ~found
+        return; % no recession rectangles -> no annotations
+      endif
+
+      this.AddAnnotation();
+    endfunction
+
+    function [] = AddAnnotation(this)
+      numYears = uint16((this.timestamp(end)-this.timestamp(1))/365);
+      if numYears > 10
+        annotation("textarrow",[0.44 0.487],[0.8 0.8],"string","Recession","fontsize",12,"headstyle","plain","headlength",8,"headwidth",8);
+      elseif numYears > 5
+        annotation("textarrow",[0.4 0.47],[0.8 0.8],"string","Recession","fontsize",12,"headstyle","plain","headlength",8,"headwidth",8);
+      elseif numYears > 1 % dummy - no recesions < 5 years
+        annotation("textarrow",[0.4 0.47],[0.8 0.8],"string","Recession","fontsize",12,"headstyle","plain","headlength",8,"headwidth",8);
+      else % dummy - no recessions < 1 year
+        annotation("textarrow",[0.4 0.47],[0.8 0.8],"string","Recession","fontsize",12,"headstyle","plain","headlength",8,"headwidth",8);
+      endif
+    endfunction
+
     function [] = Plot(this)
 
       if isempty(this.value)
@@ -69,13 +105,14 @@ classdef Binput < handle
       endif
 
       figure;
-      plot(this.timestamp,this.value,'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+      hold on;
+      plot(this.timestamp,this.value,'-','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
 
-      [xticks,fmt] = Util.GetDateTicks(this.timestamp); %this.GetTimeTicks(t);
+      [xticks,fmt] = this.GetDateTicks(this.timestamp);
       ax = gca;
       set(ax,"XTick",xticks);
-      datetick('x','mmm yy','keepticks','keeplimits');
-      xlim([xticks(1) xticks(end)]);
+      datetick('x',fmt,'keepticks','keeplimits');
+      xlim([this.timestamp(1) this.timestamp(end)]);
 
       rowIdx = this.GetRowIdx(Binput.COL_IDX_ID,this.id(1,:));
 
@@ -88,15 +125,15 @@ classdef Binput < handle
         yticklabels(ticklabels);
       endif
 
-      r=Rinput;
-      r.LoadId('JHDUSRGDPBR');
-      ylimits = ylim;
-      r.AddRecession(ax,this.timestamp,ylimits(2));
-
+      if this.flagRecession
+        ylimits = ylim;
+        this.AddRecession(ax,ylimits(2));
+      endif
 
       title_str = this.dataDefinitionTable(rowIdx,Binput.COL_IDX_TITLE);
       title(title_str,'FontSize',Constant.TitleFontSize);
       grid on;
+      hold off;
 
     endfunction
 
@@ -118,6 +155,38 @@ classdef Binput < handle
 
   methods (Access = private)
 
+    function [r,fmt] = GetDateTicks(this,t)
+      % gets xticks and date format depending on timestep
+      numYears = uint16((t(end)-t(1))/365);
+
+      if numYears > 10
+        dt = 60; % every 5 years * 12 months/yr
+        fmt = 'yyyy';
+        szfmt = 4;
+      elseif numYears <=1
+        dt = 1;
+        fmt = 'mmm yyyy';
+        szfmt = 9;
+      else
+        dt = 12;
+        fmt = 'yyyy';
+        szfmt = 4;
+      endif
+      if length(t) > Constant.MaxNumXTicks
+        r = t(1:dt:end);
+      else
+        r = t(1:1:end);
+      endif
+    endfunction
+
+    function [ia,ib,lengths] = GetOnes(this)
+      x = this.value;
+      t = this.timestamp;
+      ia = find(diff([0;x]) == 1);  % start indices
+      ib = find(diff([x;0]) == -1); % end indices
+      lengths = t(ib) - t(ia);
+    endfunction
+
     function [r] = GetRowIdx(this,colIdx,val)
       vals = this.dataDefinitionTable(Binput.ROW_IDX_FIRSTDATA:end,colIdx);
       [~,r] = ismember(val,vals);
@@ -127,21 +196,15 @@ classdef Binput < handle
     function [] = Load(this)
       fileName = fullfile(this.dataFolder,this.fileName);
       fid = fopen(fileName{:}, 'r');
-      fin = textscan(fid,"%s %d %s %s %f", 'Delimiter', ',', 'HeaderLines', 1);
-      this.id = cell2mat(fin{1});
-      this.year = fin{2};
-      this.period = cell2mat(fin{3});
-      this.label = cell2mat(fin{4});
-      this.value = fin{5};
+      fin = textscan(fid,"%s %f", 'Delimiter', ',', 'HeaderLines', 1);
+      this.observationDate = cell2mat(fin{Rinput.COL_IDX_OBSERVATION_DATE});
+      this.value = fin{Rinput.COL_IDX_VALUE};
     endfunction
 
     function [] = SetDataDefinitionTable(this)
       this.dataDefinitionTable = {'id','category','seasonality','unit','title'};
-      this.dataDefinitionTable(end+1,:)={'APU0000708111', 'inflation',    'not adjusted', 'per dozen',  'Eggs, grade A, large, per doz. in U.S. city average'};
-      this.dataDefinitionTable(end+1,:)={'CEU0000000001', 'employment',   'not adjusted', 'thousands',  'All employees, thousands, total nonfarm, not seasonally adjusted'};
-      this.dataDefinitionTable(end+1,:)={'CES0000000001', 'employment',   'adjusted',     'thousands',  'All employees, thousands, total nonfarm, seasonally adjusted'};
-      this.dataDefinitionTable(end+1,:)={'LNU04000000',   'unemployment', 'not adjusted', 'percent',    'Unemployment Rate'};
-      this.dataDefinitionTable(end+1,:)={'LNS14000000',   'unemployment', 'adjusted',     'percent',    'Unemployment Rate'};
+      this.dataDefinitionTable(end+1,:)={'JHDUSRGDPBR','production','N/A','N/A','Dates of U.S. recessions as inferred by GDP-based recession indicator'};
+      this.dataDefinitionTable(end+1,:)={'APU0000708111','prices','not adjusted','U.S. Dollars','Average Price: Eggs, Grade A, Large (per dozen) in U.S. City'};
     endfunction
 
     function [] = SetFileName(this,id)
@@ -157,7 +220,7 @@ classdef Binput < handle
     endfunction
 
     function [] = SetTimestamp(this)
-      this.timestamp = datenum(this.label,'yyyy mmm');
+      this.timestamp = datenum(this.observationDate,'yyyy-mm-dd');
     endfunction
   endmethods
 endclassdef
