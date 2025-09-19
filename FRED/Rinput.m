@@ -1,5 +1,5 @@
 classdef Rinput < handle
-  % Input structure for FRED recession data
+  % Input structure for FRED data
 
   properties (Constant)
     COL_IDX_OBSERVATION_DATE = 1;
@@ -51,9 +51,9 @@ classdef Rinput < handle
 
     function [] = ShowData(this)
       % shows {id,category,title} from data definition table
-      ids = unique(this.dataDefinitionTable(2:end,Binput.COL_IDX_ID));
-      categories = this.dataDefinitionTable(2:end,Binput.COL_IDX_CATEGORY);
-      titles = this.dataDefinitionTable(2:end,Binput.COL_IDX_TITLE);
+      ids = this.dataDefinitionTable(2:end,Rinput.COL_IDX_ID);
+      categories = this.dataDefinitionTable(2:end,Rinput.COL_IDX_CATEGORY);
+      titles = this.dataDefinitionTable(2:end,Rinput.COL_IDX_TITLE);
 
       % https://github.com/apjanke/octave-tablicious/blob/main/README.md
       % pkg install https://github.com/apjanke/octave-tablicious/releases/download/v0.4.5/tablicious-0.4.5.tar.gz
