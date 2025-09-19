@@ -103,7 +103,7 @@ classdef Sutil < Util
       ax = gca;
       set(ax,"XTick",xticks);
       datetick('x',fmt,'keepticks','keeplimits');
-      xlim([xticks(1) xticks(end)]);
+      xlim([t(1) t(end)]);
 
       legend('price','signal','noise');
       grid on;

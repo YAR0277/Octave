@@ -71,7 +71,7 @@ classdef Returns < handle
       ax = gca;
       set(ax,"XTick",xticks);
       datetick('x',fmt,'keepticks','keeplimits');
-      xlim([xticks(1) xticks(end)]);
+      xlim([t(1) t(end)]);
 
       ylabel('Rate of Return(%)','FontSize',14);
       title(this.finput.symbol,'FontSize',16);
@@ -174,7 +174,7 @@ classdef Returns < handle
       ax = gca;
       set(ax,"XTick",xticks);
       datetick('x',fmt,'keepticks','keeplimits');
-      xlim([xticks(1) xticks(end)]);
+      xlim([t(1) t(end)]);
 
       ylabel('Rate of Return (%)','FontSize',16);
       title(this.finput.symbol,'FontSize',16);
@@ -197,7 +197,7 @@ classdef Returns < handle
       ax = gca;
       set(ax,"XTick",xticks);
       datetick('x',fmt,'keepticks','keeplimits');
-      xlim([xticks(1) xticks(end)]);
+      xlim([t(1) t(end)]);
 
       ylabel('Rate of Return(%)','FontSize',14);
       title(this.finput.symbol,'FontSize',16);
@@ -220,7 +220,7 @@ classdef Returns < handle
       ax = gca;
       set(ax,"XTick",xticks);
       datetick('x',fmt,'keepticks','keeplimits');
-      xlim([xticks(1) xticks(end)]);
+      xlim([t(1) t(end)]);
 
       ylabel('Rate of Return (%)','FontSize',16);
       title(this.finput.symbol,'FontSize',16);

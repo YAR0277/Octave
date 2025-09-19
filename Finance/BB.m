@@ -68,7 +68,7 @@ classdef BB < handle
       ax = gca;
       set(ax,"XTick",xticks);
       datetick('x',fmt,'keepticks','keeplimits');
-      xlim([xticks(1) xticks(end)]);
+      xlim([t(1) t(end)]);
 
       ylabel('Bollinger Bands','FontSize',Constant.YLabelFontSize);
       legend(this.maType,'FontSize',Constant.LegendFontSize);
@@ -87,7 +87,7 @@ classdef BB < handle
       ax = gca;
       set(ax,"XTick",xticks);
       datetick('x',fmt,'keepticks','keeplimits');
-      xlim([xticks(1) xticks(end)]);
+      xlim([t(1) t(end)]);
 
       ylabel('%b','FontSize',Constant.YLabelFontSize);
 

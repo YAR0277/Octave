@@ -28,6 +28,8 @@ classdef Binput < handle
     function [obj] = Binput(varargin)
 
       pkg load tablicious;
+      addpath(genpath('../Common')); % for class Constant
+      addpath(genpath('../FRED')); % for class Rinput
 
       obj.dataFolder = '../../../data/bls'; % BLS root data folder;
       obj.SetDataDefinitionTable();
@@ -77,7 +79,7 @@ classdef Binput < handle
       ax = gca;
       set(ax,"XTick",xticks);
       datetick('x','mmm yy','keepticks','keeplimits');
-      xlim([xticks(1) xticks(end)]);
+      xlim([this.timestamp(1) this.timestamp(end)]);
 
       rowIdx = this.GetRowIdx(Binput.COL_IDX_ID,this.id(1,:));
 
@@ -91,7 +93,6 @@ classdef Binput < handle
       endif
 
       if this.flagRecession
-        addpath(genpath('../FRED'));
         ylimits = ylim;
         recessionClass = Rinput('JHDUSRGDPBR');
         recessionClass.AddRecession(ax,this.timestamp,ylimits(2));

@@ -62,7 +62,7 @@ classdef RSI < handle
       ax = gca;
       set(ax,"XTick",xticks);
       datetick('x',fmt,'keepticks','keeplimits');
-      xlim([xticks(1) xticks(end)]);
+      xlim([this.timestamp(1) this.timestamp(end)]);
 
       ylim([0 100]);
       this.AddGuideLines(70,30);

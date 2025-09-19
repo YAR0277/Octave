@@ -29,7 +29,7 @@ function [] = Plot(data1,data2,legendStr)
   ax = gca;
   set(ax,"XTick",xticks);
   datetick('x',fmt,'keepticks','keeplimits');
-  xlim([xticks(1) xticks(end)]);
+  xlim([data1.t(1) data1.t(end)]);
 
   ylabel('Noise(Points)','FontSize',14);
   legend(legendStr{1},legendStr{2});

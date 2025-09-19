@@ -120,7 +120,7 @@ classdef Price < handle
       ax = gca;
       set(ax,"XTick",xticks);
       datetick('x',fmt,'keepticks','keeplimits');
-      xlim([xticks(1) xticks(end)]);
+      xlim([t(1) t(end)]);
 
       ylabel('Price','FontSize',Constant.YLabelFontSize);
 
@@ -138,7 +138,7 @@ classdef Price < handle
       ax = gca;
       set(ax,"XTick",xticks);
       datetick('x',fmt,'keepticks','keeplimits');
-      xlim([xticks(1) xticks(end)]);
+      xlim([t(1) t(end)]);
 
       ylabel('Price-Detrend','FontSize',Constant.YLabelFontSize);
 
