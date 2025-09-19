@@ -9,6 +9,7 @@ classdef Rinput < handle
     COL_IDX_SEASONALITY = 3;
     COL_IDX_UNIT = 4;
     COL_IDX_TITLE = 5;
+    ROW_IDX_FIRSTDATA = 2;
   endproperties
 
   properties
@@ -38,7 +39,7 @@ classdef Rinput < handle
     endfunction
 
     function [] = LoadId(this,id)
-      if this.GetRowIdx(Binput.COL_IDX_ID,id)
+      if this.GetRowIdx(Rinput.COL_IDX_ID,id)
         this.id = id;
         this.SetFileName(id);
         this.SetFolder(id);
@@ -47,6 +48,46 @@ classdef Rinput < handle
       else
         fprintf('id (%s) does not exist in data definition table. \n',id);
       endif
+    endfunction
+
+    function [] = Plot(this)
+
+      if isempty(this.value)
+        fprintf('No data to plot.\n');
+        return;
+      endif
+
+      figure;
+      hold on;
+      plot(this.timestamp,this.value,'-','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+
+      [xticks,fmt] = this.GetDateTicks(this.timestamp);
+      ax = gca;
+      set(ax,"XTick",xticks);
+      datetick('x',fmt,'keepticks','keeplimits');
+      xlim([this.timestamp(1) this.timestamp(end)]);
+
+      rowIdx = this.GetRowIdx(Rinput.COL_IDX_ID,this.id(1,:));
+
+      label_str = this.dataDefinitionTable(rowIdx,Rinput.COL_IDX_UNIT);
+      ylabel(label_str,'FontSize',Constant.YLabelFontSize);
+
+      if strcmp(label_str,'thousands') == 1 % set yticklabels
+        yticks = get(ax,"YTick");
+        ticklabels = arrayfun(@(x) strcat(num2str(x),'k'), yticks/1000, "UniformOutput", false);
+        yticklabels(ticklabels);
+      endif
+
+      if this.flagRecession
+        ylimits = ylim;
+        this.AddRecession(ax,ylimits(2));
+      endif
+
+      title_str = this.dataDefinitionTable(rowIdx,Rinput.COL_IDX_TITLE);
+      title(title_str,'FontSize',Constant.TitleFontSize);
+      grid on;
+      hold off;
+
     endfunction
 
     function [] = ShowData(this)
@@ -63,8 +104,25 @@ classdef Rinput < handle
       prettyprint(T);
     endfunction
 
-    function [] = AddRecession(this,ax,hgt)
+    function [] = Stats(this)
+      % calculates statistics
+      timestep = Util.GetTimeStep(this.timestamp);
+      d1 = datestr(this.timestamp(1));
+      d2 = datestr(this.timestamp(end));
+      y = this.value;
+      n = length(y);
+      fprintf('Time Period: [%s,%s], Time Step: %s, Nr. Samples: %d\n',d1,d2,timestep,n);
+      [v_max,i_max] = max(y);
+      [v_min,i_min] = min(y);
+      fprintf('Range: [%.2f,%.2f], Mean %.2f\n',v_min,v_max,mean(y));
+      fprintf('Min: %s, %.2f\n',datestr(this.timestamp(i_min),'mmm yyyy'),v_min);
+      fprintf('Max: %s, %.2f\n',datestr(this.timestamp(i_max),'mmm yyyy'),v_max);
+    endfunction
+  endmethods
 
+  methods (Access = private)
+
+    function [] = AddRecession(this,ax,hgt)
       recessionClass=Rinput('JHDUSRGDPBR');
       recessionTimeStamp = recessionClass.timestamp;
       found = 0;
@@ -96,64 +154,6 @@ classdef Rinput < handle
         annotation("textarrow",[0.4 0.47],[0.8 0.8],"string","Recession","fontsize",12,"headstyle","plain","headlength",8,"headwidth",8);
       endif
     endfunction
-
-    function [] = Plot(this)
-
-      if isempty(this.value)
-        fprintf('No data to plot.\n');
-        return;
-      endif
-
-      figure;
-      hold on;
-      plot(this.timestamp,this.value,'-','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
-
-      [xticks,fmt] = this.GetDateTicks(this.timestamp);
-      ax = gca;
-      set(ax,"XTick",xticks);
-      datetick('x',fmt,'keepticks','keeplimits');
-      xlim([this.timestamp(1) this.timestamp(end)]);
-
-      rowIdx = this.GetRowIdx(Binput.COL_IDX_ID,this.id(1,:));
-
-      label_str = this.dataDefinitionTable(rowIdx,Binput.COL_IDX_UNIT);
-      ylabel(label_str,'FontSize',Constant.YLabelFontSize);
-
-      if strcmp(label_str,'thousands') == 1 % set yticklabels
-        yticks = get(ax,"YTick");
-        ticklabels = arrayfun(@(x) strcat(num2str(x),'k'), yticks/1000, "UniformOutput", false);
-        yticklabels(ticklabels);
-      endif
-
-      if this.flagRecession
-        ylimits = ylim;
-        this.AddRecession(ax,ylimits(2));
-      endif
-
-      title_str = this.dataDefinitionTable(rowIdx,Binput.COL_IDX_TITLE);
-      title(title_str,'FontSize',Constant.TitleFontSize);
-      grid on;
-      hold off;
-
-    endfunction
-
-    function [] = Stats(this)
-      % calculates statistics
-      timestep = Util.GetTimeStep(this.timestamp);
-      d1 = datestr(this.timestamp(1));
-      d2 = datestr(this.timestamp(end));
-      y = this.value;
-      n = length(y);
-      fprintf('Time Period: [%s,%s], Time Step: %s, Nr. Samples: %d\n',d1,d2,timestep,n);
-      [v_max,i_max] = max(y);
-      [v_min,i_min] = min(y);
-      fprintf('Range: [%.2f,%.2f], Mean %.2f\n',v_min,v_max,mean(y));
-      fprintf('Min: %s, %.2f\n',datestr(this.timestamp(i_min),'mmm yyyy'),v_min);
-      fprintf('Max: %s, %.2f\n',datestr(this.timestamp(i_max),'mmm yyyy'),v_max);
-    endfunction
-  endmethods
-
-  methods (Access = private)
 
     function [r,fmt] = GetDateTicks(this,t)
       % gets xticks and date format depending on timestep
@@ -188,7 +188,7 @@ classdef Rinput < handle
     endfunction
 
     function [r] = GetRowIdx(this,colIdx,val)
-      vals = this.dataDefinitionTable(Binput.ROW_IDX_FIRSTDATA:end,colIdx);
+      vals = this.dataDefinitionTable(Rinput.ROW_IDX_FIRSTDATA:end,colIdx);
       [~,r] = ismember(val,vals);
       r = r + 1; % add 1 for header
     endfunction
@@ -214,8 +214,8 @@ classdef Rinput < handle
 
     function [] = SetFolder(this,id)
       % append subfolder category to data folder
-      rowIdx = this.GetRowIdx(Binput.COL_IDX_ID,id);
-      subFolder = this.dataDefinitionTable(rowIdx,Binput.COL_IDX_CATEGORY);
+      rowIdx = this.GetRowIdx(Rinput.COL_IDX_ID,id);
+      subFolder = this.dataDefinitionTable(rowIdx,Rinput.COL_IDX_CATEGORY);
       this.dataFolder = fullfile(this.dataFolder,subFolder);
     endfunction
 
