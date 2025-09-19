@@ -4,9 +4,9 @@ clear all;
 
 pkg load optim;
 
-addpath(genpath('../Common/Signals'));
+addpath(genpath('../Signals/')); % for Sutil
 
-exNr = 5;
+exNr = 1;
 switch exNr
   case 1
     bls = Binput('LNS14000000');

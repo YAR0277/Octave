@@ -38,6 +38,39 @@ classdef Rinput < handle
       endif
     endfunction
 
+    function [] = AddRecession(this,ax,timestamp,hgt)
+      recessionClass=Rinput('JHDUSRGDPBR');
+      recessionTimeStamp = recessionClass.timestamp;
+      found = 0;
+
+      [ia,ib,lengths] = recessionClass.GetOnes();
+      for i=1:length(ia)
+        if ( recessionTimeStamp(ia(i)) >= timestamp(1) && recessionTimeStamp(ia(i)) < timestamp(end) )
+          rectangle(ax,'Position',[recessionTimeStamp(ia(i)) 0 lengths(i) hgt],'FaceColor',Color.LightGrey, 'EdgeColor',Color.LightGrey);
+          found = 1;
+        endif
+      endfor
+
+      if ~found
+        return; % no recession rectangles -> no annotations
+      endif
+
+      this.AddAnnotation(timestamp);
+    endfunction
+
+    function [] = AddAnnotation(this,timestamp)
+      numYears = uint16((timestamp(end)-timestamp(1))/365);
+      if numYears > 10
+        annotation("textarrow",[0.44 0.487],[0.8 0.8],"string","Recession","fontsize",12,"headstyle","plain","headlength",8,"headwidth",8);
+      elseif numYears > 5
+        annotation("textarrow",[0.4 0.47],[0.8 0.8],"string","Recession","fontsize",12,"headstyle","plain","headlength",8,"headwidth",8);
+      elseif numYears > 1 % dummy - no recesions < 5 years
+        annotation("textarrow",[0.4 0.47],[0.8 0.8],"string","Recession","fontsize",12,"headstyle","plain","headlength",8,"headwidth",8);
+      else % dummy - no recessions < 1 year
+        annotation("textarrow",[0.4 0.47],[0.8 0.8],"string","Recession","fontsize",12,"headstyle","plain","headlength",8,"headwidth",8);
+      endif
+    endfunction
+
     function [] = LoadId(this,id)
       if this.GetRowIdx(Rinput.COL_IDX_ID,id)
         this.id = id;
@@ -80,7 +113,7 @@ classdef Rinput < handle
 
       if this.flagRecession
         ylimits = ylim;
-        this.AddRecession(ax,ylimits(2));
+        this.AddRecession(ax,this.timestamp,ylimits(2));
       endif
 
       title_str = this.dataDefinitionTable(rowIdx,Rinput.COL_IDX_TITLE);
@@ -121,39 +154,6 @@ classdef Rinput < handle
   endmethods
 
   methods (Access = private)
-
-    function [] = AddRecession(this,ax,hgt)
-      recessionClass=Rinput('JHDUSRGDPBR');
-      recessionTimeStamp = recessionClass.timestamp;
-      found = 0;
-
-      [ia,ib,lengths] = recessionClass.GetOnes();
-      for i=1:length(ia)
-        if ( recessionTimeStamp(ia(i)) >= this.timestamp(1) && recessionTimeStamp(ia(i)) < this.timestamp(end) )
-          rectangle(ax,'Position',[recessionTimeStamp(ia(i)) 0 lengths(i) hgt],'FaceColor',Color.LightGrey, 'EdgeColor',Color.LightGrey);
-          found = 1;
-        endif
-      endfor
-
-      if ~found
-        return; % no recession rectangles -> no annotations
-      endif
-
-      this.AddAnnotation();
-    endfunction
-
-    function [] = AddAnnotation(this)
-      numYears = uint16((this.timestamp(end)-this.timestamp(1))/365);
-      if numYears > 10
-        annotation("textarrow",[0.44 0.487],[0.8 0.8],"string","Recession","fontsize",12,"headstyle","plain","headlength",8,"headwidth",8);
-      elseif numYears > 5
-        annotation("textarrow",[0.4 0.47],[0.8 0.8],"string","Recession","fontsize",12,"headstyle","plain","headlength",8,"headwidth",8);
-      elseif numYears > 1 % dummy - no recesions < 5 years
-        annotation("textarrow",[0.4 0.47],[0.8 0.8],"string","Recession","fontsize",12,"headstyle","plain","headlength",8,"headwidth",8);
-      else % dummy - no recessions < 1 year
-        annotation("textarrow",[0.4 0.47],[0.8 0.8],"string","Recession","fontsize",12,"headstyle","plain","headlength",8,"headwidth",8);
-      endif
-    endfunction
 
     function [r,fmt] = GetDateTicks(this,t)
       % gets xticks and date format depending on timestep

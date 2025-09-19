@@ -18,6 +18,7 @@ classdef Binput < handle
     value
     timestamp
     fileName
+    flagRecession
     dataFolder
     dataDefinitionTable
   endproperties
@@ -30,6 +31,7 @@ classdef Binput < handle
 
       obj.dataFolder = '../../../data/bls'; % BLS root data folder;
       obj.SetDataDefinitionTable();
+      obj.flagRecession = 1;
 
       if nargin == 1
         obj.LoadId(varargin{1});
@@ -49,7 +51,7 @@ classdef Binput < handle
 
     function [] = ShowData(this)
       % shows {id,category,title} from data definition table
-      ids = unique(this.dataDefinitionTable(2:end,Binput.COL_IDX_ID));
+      ids = this.dataDefinitionTable(2:end,Binput.COL_IDX_ID);
       categories = this.dataDefinitionTable(2:end,Binput.COL_IDX_CATEGORY);
       titles = this.dataDefinitionTable(2:end,Binput.COL_IDX_TITLE);
 
@@ -88,11 +90,12 @@ classdef Binput < handle
         yticklabels(ticklabels);
       endif
 
-      r=Rinput;
-      r.LoadId('JHDUSRGDPBR');
-      ylimits = ylim;
-      r.AddRecession(ax,this.timestamp,ylimits(2));
-
+      if this.flagRecession
+        addpath(genpath('../FRED'));
+        ylimits = ylim;
+        recessionClass = Rinput('JHDUSRGDPBR');
+        recessionClass.AddRecession(ax,this.timestamp,ylimits(2));
+      endif
 
       title_str = this.dataDefinitionTable(rowIdx,Binput.COL_IDX_TITLE);
       title(title_str,'FontSize',Constant.TitleFontSize);
