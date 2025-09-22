@@ -56,8 +56,8 @@ classdef Price < handle
       id = dp < 0;
       iu = dp > 0;
       iz = dp == 0;
-      fprintf('Price δP<0: Nr. (%d), mean: %.2f, range: [%.2f,%.2f] \n',sum(id),mean(dp(id)),min(dp(id)),max(dp(id)));
-      fprintf('Price δP>0: Nr. (%d), mean: %.2f, range: [%.2f,%.2f] \n',sum(iu),mean(dp(iu)),min(dp(iu)),max(dp(iu)));
+      fprintf('Price δP<0: Nr. (%d), mean: %.2f, IQM: %.2f, range: [%.2f,%.2f] \n',sum(id),mean(dp(id)),Util.IQM(dp(id)),min(dp(id)),max(dp(id)));
+      fprintf('Price δP>0: Nr. (%d), mean: %.2f, IQM: %.2f, range: [%.2f,%.2f] \n',sum(iu),mean(dp(iu)),Util.IQM(dp(iu)),min(dp(iu)),max(dp(iu)));
       fprintf('Price δP=0: num(δP =0) (%d) \n',sum(iz));
 
       addpath(genpath('..'));

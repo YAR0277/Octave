@@ -28,6 +28,7 @@ classdef Rinput < handle
     function [obj] = Rinput(varargin)
 
       pkg load tablicious;
+      addpath(genpath('../Common')); % for class Constant
 
       obj.dataFolder = '../../../data/fred'; % FRED root data folder;
       obj.SetDataDefinitionTable();
@@ -60,12 +61,14 @@ classdef Rinput < handle
 
     function [] = AddAnnotation(this,timestamp)
       numYears = uint16((timestamp(end)-timestamp(1))/365);
+      arrowStart=0.235;
+      arrowLen=.05;
       if numYears > 10
         annotation("textarrow",[0.44 0.487],[0.8 0.8],"string","Recession","fontsize",12,"headstyle","plain","headlength",8,"headwidth",8);
       elseif numYears > 5
         annotation("textarrow",[0.4 0.47],[0.8 0.8],"string","Recession","fontsize",12,"headstyle","plain","headlength",8,"headwidth",8);
       elseif numYears > 1 % dummy - no recesions < 5 years
-        annotation("textarrow",[0.4 0.47],[0.8 0.8],"string","Recession","fontsize",12,"headstyle","plain","headlength",8,"headwidth",8);
+        annotation("textarrow",[arrowStart arrowStart+arrowLen],[0.8 0.8],"string","Recession","fontsize",12,"headstyle","plain","headlength",8,"headwidth",8);
       else % dummy - no recessions < 1 year
         annotation("textarrow",[0.4 0.47],[0.8 0.8],"string","Recession","fontsize",12,"headstyle","plain","headlength",8,"headwidth",8);
       endif
@@ -205,6 +208,8 @@ classdef Rinput < handle
       this.dataDefinitionTable = {'id','category','seasonality','unit','title'};
       this.dataDefinitionTable(end+1,:)={'JHDUSRGDPBR','production','N/A','N/A','Dates of U.S. recessions as inferred by GDP-based recession indicator'};
       this.dataDefinitionTable(end+1,:)={'APU0000708111','prices','not adjusted','U.S. Dollars','Average Price: Eggs, Grade A, Large (per dozen) in U.S. City'};
+      this.dataDefinitionTable(end+1,:)={'UEMP27OV','employment','adjusted','Thousands of Persons','Long-term unemployment'};
+      this.dataDefinitionTable(end+1,:)={'LNS13023570','employment','adjusted','Percent','New Entrants as a Percent of Total Unemployed'};
     endfunction
 
     function [] = SetFileName(this,id)

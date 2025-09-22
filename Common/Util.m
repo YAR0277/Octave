@@ -17,6 +17,22 @@ classdef Util < handle
       r = 100*( (nless + 0.5.*nequal) / length(data) );
     endfunction
 
+    function [r] = CalcPercentileValue(data, percentile)
+      dataSorted = sort(data,"ascend");
+      idx = ( percentile * length(data) ) / 100;
+      idx = ceil(idx); % round up
+      r = dataSorted(idx);
+    endfunction
+
+    function [r] = IQM(data)
+      % https://en.wikipedia.org/wiki/Interquartile_mean
+      lowerBound = Util.CalcPercentileValue(data,25);
+      upperBound = Util.CalcPercentileValue(data,75);
+      dataSorted = sort(data,"ascend");
+      ix = lowerBound <= dataSorted & dataSorted <= upperBound;
+      r = mean(dataSorted(ix));
+    endfunction
+
     function [p,e_var,r,p_var,fit_var] = DoLinearRegression(x,y)
       % https://octave.sourceforge.io/optim/function/LinearRegression.html
       pkg load optim;
