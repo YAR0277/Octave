@@ -210,6 +210,7 @@ classdef Rinput < handle
       this.dataDefinitionTable(end+1,:)={'APU0000708111','prices','not adjusted','U.S. Dollars','Average Price: Eggs, Grade A, Large (per dozen) in U.S. City'};
       this.dataDefinitionTable(end+1,:)={'UEMP27OV','employment','adjusted','Thousands of Persons','Long-term unemployment'};
       this.dataDefinitionTable(end+1,:)={'LNS13023570','employment','adjusted','Percent','New Entrants as a Percent of Total Unemployed'};
+      this.dataDefinitionTable(end+1,:)={'LNU03000002','employment','not adjusted','Thousands','Unemployed Women'};
     endfunction
 
     function [] = SetFileName(this,id)
