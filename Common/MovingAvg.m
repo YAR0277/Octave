@@ -7,6 +7,7 @@ classdef MovingAvg < handle
 
     function [r] = SMA(x,wlen)
       % calculates the Simple Moving Average
+      % [r] = SMA(x,wlen) where x=input vector, wlen=length of window, r=output vector
       if wlen < 1
         error('window length(%d) must be at least 1.',wlen);
       endif
@@ -26,6 +27,7 @@ classdef MovingAvg < handle
     function [r] = WMA(x,w,wndLen)
       % calculates the weighted Moving Average
       % https://en.wikipedia.org/wiki/Moving_average#Weighted_moving_average
+      % [r] = WMA(x,w,wndLen) where x=input vector, w=weights, wndLen=length of window, r=output vector
       n = size(x,2);
       wgtLen = size(w,2);
       if wgtLen~=wndLen
@@ -63,6 +65,7 @@ classdef MovingAvg < handle
 
     function [r] = MMA(x,wlen)
       % calculates the Modified Moving Average = EMA with alpha = 1/wlen
+      % [r] = MMA(x,wlen) where x=input vector, wlen=length of window, r=output vector
       alpha = 1/wlen;
       if wlen < 1
         error('window length(%d) must be at least 1. \n',wlen);
@@ -73,7 +76,7 @@ classdef MovingAvg < handle
     function [r] = EMA(varargin)
       % calculates the Exponential Moving Average
       % https://www.investopedia.com/ask/answers/122314/what-exponential-moving-average-ema-formula-and-how-ema-calculated.asp
-
+      % [r] = EMA(x,wlen,[opt]alpha) where x=input vector, wlen=length of window, alpha=smoothing factor, r=output vector
       switch nargin
         case 2
           x = varargin{1};
