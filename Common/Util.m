@@ -54,31 +54,33 @@ classdef Util < handle
       endswitch
     endfunction
 
-    function [r] = GetDateNum(this,y)
-      yearStr = num2str(y);
-      dateStr = strcat(yearStr,'-01-01');
-      r = datenum(dateStr,'yyyy-mm-dd');
+    function [r] = GetDatestr(datenr)
+      % [r] = GetDatestr(datenr) where datenr=739884
+      r = datestr(datenr);
     endfunction
 
-    function [r] = GetDateStr(this,daynr)
-      i = find( this.timestamp == daynr );
-      r = datestr(this.timestamp(i));
-    endfunction
-
-    function [r] = GetDateToday()
+    function [r] = GetDatestrToday()
       r = datestr(now(),'yyyy-mm-dd');
     endfunction
 
-    function [r] = GetDayToday()
-      s = Util.GetDateToday();
-      r = datenum(s,'yyyy-mm-dd');
-    endfunction
-
-    function [r] = GetDay(date)
+    function [r] = GetDatenum(date)
+      % [r] = GetDatenum(date) where date='2025-09-23'
       y = str2num(datestr(date,'yyyy'));
       m = str2num(datestr(date,'mm'));
       d = str2num(datestr(date,'dd'));
       r = datenum(y,m,d);
+    endfunction
+
+    function [r] = GetDatenumToday()
+      s = Util.GetDatestrToday();
+      r = datenum(s,'yyyy-mm-dd');
+    endfunction
+
+    function [r] = GetDatenumYear(y)
+      % [r] = GetDatenumYear(y) where y=2025
+      yearStr = num2str(y);
+      dateStr = strcat(yearStr,'-01-01');
+      r = datenum(dateStr,'yyyy-mm-dd');
     endfunction
 
     function [r,fmt] = GetDateTicks(t)

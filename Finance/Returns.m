@@ -124,7 +124,7 @@ classdef Returns < handle
       y = [this.returns.rateOfReturn];
       vol = std(y); % standard deviation = volatility
       num = numel(y);
-      tvals=arrayfun(@(s) Util.GetDateNum(s),[this.returns(:).year]);
+      tvals=arrayfun(@(s) Util.GetDatenumYear(s),[this.returns(:).year]);
 
       hold on;
       plot(tvals,(0+vol)*ones(num,1),'r--');

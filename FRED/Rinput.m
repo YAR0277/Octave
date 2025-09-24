@@ -206,11 +206,12 @@ classdef Rinput < handle
 
     function [] = SetDataDefinitionTable(this)
       this.dataDefinitionTable = {'id','category','seasonality','unit','title'};
-      this.dataDefinitionTable(end+1,:)={'JHDUSRGDPBR','production','N/A','N/A','Dates of U.S. recessions as inferred by GDP-based recession indicator'};
-      this.dataDefinitionTable(end+1,:)={'APU0000708111','prices','not adjusted','U.S. Dollars','Average Price: Eggs, Grade A, Large (per dozen) in U.S. City'};
       this.dataDefinitionTable(end+1,:)={'UEMP27OV','employment','adjusted','Thousands of Persons','Long-term unemployment'};
       this.dataDefinitionTable(end+1,:)={'LNS13023570','employment','adjusted','Percent','New Entrants as a Percent of Total Unemployed'};
       this.dataDefinitionTable(end+1,:)={'LNU03000002','employment','not adjusted','Thousands','Unemployed Women'};
+      this.dataDefinitionTable(end+1,:)={'APU0000708111','prices','not adjusted','U.S. Dollars','Average Price: Eggs, Grade A, Large (per dozen) in U.S. City'};
+      this.dataDefinitionTable(end+1,:)={'CPIUFDNS','prices','not adjusted','Index 1982-1984=100','Food in U.S. City Average'};
+      this.dataDefinitionTable(end+1,:)={'JHDUSRGDPBR','production','N/A','N/A','Dates of U.S. recessions as inferred by GDP-based recession indicator'};
     endfunction
 
     function [] = SetFileName(this,id)

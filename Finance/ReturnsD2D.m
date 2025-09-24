@@ -13,7 +13,7 @@ classdef ReturnsD2D < Returns
       obj = obj@Returns(finput);
       obj.flgPlotType = 3;
       obj.startDay = obj.timestamp(1);
-      obj.endDay = Util.GetDayToday();
+      obj.endDay = Util.GetDatenumToday();
     endfunction
 
     function [t,y] = GetReturnData(this)
@@ -37,11 +37,11 @@ classdef ReturnsD2D < Returns
     endfunction
 
     function [this] = SetEndDay(this,date)
-      this.endDay = Util.GetDay(date);
+      this.endDay = Util.GetDatenum(date);
     endfunction
 
     function [this] = SetStartDay(this,date)
-      this.startDay = Util.GetDay(date);
+      this.startDay = Util.GetDatenum(date);
     endfunction
 
   endmethods % Public
