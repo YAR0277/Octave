@@ -8,6 +8,22 @@ classdef Util < handle
 
   methods (Static = true) % Public
 
+    function [t_out,x_out] = Aggregate(t_in,x_in,dt)
+      % [t_out,x_out] = Aggregate(t_in,x_in,dt) where t_in=input times, x_in=input values, dt=12, for example.
+      a = int16(0:dt:length(x_in));
+      n = int16(length(a)+1);
+      t_out = NaN(n,1);
+      x_out = NaN(n,1);
+      t_out(1) = t_in(1);
+      x_out(1) = x_in(1);
+      for i=2:n-1
+        t_out(i) = t_in(a(i));
+        x_out(i) = mean( x_in(a(i-1)+1:a(i)) );
+      endfor
+      t_out(n) = t_in(end);
+      x_out(n) = mean( x_in(a(end)+1:end) );
+    endfunction
+
     function [r] = CalcPercentile(data,value)
       data = data(:)';
       value = value(:);
@@ -84,25 +100,30 @@ classdef Util < handle
     endfunction
 
     function [r,fmt] = GetDateTicks(t)
-      % gets xticks and date format depending on timestep
+      % gets xticks and date format depending on timestep and timespan(numYears)
       timestep = Util.GetTimeStep(t);
       switch timestep
         case 'day'
           dt = 15;
           fmt = 'YY-mm-dd';
           szfmt = 8;
+          numYears = uint16((t(end)-t(1))/365);
         case 'week'
           dt = 10;
           fmt = 'YY-mm-dd';
           szfmt = 8;
+          numYears = uint16((t(end)-t(1))/52);
         case 'month'
-          dt = 10;
-          fmt = 'YY-mm';
-          szfmt = 6;
+          numYears = uint16((t(end)-t(1))/12);
+          [r,dt,fmt,szfmt] = Util.GetDateTicksMonth(t,numYears);
         case 'quarter'
           dt = 10;
           fmt = 'YY-mm';
           szfmt = 6;
+          numYears = uint16((t(end)-t(1))/4);
+        case 'year'
+          numYears = uint16(length(t));
+          [r,dt,fmt,szfmt] = Util.GetDateTicksYear(t,numYears);
         otherwise
           error('invalid number timestep: %s. \n',timestep);
       endswitch
@@ -113,10 +134,48 @@ classdef Util < handle
       endif
       % if there is enough room (szfmt), add the last return to the ticks,
       % otherwise replace the last tick with the last return.
-      if t(end) - r(end) > szfmt
-        r(end+1) = t(end);
+##      if t(end) - r(end) > szfmt
+##        r(end+1) = t(end);
+##      else
+##        r(end) = t(end);
+##      endif
+    endfunction
+
+    function [r,dt,fmt,szfmt] = GetDateTicksMonth(t,numYears)
+      if numYears > 10
+        dt = 60; % every 5 years * 12 months/yr
+        fmt = 'yyyy';
+        szfmt = 4;
+      elseif numYears <=1
+        dt = 1;
+        fmt = 'mmm yyyy';
+        szfmt = 9;
       else
-        r(end) = t(end);
+        dt = 12;
+        fmt = 'yyyy';
+        szfmt = 4;
+      endif
+      if length(t) > Constant.MaxNumXTicks
+        r = t(1:dt:end);
+      else
+        r = t(1:1:end);
+      endif
+    endfunction
+
+    function [r,dt,fmt,szfmt] = GetDateTicksYear(t,numYears)
+      if numYears > 10
+        dt = 5; % every 5 years
+        fmt = 'yyyy';
+        szfmt = 4;
+      else
+        dt = 1;
+        fmt = 'yyyy';
+        szfmt = 4;
+      endif
+      if length(t) > Constant.MaxNumXTicks
+        r = t(1:dt:end);
+      else
+        r = t(1:1:end);
       endif
     endfunction
 
@@ -143,6 +202,8 @@ classdef Util < handle
           r = 'month';
         elseif dd >= 89 && dd <= 92
           r = 'quarter';
+        elseif dd >= 364 && dd <= 366
+          r = 'year';
         else
           error('invalid delta timestamp: %.2f. \n',dd);
         endif

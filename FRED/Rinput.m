@@ -87,43 +87,24 @@ classdef Rinput < handle
     endfunction
 
     function [] = Plot(this)
-
-      if isempty(this.value)
+      % [] = Plot
+      t = this.timestamp;
+      x = this.value;
+      if isempty(x)
         fprintf('No data to plot.\n');
         return;
       endif
+      this.DoPlot(t,x);
+    endfunction
 
-      figure;
-      hold on;
-      plot(this.timestamp,this.value,'-','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
-
-      [xticks,fmt] = this.GetDateTicks(this.timestamp);
-      ax = gca;
-      set(ax,"XTick",xticks);
-      datetick('x',fmt,'keepticks','keeplimits');
-      xlim([this.timestamp(1) this.timestamp(end)]);
-
-      rowIdx = this.GetRowIdx(Rinput.COL_IDX_ID,this.id(1,:));
-
-      label_str = this.dataDefinitionTable(rowIdx,Rinput.COL_IDX_UNIT);
-      ylabel(label_str,'FontSize',Constant.YLabelFontSize);
-
-      if strcmp(label_str,'thousands') == 1 % set yticklabels
-        yticks = get(ax,"YTick");
-        ticklabels = arrayfun(@(x) strcat(num2str(x),'k'), yticks/1000, "UniformOutput", false);
-        yticklabels(ticklabels);
+    function [] = PlotAggregate(this,dt)
+      % [] = PlotAggregate(dt) where dt=12, for example.
+      [t,x] = Util.Aggregate(this.timestamp,this.value,dt);
+      if isempty(x)
+        fprintf('No data to plot.\n');
+        return;
       endif
-
-      if this.flagRecession
-        ylimits = ylim;
-        this.AddRecession(ax,this.timestamp,ylimits(2));
-      endif
-
-      title_str = this.dataDefinitionTable(rowIdx,Rinput.COL_IDX_TITLE);
-      title(title_str,'FontSize',Constant.TitleFontSize);
-      grid on;
-      hold off;
-
+      this.DoPlot(t,x);
     endfunction
 
     function [] = ShowData(this)
@@ -158,28 +139,38 @@ classdef Rinput < handle
 
   methods (Access = private)
 
-    function [r,fmt] = GetDateTicks(this,t)
-      % gets xticks and date format depending on timestep
-      numYears = uint16((t(end)-t(1))/365);
+    function [] = DoPlot(this,t,x)
 
-      if numYears > 10
-        dt = 60; % every 5 years * 12 months/yr
-        fmt = 'yyyy';
-        szfmt = 4;
-      elseif numYears <=1
-        dt = 1;
-        fmt = 'mmm yyyy';
-        szfmt = 9;
-      else
-        dt = 12;
-        fmt = 'yyyy';
-        szfmt = 4;
+      figure;
+      hold on;
+      plot(t,x,'-','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+
+      [xticks,fmt] = Util.GetDateTicks(t);
+      ax = gca;
+      set(ax,"XTick",xticks);
+      datetick('x',fmt,'keepticks','keeplimits');
+      xlim([t(1) t(end)]);
+
+      rowIdx = this.GetRowIdx(Rinput.COL_IDX_ID,this.id(1,:));
+      label_str = this.dataDefinitionTable(rowIdx,Rinput.COL_IDX_UNIT);
+      ylabel(label_str,'FontSize',Constant.YLabelFontSize);
+
+      if strcmp(label_str,'thousands') == 1 % set yticklabels
+        yticks = get(ax,"YTick");
+        ticklabels = arrayfun(@(x) strcat(num2str(x),'k'), yticks/1000, "UniformOutput", false);
+        yticklabels(ticklabels);
       endif
-      if length(t) > Constant.MaxNumXTicks
-        r = t(1:dt:end);
-      else
-        r = t(1:1:end);
+
+      ylimits = ylim;
+      if this.flagRecession
+        this.AddRecession(ax,t,ylimits(2));
       endif
+      ylim([ylimits(1) ylimits(2)]);
+
+      title_str = this.dataDefinitionTable(rowIdx,Rinput.COL_IDX_TITLE);
+      title(title_str,'FontSize',Constant.TitleFontSize);
+      grid on;
+      hold off;
     endfunction
 
     function [ia,ib,lengths] = GetOnes(this)
@@ -206,12 +197,14 @@ classdef Rinput < handle
 
     function [] = SetDataDefinitionTable(this)
       this.dataDefinitionTable = {'id','category','seasonality','unit','title'};
-      this.dataDefinitionTable(end+1,:)={'UEMP27OV','employment','adjusted','Thousands of Persons','Long-term unemployment'};
       this.dataDefinitionTable(end+1,:)={'LNS13023570','employment','adjusted','Percent','New Entrants as a Percent of Total Unemployed'};
       this.dataDefinitionTable(end+1,:)={'LNU03000002','employment','not adjusted','Thousands','Unemployed Women'};
       this.dataDefinitionTable(end+1,:)={'APU0000708111','prices','not adjusted','U.S. Dollars','Average Price: Eggs, Grade A, Large (per dozen) in U.S. City'};
       this.dataDefinitionTable(end+1,:)={'CPIUFDNS','prices','not adjusted','Index 1982-1984=100','Food in U.S. City Average'};
       this.dataDefinitionTable(end+1,:)={'JHDUSRGDPBR','production','N/A','N/A','Dates of U.S. recessions as inferred by GDP-based recession indicator'};
+      this.dataDefinitionTable(end+1,:)={'UEMP27OV','unemployment','adjusted','Thousands of Persons','Long-term unemployment'};
+      this.dataDefinitionTable(end+1,:)={'MEUR','unemployment','adjusted','Percent','Unemployment Rate in Maine'};
+      this.dataDefinitionTable(end+1,:)={'MEURN','unemployment','not adjusted','Percent','Unemployment Rate in Maine'};
     endfunction
 
     function [] = SetFileName(this,id)
