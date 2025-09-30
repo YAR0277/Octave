@@ -1,5 +1,5 @@
 ##clear all;
-f=Finput;
+f=FidelityFile;
 f.SetFolder('equity');
 f.SetFile('2025-05-10-fidelity-VZ-m.csv');
 f.SetSymbol('VZ');

@@ -8,9 +8,9 @@ classdef ReturnsD2D < Returns
 
   methods % Public
 
-    function obj = ReturnsD2D(finput)
-      % c'tor to create a ReturnsD2D object, input is an Finput object.
-      obj = obj@Returns(finput);
+    function obj = ReturnsD2D(fidelityFile)
+      % c'tor to create a ReturnsD2D object, input is an FidelityFile object.
+      obj = obj@Returns(fidelityFile);
       obj.flgPlotType = 3;
       obj.startDay = obj.timestamp(1);
       obj.endDay = Util.GetDatenumToday();
@@ -21,7 +21,7 @@ classdef ReturnsD2D < Returns
       % calculates a vector of returns over all startDay <= timestamps <= endDay
       ix = this.startDay <= this.timestamp & this.timestamp <= this.endDay;
       t = this.timestamp(ix);
-      price = this.data.(this.finput.dataCol);
+      price = this.data.(this.fidelityFile.dataCol);
       x = price(ix);
 
       n = length(t);

@@ -1,7 +1,7 @@
-date = '2025-09-21';
+date = '2025-09-30';
 symbolList = {...
 ##  'DJI',...
-  'EWG',...
+  'PLTR',...
   'FDD',...
   'FGD',...
   'IVV',...
@@ -14,14 +14,14 @@ for i=1:n
   symbol = symbolList{i};
 
   clear f;
-  f=Finput;
+  f=FidelityFile;
   f.SetFolder('etf');
   f.SetFile(strcat(date,'-fidelity-',strcat(symbol,'-d.csv')));
   f.SetSymbol(symbol);
   f.Save(strcat(symbol,'-d'));
 
   clear f;
-  f=Finput;
+  f=FidelityFile;
   f.SetFolder('etf');
   f.SetFile(strcat(date,'-fidelity-',strcat(symbol,'-w.csv')));
   f.SetSymbol(symbol);

@@ -6,7 +6,7 @@ classdef BB < handle
   properties
     alpha     % smoothing parameter: alpha -> 1 (less smoothing), alpha -> 0 (more smoothing)
     data      % struct of input data
-    finput    % Reference to Finput class
+    fidelityFile    % Reference to FidelityFile class
     price     % x - prices of investment
     maType    % type of Moving Average = {"SMA","MMA","EMA","WMA"}
     timestamp % t - timestamp of prices
@@ -16,19 +16,19 @@ classdef BB < handle
 
   methods % Public
 
-    function obj = BB(finput)
-      % c'tor to create an BB object, input is an Finput object.
-      if ~isa(finput, 'Finput')
+    function obj = BB(fidelityFile)
+      % c'tor to create an BB object, input is an FidelityFile object.
+      if ~isa(fidelityFile, 'FidelityFile')
         return;
       endif
 
-      obj.finput = finput;
-      obj.data = readf(finput);
+      obj.fidelityFile = fidelityFile;
+      obj.data = readf(fidelityFile);
       obj.maType = "SMA"; % default
       obj.alpha = 0.1;
       obj.wlen = 14;
       obj.timestamp = obj.data.Date;
-      obj.price = obj.data.(finput.dataCol);
+      obj.price = obj.data.(fidelityFile.dataCol);
     endfunction
 
     function [r] = CalcMA(this,x)
@@ -50,7 +50,7 @@ classdef BB < handle
       figure;
       this.Subplot();
       ## https://stackoverflow.com/questions/67171470/easy-waybuiltin-function-to-put-main-title-in-plot-in-octave
-      S = axes('visible','off','title',this.finput.symbol,'FontSize',16);
+      S = axes('visible','off','title',this.fidelityFile.symbol,'FontSize',16);
     endfunction
 
     function [] = Subplot(this)

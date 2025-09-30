@@ -1,4 +1,4 @@
-classdef Binput < handle
+classdef BlsFile < handle
   % Input structure for BLS data
 
   properties (Constant)
@@ -25,7 +25,7 @@ classdef Binput < handle
 
   methods % Public
 
-    function [obj] = Binput(varargin)
+    function [obj] = BlsFile(varargin)
 
       pkg load tablicious;
       addpath(genpath('../Common')); % for class Constant
@@ -41,7 +41,7 @@ classdef Binput < handle
     endfunction
 
     function [] = LoadId(this,id)
-      if this.GetRowIdx(Binput.COL_IDX_ID,id)
+      if this.GetRowIdx(BlsFile.COL_IDX_ID,id)
         this.SetFileName(id);
         this.SetFolder(id);
         this.Load();
@@ -53,9 +53,9 @@ classdef Binput < handle
 
     function [] = ShowData(this)
       % shows {id,category,title} from data definition table
-      ids = this.dataDefinitionTable(2:end,Binput.COL_IDX_ID);
-      categories = this.dataDefinitionTable(2:end,Binput.COL_IDX_CATEGORY);
-      titles = this.dataDefinitionTable(2:end,Binput.COL_IDX_TITLE);
+      ids = this.dataDefinitionTable(2:end,BlsFile.COL_IDX_ID);
+      categories = this.dataDefinitionTable(2:end,BlsFile.COL_IDX_CATEGORY);
+      titles = this.dataDefinitionTable(2:end,BlsFile.COL_IDX_TITLE);
 
       % https://github.com/apjanke/octave-tablicious/blob/main/README.md
       % pkg install https://github.com/apjanke/octave-tablicious/releases/download/v0.4.5/tablicious-0.4.5.tar.gz
@@ -81,9 +81,9 @@ classdef Binput < handle
       datetick('x','mmm yy','keepticks','keeplimits');
       xlim([this.timestamp(1) this.timestamp(end)]);
 
-      rowIdx = this.GetRowIdx(Binput.COL_IDX_ID,this.id(1,:));
+      rowIdx = this.GetRowIdx(BlsFile.COL_IDX_ID,this.id(1,:));
 
-      label_str = this.dataDefinitionTable(rowIdx,Binput.COL_IDX_UNIT);
+      label_str = this.dataDefinitionTable(rowIdx,BlsFile.COL_IDX_UNIT);
       ylabel(label_str,'FontSize',Constant.YLabelFontSize);
 
       if strcmp(label_str,'thousands') == 1 % set yticklabels
@@ -98,7 +98,7 @@ classdef Binput < handle
         recessionClass.AddRecession(ax,this.timestamp,ylimits(2));
       endif
 
-      title_str = this.dataDefinitionTable(rowIdx,Binput.COL_IDX_TITLE);
+      title_str = this.dataDefinitionTable(rowIdx,BlsFile.COL_IDX_TITLE);
       title(title_str,'FontSize',Constant.TitleFontSize);
       grid on;
 
@@ -123,7 +123,7 @@ classdef Binput < handle
   methods (Access = private)
 
     function [r] = GetRowIdx(this,colIdx,val)
-      vals = this.dataDefinitionTable(Binput.ROW_IDX_FIRSTDATA:end,colIdx);
+      vals = this.dataDefinitionTable(BlsFile.ROW_IDX_FIRSTDATA:end,colIdx);
       [~,r] = ismember(val,vals);
       r = r + 1; % add 1 for header
     endfunction
@@ -155,8 +155,8 @@ classdef Binput < handle
 
     function [] = SetFolder(this,id)
       % append subfolder category to data folder
-      rowIdx = this.GetRowIdx(Binput.COL_IDX_ID,id);
-      subFolder = this.dataDefinitionTable(rowIdx,Binput.COL_IDX_CATEGORY);
+      rowIdx = this.GetRowIdx(BlsFile.COL_IDX_ID,id);
+      subFolder = this.dataDefinitionTable(rowIdx,BlsFile.COL_IDX_CATEGORY);
       this.dataFolder = fullfile(this.dataFolder,subFolder);
     endfunction
 

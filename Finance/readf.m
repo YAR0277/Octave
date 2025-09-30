@@ -1,14 +1,14 @@
-% readf(finput) - function to read financial data using Finput
-function [s] = readf(finput)
-  % finput - instance of Finput
+% readf(fidelityFile) - function to read financial data using FidelityFile
+function [s] = readf(fidelityFile)
+  % fidelityFile - instance of FidelityFile
 
   pkg load io;
 
-  if ~isa(finput, 'Finput')
+  if ~isa(fidelityFile, 'FidelityFile')
     return;
   endif
 
-  data=csv2cell(fullfile(finput.dataFolder,finput.fileName));
+  data=csv2cell(fullfile(fidelityFile.dataFolder,fidelityFile.fileName));
   timestampCol=1; % col 1 is for timestamp
   firstDataRow=2; % row 1 is for header
 
@@ -16,39 +16,39 @@ function [s] = readf(finput)
   s = struct('Date',0,'Open',0,'High',0,'Low',0,'Close',0,'pctChange',0,'pctChangeAvg',0,'Volume',0);
 
   % Date values
-  if finput.descendFlag
-    s.Date=datenum(flip(data(firstDataRow:end,timestampCol)),finput.dateFormat);
+  if fidelityFile.descendFlag
+    s.Date=datenum(flip(data(firstDataRow:end,timestampCol)),fidelityFile.dateFormat);
   else
-    s.Date=datenum(data(firstDataRow:end,timestampCol),finput.dateFormat);
+    s.Date=datenum(data(firstDataRow:end,timestampCol),fidelityFile.dateFormat);
   endif
 
   fieldname = 'Open';
   ixCol = find(strcmp(fieldnames(s),fieldname));
-  s=SetData(finput,s,fieldname,GetData(data,firstDataRow,ixCol));
+  s=SetData(fidelityFile,s,fieldname,GetData(data,firstDataRow,ixCol));
 
   fieldname = 'High';
   ixCol = find(strcmp(fieldnames(s),fieldname));
-  s=SetData(finput,s,fieldname,GetData(data,firstDataRow,ixCol));
+  s=SetData(fidelityFile,s,fieldname,GetData(data,firstDataRow,ixCol));
 
   fieldname = 'Low';
   ixCol = find(strcmp(fieldnames(s),fieldname));
-  s=SetData(finput,s,fieldname,GetData(data,firstDataRow,ixCol));
+  s=SetData(fidelityFile,s,fieldname,GetData(data,firstDataRow,ixCol));
 
   fieldname = 'Close';
   ixCol = find(strcmp(fieldnames(s),fieldname));
-  s=SetData(finput,s,fieldname,GetData(data,firstDataRow,ixCol));
+  s=SetData(fidelityFile,s,fieldname,GetData(data,firstDataRow,ixCol));
 
   fieldname = 'pctChange';
   ixCol = find(strcmp(fieldnames(s),fieldname));
-  s=SetData(finput,s,fieldname,GetData(data,firstDataRow,ixCol));
+  s=SetData(fidelityFile,s,fieldname,GetData(data,firstDataRow,ixCol));
 
   fieldname = 'pctChangeAvg';
   ixCol = find(strcmp(fieldnames(s),fieldname));
-  s=SetData(finput,s,fieldname,GetData(data,firstDataRow,ixCol));
+  s=SetData(fidelityFile,s,fieldname,GetData(data,firstDataRow,ixCol));
 
   fieldname = 'Volume';
   ixCol = find(strcmp(fieldnames(s),fieldname));
-  s=SetData(finput,s,fieldname,uint32(GetData(data,firstDataRow,ixCol)));
+  s=SetData(fidelityFile,s,fieldname,uint32(GetData(data,firstDataRow,ixCol)));
 
 endfunction
 
@@ -63,8 +63,8 @@ function [r] = GetData(data,firstRow,col)
   r = cell2mat(data(firstRow:end,col));
 endfunction
 
-function [s] = SetData(finput,s,fieldname,v)
-  if finput.descendFlag
+function [s] = SetData(fidelityFile,s,fieldname,v)
+  if fidelityFile.descendFlag
     s.(fieldname) = flip(v);
   else
     s.(fieldname) = v;

@@ -5,9 +5,9 @@ classdef CSI < handle
 
   properties
     data      % struct for input data
-    finput    % Finput class object
+    fidelityFile    % FidelityFile class object
     price     % x - prices of investment
-    refFinput % reference Finput class object
+    refFinput % reference FidelityFile class object
     refPrice  % reference prices
     refSymbol % reference symbol
     refTimestamp % reference timestamp
@@ -16,24 +16,24 @@ classdef CSI < handle
 
   methods % Public
 
-    function obj = CSI(finput,refInput)
-      % c'tor to create an CSI object, input is an Finput object.
-      if ~isa(finput, 'Finput') || ~isa(refInput, 'Finput')
+    function obj = CSI(fidelityFile,refInput)
+      % c'tor to create an CSI object, input is an FidelityFile object.
+      if ~isa(fidelityFile, 'FidelityFile') || ~isa(refInput, 'FidelityFile')
         return;
       endif
 
-      obj.finput = finput;
-      obj.data = readf(finput);
+      obj.fidelityFile = fidelityFile;
+      obj.data = readf(fidelityFile);
       obj.timestamp = obj.data.Date;
-      obj.price = obj.data.(finput.dataCol);
+      obj.price = obj.data.(fidelityFile.dataCol);
       obj.AddReference(refInput);
     endfunction
 
-    function [] = AddReference(this,finput)
-      dataRef = readf(finput);
-      this.refFinput = finput;
-      this.refPrice = dataRef.(finput.dataCol);
-      this.refSymbol = finput.symbol;
+    function [] = AddReference(this,fidelityFile)
+      dataRef = readf(fidelityFile);
+      this.refFinput = fidelityFile;
+      this.refPrice = dataRef.(fidelityFile.dataCol);
+      this.refSymbol = fidelityFile.symbol;
       this.refTimestamp = dataRef.Date;
     endfunction
 
@@ -56,11 +56,11 @@ classdef CSI < handle
       dref(dy  < 0) = 1;
       dref(dy >= 0) = 0;
 
-      fprintf('Symbol: %s\n',this.finput.symbol);
+      fprintf('Symbol: %s\n',this.fidelityFile.symbol);
       fprintf('Time Period: [%s,%s], Time Step: %s, Nr. Samples: %s(%d), %s(%d)\n',...
         datestr(this.refTimestamp(1)),datestr(this.refTimestamp(end)),...
         Util.GetTimeStep(this.timestamp),...
-        this.finput.symbol,numel(x),this.refSymbol,numel(y));
+        this.fidelityFile.symbol,numel(x),this.refSymbol,numel(y));
 
       if numel(dx) ~= numel(dy)
         fprintf('Unequal sizes: dx=%d, dy=%d\n',numel(dx),numel(dy));

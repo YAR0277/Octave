@@ -6,7 +6,7 @@ classdef RSI < handle
   properties
     alpha     % smoothing parameter: alpha -> 1 (less smoothing), alpha -> 0 (more smoothing)
     data      % struct of input data
-    finput    % Reference to Finput class
+    fidelityFile    % Reference to FidelityFile class
     price     % x - prices of investment
     rsiType   % type of RSI = {"SMA","MMA","EMA","WMA"}
     timestamp % t - timestamp of prices
@@ -16,20 +16,20 @@ classdef RSI < handle
 
   methods % Public
 
-    function obj = RSI(finput)
-      % c'tor to create an RSI object, input is an Finput object.
-      if ~isa(finput, 'Finput')
+    function obj = RSI(fidelityFile)
+      % c'tor to create an RSI object, input is an FidelityFile object.
+      if ~isa(fidelityFile, 'FidelityFile')
         return;
       endif
 
-      obj.finput = finput;
-      obj.data = readf(finput);
+      obj.fidelityFile = fidelityFile;
+      obj.data = readf(fidelityFile);
       obj.rsiType = "SMA"; % default
       obj.alpha = 0.1;
       obj.wlen = 14;
       obj.w = 1:14;
       obj.timestamp = obj.data.Date;
-      obj.price = obj.data.(finput.dataCol);
+      obj.price = obj.data.(fidelityFile.dataCol);
     endfunction
 
     function [] = Compare(this)
@@ -68,7 +68,7 @@ classdef RSI < handle
       this.AddGuideLines(70,30);
       ylabel('RSI','FontSize',Constant.YLabelFontSize);
       legend(this.rsiType,'FontSize',Constant.LegendFontSize);
-      title(this.finput.symbol,'FontSize',16);
+      title(this.fidelityFile.symbol,'FontSize',16);
       grid on;
       grid minor;
       hold off;

@@ -1,5 +1,5 @@
 clear all;
-f=Finput;
+f=FidelityFile;
 f.SetFolder('index');
 f.SetFile('2025-05-08-fidelity-BRK_B-m.csv');
 f.SetSymbol('BRK-B');

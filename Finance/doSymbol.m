@@ -1,4 +1,7 @@
 function [] = doSymbol(varargin)
+
+  addpath(genpath('../Common'));
+
   switch nargin
     case 1
       symbol = varargin{1};
@@ -31,9 +34,9 @@ function [] = doSymbol(varargin)
 endfunction
 
 function [fday,fweek,fref] = GetFinput(symbol)
-  fday  = Finput(fullfile('Input',strcat(symbol,'-d.txt')));
-  fweek = Finput(fullfile('Input',strcat(symbol,'-w.txt')));
-  fref  = Finput(fullfile('Input','DJI-d.txt'));
+  fday  = FidelityFile(fullfile('Input',strcat(symbol,'-d.txt')));
+  fweek = FidelityFile(fullfile('Input',strcat(symbol,'-w.txt')));
+  fref  = FidelityFile(fullfile('Input','DJI-d.txt'));
 endfunction
 
 

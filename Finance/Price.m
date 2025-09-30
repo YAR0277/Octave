@@ -3,7 +3,7 @@ classdef Price < handle
 
   properties
     data          % struct of input data
-    finput        % Reference to Finput class
+    fidelityFile        % Reference to FidelityFile class
     timestamp     % t - timestamp of prices
     timestep      % time interval of price data {'day','week','month','quarter'}
     volume        % volume data
@@ -11,28 +11,28 @@ classdef Price < handle
 
   methods % Public
 
-    function obj = Price(finput)
-      % c'tor to create a Price object, input is an Finput object.
-      if ~isa(finput, 'Finput')
+    function obj = Price(fidelityFile)
+      % c'tor to create a Price object, input is an FidelityFile object.
+      if ~isa(fidelityFile, 'FidelityFile')
         return;
       endif
 
-      obj.finput = finput;
-      obj.data = readf(finput);
+      obj.fidelityFile = fidelityFile;
+      obj.data = readf(fidelityFile);
       obj.timestamp = obj.data.Date;
       obj.timestep = Util.GetTimeStep(obj.timestamp);
       obj.volume = obj.data.Volume;
     endfunction
 
     function [r] = GetPrices(this)
-      r = this.data.(this.finput.dataCol);
+      r = this.data.(this.fidelityFile.dataCol);
     endfunction
 
     function [r] = Plot(this)
       figure;
       this.DoPlot();
       ## https://stackoverflow.com/questions/67171470/easy-waybuiltin-function-to-put-main-title-in-plot-in-octave
-      S = axes('visible','off','title',this.finput.symbol,'FontSize',16);
+      S = axes('visible','off','title',this.fidelityFile.symbol,'FontSize',16);
     endfunction
 
     function [r] = Stats(this)
@@ -43,7 +43,7 @@ classdef Price < handle
         return;
       endif
 
-      fprintf('Symbol: %s\n',this.finput.symbol);
+      fprintf('Symbol: %s\n',this.fidelityFile.symbol);
       t1 = this.timestamp(1);
       t2 = this.timestamp(end);
       fprintf('Time Period: [%s,%s], Time Step: (%s), Nr. (%d)\n',datestr(t1),datestr(t2),this.timestep,numel(price));

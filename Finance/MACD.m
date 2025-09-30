@@ -5,7 +5,7 @@ classdef MACD < handle
 
   properties
     data      % struct of input data
-    finput    % Reference to Finput class
+    fidelityFile    % Reference to FidelityFile class
     price     % x - prices of investment
     timestamp % t - timestamp of prices
     wndLengthFast % window length fast
@@ -15,15 +15,15 @@ classdef MACD < handle
 
   methods % Public
 
-    function obj = MACD(finput)
-      % c'tor to create an MACD object, input is an Finput object.
-      if ~isa(finput, 'Finput')
+    function obj = MACD(fidelityFile)
+      % c'tor to create an MACD object, input is an FidelityFile object.
+      if ~isa(fidelityFile, 'FidelityFile')
         return;
       endif
 
-      obj.finput = finput;
-      obj.data = readf(finput);
-      obj.price = obj.data.(finput.dataCol);
+      obj.fidelityFile = fidelityFile;
+      obj.data = readf(fidelityFile);
+      obj.price = obj.data.(fidelityFile.dataCol);
       obj.timestamp = obj.data.Date;
       obj.wndLengthFast = 12;
       obj.wndLengthSlow = 26;
@@ -34,7 +34,7 @@ classdef MACD < handle
       figure;
       this.Subplot();
       ## https://stackoverflow.com/questions/67171470/easy-waybuiltin-function-to-put-main-title-in-plot-in-octave
-      S = axes('visible','off','title',this.finput.symbol,'FontSize',16);
+      S = axes('visible','off','title',this.fidelityFile.symbol,'FontSize',16);
     endfunction
   endmethods %Public
 

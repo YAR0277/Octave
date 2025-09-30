@@ -6,7 +6,7 @@ classdef StoOsc < handle
 
   properties
     data      % struct of input data
-    finput    % Reference to Finput class
+    fidelityFile    % Reference to FidelityFile class
     high      % high prices
     low       % low prices
     price     % closing (dataCol) prices of investment
@@ -17,17 +17,17 @@ classdef StoOsc < handle
 
   methods % Public
 
-    function obj = StoOsc(finput)
-      % c'tor to create an StoOsc object, input is an Finput object.
-      if ~isa(finput, 'Finput')
+    function obj = StoOsc(fidelityFile)
+      % c'tor to create an StoOsc object, input is an FidelityFile object.
+      if ~isa(fidelityFile, 'FidelityFile')
         return;
       endif
 
-      obj.finput = finput;
-      obj.data = readf(finput);
+      obj.fidelityFile = fidelityFile;
+      obj.data = readf(fidelityFile);
       obj.high = obj.data.High;
       obj.low = obj.data.Low;
-      obj.price = obj.data.(finput.dataCol);
+      obj.price = obj.data.(fidelityFile.dataCol);
       obj.timestamp = obj.data.Date;
       obj.wndLengthSlow = 3;
       obj.numPeriods = 14;
@@ -37,7 +37,7 @@ classdef StoOsc < handle
       figure;
       this.Subplot();
       ## https://stackoverflow.com/questions/67171470/easy-waybuiltin-function-to-put-main-title-in-plot-in-octave
-      S = axes('visible','off','title',this.finput.symbol,'FontSize',16);
+      S = axes('visible','off','title',this.fidelityFile.symbol,'FontSize',16);
     endfunction
 
   endmethods %Public

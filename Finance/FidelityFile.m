@@ -1,4 +1,4 @@
-classdef Finput < handle
+classdef FidelityFile < handle
   % Input structure for financial functions plotf, readf and classes Returns
 
   properties
@@ -12,7 +12,7 @@ classdef Finput < handle
 
   methods % Public
 
-    function [obj] = Finput(varargin)
+    function [obj] = FidelityFile(varargin)
       obj.dataCol = 'Close'; % 'Open','High','Low','Close','pctChange','pctChangeAvg','Volume'
       obj.dataFolder = '../../../data/finance'; % financial data folder;
       obj.dateFormat = 'yyyy-mm-dd';

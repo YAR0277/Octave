@@ -3,16 +3,16 @@ function [] = doSNR()
   addpath(genpath('../Common/'));
   addpath(genpath('../Signals/'));
 
-  finput = Finput(fullfile('Input','DJI-m.txt'));
-  monthly = Process(finput);
+  fidelityFile = FidelityFile(fullfile('Input','DJI-m.txt'));
+  monthly = Process(fidelityFile);
   Print(monthly);
 
-  finput = Finput(fullfile('Input','DJI-w.txt'));
-  weekly = Process(finput);
+  fidelityFile = FidelityFile(fullfile('Input','DJI-w.txt'));
+  weekly = Process(fidelityFile);
   Print(weekly);
 
-  finput = Finput(fullfile('Input','DJI-d.txt'));
-  daily = Process(finput);
+  fidelityFile = FidelityFile(fullfile('Input','DJI-d.txt'));
+  daily = Process(fidelityFile);
   Print(daily);
 
   Plot(monthly,weekly,{'monthly','weekly'});
@@ -38,10 +38,10 @@ function [] = Plot(data1,data2,legendStr)
   hold off;
 endfunction
 
-function [result] = Process(finput)
+function [result] = Process(fidelityFile)
   clear result;
   clear r;
-  r = ReturnsD2D(finput);
+  r = ReturnsD2D(fidelityFile);
   r.GetReturnData(); % fills returns
   t = r.timestamp;
   x = r.data.Close;

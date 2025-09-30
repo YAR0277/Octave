@@ -3,7 +3,7 @@ classdef Returns < handle
 
   properties
     data          % struct of input data
-    finput        % Reference to Finput class
+    fidelityFile        % Reference to FidelityFile class
     returns       % rate of return
     timestamp     % t - timestamp of prices
     timestep      % time interval of price data {'day','week','month','quarter'}
@@ -18,14 +18,14 @@ classdef Returns < handle
 
   methods % Public
 
-    function obj = Returns(finput)
-      % c'tor to create a Returns object, input is an Finput object.
-      if ~isa(finput, 'Finput')
+    function obj = Returns(fidelityFile)
+      % c'tor to create a Returns object, input is an FidelityFile object.
+      if ~isa(fidelityFile, 'FidelityFile')
         return;
       endif
 
-      obj.finput = finput;
-      obj.data = readf(finput);
+      obj.fidelityFile = fidelityFile;
+      obj.data = readf(fidelityFile);
       obj.timestamp = obj.data.Date;
       obj.timestep = Util.GetTimeStep(obj.timestamp);
       obj.flgPctChange = 1;
@@ -74,7 +74,7 @@ classdef Returns < handle
       xlim([t(1) t(end)]);
 
       ylabel('Rate of Return(%)','FontSize',14);
-      title(this.finput.symbol,'FontSize',16);
+      title(this.fidelityFile.symbol,'FontSize',16);
       grid on;
       grid minor;
     endfunction
@@ -94,7 +94,7 @@ classdef Returns < handle
     function [] = Calc(this)
       % calculates rate of returns
 
-      price = this.data.(this.finput.dataCol);
+      price = this.data.(this.fidelityFile.dataCol);
       if numel(price) < 2 % at least 2 to get a return
         return;
       endif
@@ -139,7 +139,7 @@ classdef Returns < handle
         return;
       endif
 
-      fprintf('Symbol: %s\n',this.finput.symbol);
+      fprintf('Symbol: %s\n',this.fidelityFile.symbol);
       fprintf('Time Period: [%s,%s], Time Step: %s, Nr. Samples: %d\n',datestr(t1),datestr(t2),this.timestep,numel(y));
       fprintf('Returns: range: [%.2f%%,%.2f%%], mean: %.2f%%, std. dev.: %.2f%%\n',min(y),max(y),mean(y),std(y));
       fprintf('Returns: total: %.2f%%, APR=%.2f%%\n',sum(y),Util.GetAPR(this.timestamp,y));
@@ -177,7 +177,7 @@ classdef Returns < handle
       xlim([t(1) t(end)]);
 
       ylabel('Rate of Return (%)','FontSize',16);
-      title(this.finput.symbol,'FontSize',16);
+      title(this.fidelityFile.symbol,'FontSize',16);
       grid on;
     endfunction
 
@@ -200,7 +200,7 @@ classdef Returns < handle
       xlim([t(1) t(end)]);
 
       ylabel('Rate of Return(%)','FontSize',14);
-      title(this.finput.symbol,'FontSize',16);
+      title(this.fidelityFile.symbol,'FontSize',16);
       grid on;
     endfunction
 
@@ -223,7 +223,7 @@ classdef Returns < handle
       xlim([t(1) t(end)]);
 
       ylabel('Rate of Return (%)','FontSize',16);
-      title(this.finput.symbol,'FontSize',16);
+      title(this.fidelityFile.symbol,'FontSize',16);
       grid on;
       grid minor;
     endfunction

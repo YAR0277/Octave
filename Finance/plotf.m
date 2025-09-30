@@ -1,16 +1,16 @@
-% plotf(finput) - function to plot financial data
-function [] = plotf(finput)
-  % finput - instance of Finput
+% plotf(fidelityFile) - function to plot financial data
+function [] = plotf(fidelityFile)
+  % fidelityFile - instance of FidelityFile
 
   pkg load io;
 
-  if ~isa(finput, 'Finput')
+  if ~isa(fidelityFile, 'FidelityFile')
     return;
   endif
 
-  s = readf(finput);
+  s = readf(fidelityFile);
   t = s.Date;
-  x = s.(finput.dataCol);
+  x = s.(fidelityFile.dataCol);
 
   figure;
   subplot(2,1,1);
@@ -22,23 +22,23 @@ function [] = plotf(finput)
   datetick('x',fmt,'keepticks','keeplimits');
   xlim([xticks(1) xticks(end)]);
 
-  legend(finput.dataCol,'FontSize',Constant.LegendFontSize);
-  ylabel(GetLabelY(finput), 'FontSize', Constant.YLabelFontSize);
-  title(finput.symbol, 'FontSize', Constant.TitleFontSize);
+  legend(fidelityFile.dataCol,'FontSize',Constant.LegendFontSize);
+  ylabel(GetLabelY(fidelityFile), 'FontSize', Constant.YLabelFontSize);
+  title(fidelityFile.symbol, 'FontSize', Constant.TitleFontSize);
 
   grid on;
   grid minor;
 
   subplot(2,1,2);
-  r = Returns(finput);
+  r = Returns(fidelityFile);
   r.Subplot();
 
 endfunction
 % Ref.: search string "octave read in datatime from csv"
 %                     "octave plot with datestr"
 
-function [r] = GetLabelY(finput)
-  switch finput.dataCol
+function [r] = GetLabelY(fidelityFile)
+  switch fidelityFile.dataCol
     case {'Open','High','Low','Close'}
       r = 'Price ($)';
     case {'pctChange','pctChangeAvg'}

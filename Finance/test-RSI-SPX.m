@@ -1,5 +1,5 @@
 clear all;
-f=Finput;
+f=FidelityFile;
 f.SetFolder('index');
 f.SetFile('2025-05-06-fidelity-SPX-w.csv');
 f.SetSymbol('SPX');

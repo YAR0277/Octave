@@ -1,4 +1,4 @@
-classdef Rinput < handle
+classdef FredFile < handle
   % Input structure for FRED data
 
   properties (Constant)
@@ -25,7 +25,7 @@ classdef Rinput < handle
 
   methods % Public
 
-    function [obj] = Rinput(varargin)
+    function [obj] = FredFile(varargin)
 
       pkg load tablicious;
       addpath(genpath('../Common')); % for class Constant
@@ -40,7 +40,7 @@ classdef Rinput < handle
     endfunction
 
     function [] = AddRecession(this,ax,timestamp,hgt)
-      recessionClass=Rinput('JHDUSRGDPBR');
+      recessionClass=FredFile('JHDUSRGDPBR');
       recessionTimeStamp = recessionClass.timestamp;
       found = 0;
 
@@ -75,7 +75,7 @@ classdef Rinput < handle
     endfunction
 
     function [] = LoadId(this,id)
-      if this.GetRowIdx(Rinput.COL_IDX_ID,id)
+      if this.GetRowIdx(FredFile.COL_IDX_ID,id)
         this.id = id;
         this.SetFileName(id);
         this.SetFolder(id);
@@ -109,9 +109,9 @@ classdef Rinput < handle
 
     function [] = ShowData(this)
       % shows {id,category,title} from data definition table
-      ids = this.dataDefinitionTable(2:end,Rinput.COL_IDX_ID);
-      categories = this.dataDefinitionTable(2:end,Rinput.COL_IDX_CATEGORY);
-      titles = this.dataDefinitionTable(2:end,Rinput.COL_IDX_TITLE);
+      ids = this.dataDefinitionTable(2:end,FredFile.COL_IDX_ID);
+      categories = this.dataDefinitionTable(2:end,FredFile.COL_IDX_CATEGORY);
+      titles = this.dataDefinitionTable(2:end,FredFile.COL_IDX_TITLE);
 
       % https://github.com/apjanke/octave-tablicious/blob/main/README.md
       % pkg install https://github.com/apjanke/octave-tablicious/releases/download/v0.4.5/tablicious-0.4.5.tar.gz
@@ -151,8 +151,8 @@ classdef Rinput < handle
       datetick('x',fmt,'keepticks','keeplimits');
       xlim([t(1) t(end)]);
 
-      rowIdx = this.GetRowIdx(Rinput.COL_IDX_ID,this.id(1,:));
-      label_str = this.dataDefinitionTable(rowIdx,Rinput.COL_IDX_UNIT);
+      rowIdx = this.GetRowIdx(FredFile.COL_IDX_ID,this.id(1,:));
+      label_str = this.dataDefinitionTable(rowIdx,FredFile.COL_IDX_UNIT);
       ylabel(label_str,'FontSize',Constant.YLabelFontSize);
 
       if strcmp(label_str,'thousands') == 1 % set yticklabels
@@ -167,7 +167,7 @@ classdef Rinput < handle
       endif
       ylim([ylimits(1) ylimits(2)]);
 
-      title_str = this.dataDefinitionTable(rowIdx,Rinput.COL_IDX_TITLE);
+      title_str = this.dataDefinitionTable(rowIdx,FredFile.COL_IDX_TITLE);
       title(title_str,'FontSize',Constant.TitleFontSize);
       grid on;
       hold off;
@@ -182,7 +182,7 @@ classdef Rinput < handle
     endfunction
 
     function [r] = GetRowIdx(this,colIdx,val)
-      vals = this.dataDefinitionTable(Rinput.ROW_IDX_FIRSTDATA:end,colIdx);
+      vals = this.dataDefinitionTable(FredFile.ROW_IDX_FIRSTDATA:end,colIdx);
       [~,r] = ismember(val,vals);
       r = r + 1; % add 1 for header
     endfunction
@@ -191,8 +191,8 @@ classdef Rinput < handle
       fileName = fullfile(this.dataFolder,this.fileName);
       fid = fopen(fileName{:}, 'r');
       fin = textscan(fid,"%s %f", 'Delimiter', ',', 'HeaderLines', 1);
-      this.observationDate = cell2mat(fin{Rinput.COL_IDX_OBSERVATION_DATE});
-      this.value = fin{Rinput.COL_IDX_VALUE};
+      this.observationDate = cell2mat(fin{FredFile.COL_IDX_OBSERVATION_DATE});
+      this.value = fin{FredFile.COL_IDX_VALUE};
     endfunction
 
     function [] = SetDataDefinitionTable(this)
@@ -214,8 +214,8 @@ classdef Rinput < handle
 
     function [] = SetFolder(this,id)
       % append subfolder category to data folder
-      rowIdx = this.GetRowIdx(Rinput.COL_IDX_ID,id);
-      subFolder = this.dataDefinitionTable(rowIdx,Rinput.COL_IDX_CATEGORY);
+      rowIdx = this.GetRowIdx(FredFile.COL_IDX_ID,id);
+      subFolder = this.dataDefinitionTable(rowIdx,FredFile.COL_IDX_CATEGORY);
       this.dataFolder = fullfile(this.dataFolder,subFolder);
     endfunction
 

@@ -17,7 +17,7 @@ classdef RndSeq < handle
   methods % Public
 
     function obj = RndSeq(sinput)
-      % c'tor to create a Returns object, input is an Finput object.
+      % c'tor to create a Returns object, input is an Sinput object.
 
       if nargin ~= 1
         fmt = ['c''tor: RndSeq(y) where y = instance of class Sinput.','\n'];
