@@ -5,7 +5,6 @@ classdef StoOsc < handle
   % https://www.investopedia.com/ask/answers/06/daytradingstochastic.asp
 
   properties
-    data      % struct of input data
     fidelityFile    % Reference to FidelityFile class
     high      % high prices
     low       % low prices
@@ -24,11 +23,10 @@ classdef StoOsc < handle
       endif
 
       obj.fidelityFile = fidelityFile;
-      obj.data = readf(fidelityFile);
-      obj.high = obj.data.High;
-      obj.low = obj.data.Low;
-      obj.price = obj.data.(fidelityFile.dataCol);
-      obj.timestamp = obj.data.Date;
+      obj.high = fidelityFile.data.High;
+      obj.low = fidelityFile.data.Low;
+      obj.price = fidelityFile.data.(fidelityFile.dataCol);
+      obj.timestamp = fidelityFile.GetTimestamp;
       obj.wndLengthSlow = 3;
       obj.numPeriods = 14;
     endfunction

@@ -2,8 +2,7 @@ classdef Price < handle
   % class to handle prices of financial data
 
   properties
-    data          % struct of input data
-    fidelityFile        % Reference to FidelityFile class
+    fidelityFile  % Reference to FidelityFile class
     timestamp     % t - timestamp of prices
     timestep      % time interval of price data {'day','week','month','quarter'}
     volume        % volume data
@@ -18,14 +17,13 @@ classdef Price < handle
       endif
 
       obj.fidelityFile = fidelityFile;
-      obj.data = readf(fidelityFile);
-      obj.timestamp = obj.data.Date;
+      obj.timestamp = fidelityFile.GetTimestamp; %obj.data.Date;
       obj.timestep = Util.GetTimeStep(obj.timestamp);
-      obj.volume = obj.data.Volume;
+      obj.volume = fidelityFile.GetVolume; %obj.data.Volume;
     endfunction
 
     function [r] = GetPrices(this)
-      r = this.data.(this.fidelityFile.dataCol);
+      r = this.fidelityFile.data.(this.fidelityFile.dataCol);
     endfunction
 
     function [r] = Plot(this)
@@ -145,7 +143,6 @@ classdef Price < handle
       grid on;
       grid minor;
       hold off;
-
     endfunction
   endmethods % Private
 endclassdef

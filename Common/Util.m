@@ -209,6 +209,14 @@ classdef Util < handle
         endif
     endfunction
 
+    function [s] = PropToStruct(className)
+      s = struct();
+      fields = fieldnames(className);
+      for i=1:length(fields)
+        s.(fields{i}) = getfield(className,fields{i});
+      endfor
+    endfunction
+
     function [r] = RemoveTrend(x)
       r = diff(x);
     endfunction
@@ -217,5 +225,17 @@ classdef Util < handle
       r = round(r.*100)./100; % round to nearest 2 decimal places
     endfunction
 
+    function [] = SaveStruct(className,folderName,fileName)
+      filename = fullfile(folderName,strcat(fileName,".txt"));
+      asStruct = Util.PropToStruct(className);
+      fid = fopen(filename, 'w+');
+      % https://www.mathworks.com/matlabcentral/answers/80200-access-elements-fields-from-a-struct
+      names = fieldnames(asStruct);
+      for i=1:length(names)
+        value{i} = getfield(asStruct,names{i});
+        fprintf(fid,'%s=%s\n',names{i},value{i});
+      endfor
+      fclose(fid);
+    endfunction
   endmethods
 endclassdef

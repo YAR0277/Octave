@@ -5,9 +5,7 @@ classdef BB < handle
 
   properties
     alpha     % smoothing parameter: alpha -> 1 (less smoothing), alpha -> 0 (more smoothing)
-    data      % struct of input data
     fidelityFile    % Reference to FidelityFile class
-    price     % x - prices of investment
     maType    % type of Moving Average = {"SMA","MMA","EMA","WMA"}
     timestamp % t - timestamp of prices
     w         % weighting of data
@@ -22,13 +20,11 @@ classdef BB < handle
         return;
       endif
 
-      obj.fidelityFile = fidelityFile;
-      obj.data = readf(fidelityFile);
-      obj.maType = "SMA"; % default
       obj.alpha = 0.1;
+      obj.fidelityFile = fidelityFile;
+      obj.maType = "SMA"; % default
+      obj.timestamp = fidelityFile.GetTimestamp;
       obj.wlen = 14;
-      obj.timestamp = obj.data.Date;
-      obj.price = obj.data.(fidelityFile.dataCol);
     endfunction
 
     function [r] = CalcMA(this,x)
@@ -46,6 +42,10 @@ classdef BB < handle
       endswitch
     endfunction
 
+    function [r] = GetPrices(this)
+      r = this.fidelityFile.data.(this.fidelityFile.dataCol);
+    endfunction
+
     function [] = Plot(this)
       figure;
       this.Subplot();
@@ -55,11 +55,11 @@ classdef BB < handle
 
     function [] = Subplot(this)
 
-      x=this.CalcMA(this.price);
+      x=this.CalcMA(this.GetPrices);
       t=this.timestamp;
 
       subplot(2,1,1);
-      plot(t,this.price,'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+      plot(t,this.GetPrices,'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
 
       hold on;
       [lower,upper] = this.AddBandLines(t,x);
@@ -78,7 +78,7 @@ classdef BB < handle
       hold off;
 
       subplot(2,1,2);
-      pctB = ((this.price - lower) ./ (upper - lower) );
+      pctB = ((this.GetPrices - lower) ./ (upper - lower) );
       plot(t,pctB,'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
 
       hold on;

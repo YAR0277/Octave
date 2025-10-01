@@ -4,9 +4,7 @@ classdef MACD < handle
   % https://www.investopedia.com/terms/m/macd.asp
 
   properties
-    data      % struct of input data
     fidelityFile    % Reference to FidelityFile class
-    price     % x - prices of investment
     timestamp % t - timestamp of prices
     wndLengthFast % window length fast
     wndLengthSlow % window length fast
@@ -22,9 +20,7 @@ classdef MACD < handle
       endif
 
       obj.fidelityFile = fidelityFile;
-      obj.data = readf(fidelityFile);
-      obj.price = obj.data.(fidelityFile.dataCol);
-      obj.timestamp = obj.data.Date;
+      obj.timestamp = fidelityFile.GetTimestamp;
       obj.wndLengthFast = 12;
       obj.wndLengthSlow = 26;
       obj.wndLengthSignal = 9;
@@ -53,13 +49,17 @@ classdef MACD < handle
       r = MovingAvg.EMA(macd,this.wndLengthSignal); % signal line
     endfunction
 
+    function [r] = GetPrices(this)
+      r = this.fidelityFile.data.(this.fidelityFile.dataCol);
+    endfunction
+
     function [] = Subplot(this)
 
       t=this.timestamp;
-      [signal,macd,fast,slow] = this.CalcMACD(this.price);
+      [signal,macd,fast,slow] = this.CalcMACD(this.GetPrices);
 
       subplot(2,1,1);
-      plot(t,this.price,'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+      plot(t,this.GetPrices,'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
 
       hold on;
       plot(t,fast,'-','color','magenta','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);

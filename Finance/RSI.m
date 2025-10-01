@@ -5,7 +5,6 @@ classdef RSI < handle
 
   properties
     alpha     % smoothing parameter: alpha -> 1 (less smoothing), alpha -> 0 (more smoothing)
-    data      % struct of input data
     fidelityFile    % Reference to FidelityFile class
     price     % x - prices of investment
     rsiType   % type of RSI = {"SMA","MMA","EMA","WMA"}
@@ -22,15 +21,22 @@ classdef RSI < handle
         return;
       endif
 
-      obj.fidelityFile = fidelityFile;
-      obj.data = readf(fidelityFile);
-      obj.rsiType = "SMA"; % default
       obj.alpha = 0.1;
+      obj.fidelityFile = fidelityFile;
+      obj.rsiType = "SMA"; % default
+      obj.timestamp = fidelityFile.GetTimestamp;
       obj.wlen = 14;
       obj.w = 1:14;
-      obj.timestamp = obj.data.Date;
-      obj.price = obj.data.(fidelityFile.dataCol);
+      obj.price = fidelityFile.data.(fidelityFile.dataCol);
     endfunction
+
+    function [r] = GetTimestamp(this)
+      r = this.timestamp(2:end);
+    end
+
+    function [r] = GetValue(this)
+      r = this.CalcRSI();
+    end
 
     function [] = Compare(this)
       figure;
@@ -72,6 +78,14 @@ classdef RSI < handle
       grid on;
       grid minor;
       hold off;
+    endfunction
+
+    function [] = PlotAggregate(this,dt)
+      TimeSeries.PlotAggregate(this,dt);
+    endfunction
+
+    function [] = PlotTrend(this,wlen)
+      TimeSeries.PlotTrend(this,wlen);
     endfunction
 
     function [] = SetAlpha(this,alpha)

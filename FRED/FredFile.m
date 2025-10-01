@@ -1,4 +1,4 @@
-classdef FredFile < handle
+classdef FredFile < CsvFile
   % Input structure for FRED data
 
   properties (Constant)
@@ -30,6 +30,7 @@ classdef FredFile < handle
       pkg load tablicious;
       addpath(genpath('../Common')); % for class Constant
 
+      obj = obj@CsvFile();
       obj.dataFolder = '../../../data/fred'; % FRED root data folder;
       obj.SetDataDefinitionTable();
       obj.flagRecession = 1;
@@ -74,6 +75,14 @@ classdef FredFile < handle
       endif
     endfunction
 
+    function [r] = GetTimestamp(this)
+      r = this.timestamp;
+    end
+
+    function [r] = GetValue(this)
+      r = this.value;
+    end
+
     function [] = LoadId(this,id)
       if this.GetRowIdx(FredFile.COL_IDX_ID,id)
         this.id = id;
@@ -98,13 +107,11 @@ classdef FredFile < handle
     endfunction
 
     function [] = PlotAggregate(this,dt)
-      % [] = PlotAggregate(dt) where dt=12, for example.
-      [t,x] = Util.Aggregate(this.timestamp,this.value,dt);
-      if isempty(x)
-        fprintf('No data to plot.\n');
-        return;
-      endif
-      this.DoPlot(t,x);
+      TimeSeries.PlotAggregate(this,dt);
+    endfunction
+
+    function [] = PlotTrend(this,wlen)
+      TimeSeries.PlotTrend(this,wlen);
     endfunction
 
     function [] = ShowData(this)
@@ -140,7 +147,6 @@ classdef FredFile < handle
   methods (Access = private)
 
     function [] = DoPlot(this,t,x)
-
       figure;
       hold on;
       plot(t,x,'-','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);

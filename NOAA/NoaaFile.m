@@ -1,4 +1,4 @@
-classdef NoaaFile < handle
+classdef NoaaFile < CsvFile
   % Input structure for NOAA data
 
   properties (Constant)
@@ -16,7 +16,6 @@ classdef NoaaFile < handle
     dataFolder
     dataDefinitionTable
     fileName
-##    flagRecession
     id
     observationDate
     timestamp
@@ -30,49 +29,22 @@ classdef NoaaFile < handle
       pkg load tablicious;
       addpath(genpath('../Common')); % for class Constant
 
+      obj = obj@CsvFile();
       obj.dataFolder = '../../../data/noaa'; % NOAA root data folder;
       obj.SetDataDefinitionTable();
-##      obj.flagRecession = 1;
 
       if nargin == 1
         obj.LoadId(varargin{1});
       endif
     endfunction
 
-##    function [] = AddRecession(this,ax,timestamp,hgt)
-##      recessionClass=Rinput('JHDUSRGDPBR');
-##      recessionTimeStamp = recessionClass.timestamp;
-##      found = 0;
-##
-##      [ia,ib,lengths] = recessionClass.GetOnes();
-##      for i=1:length(ia)
-##        if ( recessionTimeStamp(ia(i)) >= timestamp(1) && recessionTimeStamp(ia(i)) < timestamp(end) )
-##          rectangle(ax,'Position',[recessionTimeStamp(ia(i)) 0 lengths(i) hgt],'FaceColor',Color.LightGrey, 'EdgeColor',Color.LightGrey);
-##          found = 1;
-##        endif
-##      endfor
-##
-##      if ~found
-##        return; % no recession rectangles -> no annotations
-##      endif
-##
-##      this.AddAnnotation(timestamp);
-##    endfunction
-##
-##    function [] = AddAnnotation(this,timestamp)
-##      numYears = uint16((timestamp(end)-timestamp(1))/365);
-##      arrowStart=0.235;
-##      arrowLen=.05;
-##      if numYears > 10
-##        annotation("textarrow",[0.44 0.487],[0.8 0.8],"string","Recession","fontsize",12,"headstyle","plain","headlength",8,"headwidth",8);
-##      elseif numYears > 5
-##        annotation("textarrow",[0.4 0.47],[0.8 0.8],"string","Recession","fontsize",12,"headstyle","plain","headlength",8,"headwidth",8);
-##      elseif numYears > 1 % dummy - no recesions < 5 years
-##        annotation("textarrow",[arrowStart arrowStart+arrowLen],[0.8 0.8],"string","Recession","fontsize",12,"headstyle","plain","headlength",8,"headwidth",8);
-##      else % dummy - no recessions < 1 year
-##        annotation("textarrow",[0.4 0.47],[0.8 0.8],"string","Recession","fontsize",12,"headstyle","plain","headlength",8,"headwidth",8);
-##      endif
-##    endfunction
+    function [r] = GetTimestamp(this)
+      r = this.timestamp;
+    end
+
+    function [r] = GetValue(this)
+      r = this.value;
+    end
 
     function [] = LoadId(this,id)
       if this.GetRowIdx(NoaaFile.COL_IDX_ID,id)
@@ -97,23 +69,12 @@ classdef NoaaFile < handle
       this.DoPlot(t,x);
     endfunction
 
-##    function [] = PlotAggregate(this,dt)
-##      % [] = PlotAggregate(dt) where dt=12, for example.
-##      [t,x] = Util.Aggregate(this.timestamp,this.value,dt);
-##      if isempty(x)
-##        fprintf('No data to plot.\n');
-##        return;
-##      endif
-##      this.DoPlot(t,x);
-##    endfunction
+    function [] = PlotAggregate(this,dt)
+      TimeSeries.PlotAggregate(this,dt);
+    endfunction
 
     function [] = PlotTrend(this,wlen)
-      % [] = PlotTrend(wlen) where window length, wlen=30, for example.
-      hold on;
-      ax = gca;
-      trend = MovingAvg.SMA(this.value,wlen);
-      plot(ax,this.timestamp,trend,'--','Color',Color.Maroon);
-      hold off;
+      TimeSeries.PlotTrend(this,wlen);
     endfunction
 
     function [] = ShowData(this)
@@ -149,7 +110,6 @@ classdef NoaaFile < handle
   methods (Access = private)
 
     function [] = DoPlot(this,t,x)
-
       figure;
       hold on;
       plot(t,x,'-','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);

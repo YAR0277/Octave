@@ -1,4 +1,4 @@
-classdef BlsFile < handle
+classdef BlsFile < CsvFile
   % Input structure for BLS data
 
   properties (Constant)
@@ -31,6 +31,7 @@ classdef BlsFile < handle
       addpath(genpath('../Common')); % for class Constant
       addpath(genpath('../FRED')); % for class Rinput
 
+      obj = obj@CsvFile();
       obj.dataFolder = '../../../data/bls'; % BLS root data folder;
       obj.SetDataDefinitionTable();
       obj.flagRecession = 1;
@@ -39,6 +40,14 @@ classdef BlsFile < handle
         obj.LoadId(varargin{1});
       endif
     endfunction
+
+    function [r] = GetTimestamp(this)
+      r = this.timestamp;
+    end
+
+    function [r] = GetValue(this)
+      r = this.value;
+    end
 
     function [] = LoadId(this,id)
       if this.GetRowIdx(BlsFile.COL_IDX_ID,id)
@@ -82,7 +91,6 @@ classdef BlsFile < handle
       xlim([this.timestamp(1) this.timestamp(end)]);
 
       rowIdx = this.GetRowIdx(BlsFile.COL_IDX_ID,this.id(1,:));
-
       label_str = this.dataDefinitionTable(rowIdx,BlsFile.COL_IDX_UNIT);
       ylabel(label_str,'FontSize',Constant.YLabelFontSize);
 
@@ -94,14 +102,21 @@ classdef BlsFile < handle
 
       if this.flagRecession
         ylimits = ylim;
-        recessionClass = Rinput('JHDUSRGDPBR');
-        recessionClass.AddRecession(ax,this.timestamp,ylimits(2));
+        recessionFile = FredFile('JHDUSRGDPBR');
+        recessionFile.AddRecession(ax,this.timestamp,ylimits(2));
       endif
 
       title_str = this.dataDefinitionTable(rowIdx,BlsFile.COL_IDX_TITLE);
       title(title_str,'FontSize',Constant.TitleFontSize);
       grid on;
+    endfunction
 
+    function [] = PlotAggregate(this,dt)
+      TimeSeries.PlotAggregate(this,dt);
+    endfunction
+
+    function [] = PlotTrend(this,wlen)
+      TimeSeries.PlotTrend(this,wlen);
     endfunction
 
     function [] = Stats(this)

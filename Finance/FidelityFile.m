@@ -1,28 +1,71 @@
-classdef FidelityFile < handle
-  % Input structure for financial functions plotf, readf and classes Returns
+classdef FidelityFile < CsvFile
+  % Input structure for financial functions plotf, readf and classes
 
   properties
+    data
     dataCol
     dataFolder
     dateFormat
     descendFlag
     fileName
     symbol
+    timestamp
   endproperties
 
   methods % Public
 
-    function [obj] = FidelityFile(varargin)
+    function [obj] = FidelityFile()
+      obj = obj@CsvFile();
       obj.dataCol = 'Close'; % 'Open','High','Low','Close','pctChange','pctChangeAvg','Volume'
       obj.dataFolder = '../../../data/finance'; % financial data folder;
       obj.dateFormat = 'yyyy-mm-dd';
       obj.descendFlag = 0; % data is in ascending order: oldest -> newest
       obj.fileName = '';
       obj.symbol = '';
+    endfunction
 
-      if ~isempty(varargin)
-        obj.Load(varargin{1});
+    function [r] = GetTimestamp(this)
+      r = this.data.Date;
+    end
+
+    function [r] = GetPctChange(this)
+      r = this.data.pctChange;
+    end
+
+    function [r] = GetValue(this)
+      r = this.data.(this.dataCol);
+    end
+
+    function [r] = GetVolume(this)
+      r = this.data.Volume;
+    end
+
+    function [] = LoadFile(this,fileName)
+      this.SetFile(fileName);
+      if exist(fullfile(this.dataFolder,this.fileName),'file')
+        this.data = readf(this);
+      else
+        fprintf('file (%s) does not exist. \n',this.fileName);
       endif
+    endfunction
+
+    function [] = Plot(this)
+      % [] = Plot
+      t = this.GetTimestamp;
+      x = this.GetValue;
+      if isempty(x)
+        fprintf('No data to plot.\n');
+        return;
+      endif
+      this.DoPlot(t,x);
+    endfunction
+
+    function [] = PlotAggregate(this,dt)
+      TimeSeries.PlotAggregate(this,dt);
+    endfunction
+
+    function [] = PlotTrend(this,wlen)
+      TimeSeries.PlotTrend(this,wlen);
     endfunction
 
     function [] = SetFile(this,fileName)
@@ -55,39 +98,31 @@ classdef FidelityFile < handle
       r = {folders(idx).name}';
       r(ismember(r,{'.','..'})) = [];
     endfunction
-
-    function [] = Load(this, fileName)
-      fid = fopen(fileName, 'r');
-      fin = textscan(fid,"%s %s %s %d %s %s", 'delimiter', '\n');
-      this.dataCol = cell2mat(fin{1});
-      this.dataFolder = cell2mat(fin{2});
-      this.dateFormat = cell2mat(fin{3});
-      this.descendFlag = fin{4};
-      this.fileName = cell2mat(fin{5});
-      this.symbol = cell2mat(fin{6});
-    endfunction
-
-    function [] = Save(this,fname)
-      filename = fullfile('Input',strcat(fname,".txt"));
-      asStruct = this.ToStruct();
-      fid = fopen(filename, 'w+');
-      fprintf(fid,'%s\n',asStruct.dataCol);
-      fprintf(fid,'%s\n',asStruct.dataFolder);
-      fprintf(fid,'%s\n',asStruct.dateFormat);
-      fprintf(fid,'%d\n',asStruct.descendFlag);
-      fprintf(fid,'%s\n',asStruct.fileName);
-      fprintf(fid,'%s\n',asStruct.symbol);
-      fclose(fid);
-    endfunction
   endmethods %Public
 
   methods (Access = private)
-    function [s] = ToStruct(this)
-      s = struct();
-      fields = fieldnames(this);
-      for i=1:length(fields)
-        s.(fields{i}) = getfield(this,fields{i});
-      endfor
+
+    function [] = DoPlot(this,t,x)
+      figure;
+      hold on;
+      plot(t,x,'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+
+      [xticks,fmt] = Util.GetDateTicks(t);
+      ax = gca;
+      set(ax,"XTick",xticks);
+      datetick('x',fmt,'keepticks','keeplimits');
+      xlim([t(1) t(end)]);
+
+      label_str = "Values";
+      ylabel(label_str,'FontSize',Constant.YLabelFontSize);
+
+      ylimits = ylim;
+      ylim([ylimits(1) ylimits(2)]);
+
+      title_str = this.fileName;
+      title(title_str,'FontSize',Constant.TitleFontSize);
+      grid on;
+      hold off;
     endfunction
   endmethods
 endclassdef

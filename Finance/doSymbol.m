@@ -1,19 +1,21 @@
 function [] = doSymbol(varargin)
-
+  % call is doSymbol('2025-09-30','FDD'), doSymbol('2025-09-30','FDD',1)
   addpath(genpath('../Common'));
 
   switch nargin
-    case 1
-      symbol = varargin{1};
-      bShowPlot = 0;
     case 2
-      symbol = varargin{1};
-      bShowPlot = varargin{2};
+      fdate = varargin{1};
+      symbol = varargin{2};
+      bShowPlot = 0;
+    case 3
+      fdate = varargin{1};
+      symbol = varargin{2};
+      bShowPlot = varargin{3};
     otherwise
       error('invalid number of arguments %d. \n',nargin);
   endswitch
 
-  [fday,fweek,fref] = GetFinput(symbol);
+  [fday,fweek,fref] = GetFinput(fdate,symbol);
   p = Price(fday);
   p.Stats
   r = Returns(fweek);
@@ -33,10 +35,20 @@ function [] = doSymbol(varargin)
   endif
 endfunction
 
-function [fday,fweek,fref] = GetFinput(symbol)
-  fday  = FidelityFile(fullfile('Input',strcat(symbol,'-d.txt')));
-  fweek = FidelityFile(fullfile('Input',strcat(symbol,'-w.txt')));
-  fref  = FidelityFile(fullfile('Input','DJI-d.txt'));
+function [fday,fweek,fref] = GetFinput(fdate,symbol)
+  fday  = FidelityFile;
+  fday.SetFolder('etf');
+  fday.LoadFile(strcat(strcat(strcat(fdate,'-fidelity-'),symbol),'-d.csv'));
+  fday.SetSymbol(symbol);
+
+  fweek  = FidelityFile;
+  fweek.SetFolder('etf');
+  fweek.LoadFile(strcat(strcat(strcat(fdate,'-fidelity-'),symbol),'-w.csv'));
+  fweek.SetSymbol(symbol);
+
+  fref  = FidelityFile;
+  fref.SetFolder('index');
+  fref.LoadFile(strcat(fdate,'-fidelity-DJI-d.csv'));
 endfunction
 
 

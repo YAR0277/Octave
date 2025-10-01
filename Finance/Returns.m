@@ -2,8 +2,7 @@ classdef Returns < handle
   % class to compute rate of returns of financial data
 
   properties
-    data          % struct of input data
-    fidelityFile        % Reference to FidelityFile class
+    fidelityFile  % Reference to FidelityFile class
     returns       % rate of return
     timestamp     % t - timestamp of prices
     timestep      % time interval of price data {'day','week','month','quarter'}
@@ -25,18 +24,25 @@ classdef Returns < handle
       endif
 
       obj.fidelityFile = fidelityFile;
-      obj.data = readf(fidelityFile);
-      obj.timestamp = obj.data.Date;
+      obj.timestamp = fidelityFile.GetTimestamp;
       obj.timestep = Util.GetTimeStep(obj.timestamp);
       obj.flgPctChange = 1;
-      obj.flgPlotType = 2;
-      obj.volume = obj.data.Volume;
+      obj.flgPlotType = 3;
+      obj.volume = fidelityFile.GetVolume;
     endfunction
+
+    function [r] = GetTimestamp(this)
+      r = this.timestamp;
+    end
+
+    function [r] = GetValue(this)
+      [~,r] = this.GetReturnData;
+    end
 
     function [t,y] = GetReturnData(this)
       if this.flgPctChange
-        t = this.data.Date; %this.timestamp;
-        y = this.data.pctChange; %this.pctChange;
+        t = this.timestamp;
+        y = this.fidelityFile.GetPctChange;
       else
         this.Calc(); % calculate returns just in case they haven't been calculated
         t = this.timestamp(1:end-1); % n price values => n-1 returns
@@ -56,6 +62,14 @@ classdef Returns < handle
         otherwise
           this.PlotBar();
       endswitch
+    endfunction
+
+    function [] = PlotAggregate(this,dt)
+      TimeSeries.PlotAggregate(this,dt);
+    endfunction
+
+    function [] = PlotTrend(this,wlen)
+      TimeSeries.PlotTrend(this,wlen);
     endfunction
 
     function [r] = Subplot(this)
@@ -82,7 +96,7 @@ classdef Returns < handle
     function [r] = Stats(this)
       % calculates statistics on returns
       if this.flgPctChange
-        this.DoStats(this.timestamp(1),this.timestamp(end),this.data.pctChange);
+        this.DoStats(this.timestamp(1),this.timestamp(end),this.fidelityFile.GetPctChange);
       else
         this.DoStats(this.timestamp(1),this.timestamp(end),this.returns);
       endif
@@ -94,7 +108,7 @@ classdef Returns < handle
     function [] = Calc(this)
       % calculates rate of returns
 
-      price = this.data.(this.fidelityFile.dataCol);
+      price = this.fidelityFile.GetValue;
       if numel(price) < 2 % at least 2 to get a return
         return;
       endif

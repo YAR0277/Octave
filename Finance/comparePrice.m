@@ -8,34 +8,14 @@ function [] = comparePrice(fidelityFile)
     return;
   endif
 
-  figure;
-  hold on;
+  fidelityFile.SetFolder('etf');
 
-  fidelityFile.SetFile('2025-06-11-fidelity-BKLC-w.csv');
-  [s] = readf(fidelityFile);
-  plot(s.Date,s.(fidelityFile.dataCol),'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+  fidelityFile.LoadFile('2025-09-30-fidelity-FDD-d.csv');
+  fidelityFile.Plot;
 
-  fidelityFile.SetFile('2025-06-11-fidelity-BKLC-m.csv');
-  [s] = readf(fidelityFile);
-  plot(s.Date,s.(fidelityFile.dataCol),'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+  fidelityFile.LoadFile('2025-09-30-fidelity-FDD-w.csv');
+  fidelityFile.Plot;
 
-  fidelityFile.SetFile('2025-06-11-fidelity-BKLC-q.csv');
-  [s] = readf(fidelityFile);
-  plot(s.Date,s.(fidelityFile.dataCol),'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
-
-  hold off;
-
-  [xticks,fmt] = Util.GetDateTicks(s.Date);
-  ax = gca;
-  set(ax,"XTick",xticks);
-  datetick('x',fmt,'keepticks','keeplimits');
-  xlim([xticks(1) xticks(end)]);
-
-  legend({'week','month','quarter'},'FontSize',Constant.LegendFontSize);
-  ylabel('Price ($)', 'FontSize', Constant.YLabelFontSize);
-  title(fidelityFile.symbol, 'FontSize', Constant.TitleFontSize);
-  grid on;
-  grid minor;
 endfunction
 
 

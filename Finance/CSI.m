@@ -4,11 +4,8 @@ classdef CSI < handle
   % https://www.investopedia.com/terms/r/rsi.asp
 
   properties
-    data      % struct for input data
     fidelityFile    % FidelityFile class object
-    price     % x - prices of investment
-    refFinput % reference FidelityFile class object
-    refPrice  % reference prices
+    refFile % reference FidelityFile class object
     refSymbol % reference symbol
     refTimestamp % reference timestamp
     timestamp % t - timestamp of prices
@@ -16,31 +13,23 @@ classdef CSI < handle
 
   methods % Public
 
-    function obj = CSI(fidelityFile,refInput)
+    function obj = CSI(fidelityFile,refFile)
       % c'tor to create an CSI object, input is an FidelityFile object.
-      if ~isa(fidelityFile, 'FidelityFile') || ~isa(refInput, 'FidelityFile')
+      if ~isa(fidelityFile, 'FidelityFile') || ~isa(refFile, 'FidelityFile')
         return;
       endif
 
       obj.fidelityFile = fidelityFile;
-      obj.data = readf(fidelityFile);
-      obj.timestamp = obj.data.Date;
-      obj.price = obj.data.(fidelityFile.dataCol);
-      obj.AddReference(refInput);
-    endfunction
-
-    function [] = AddReference(this,fidelityFile)
-      dataRef = readf(fidelityFile);
-      this.refFinput = fidelityFile;
-      this.refPrice = dataRef.(fidelityFile.dataCol);
-      this.refSymbol = fidelityFile.symbol;
-      this.refTimestamp = dataRef.Date;
+      obj.timestamp = fidelityFile.GetTimestamp;
+      obj.refFile = refFile;
+      obj.refTimestamp = refFile.GetTimestamp;
     endfunction
 
     function [] = Stats(this)
 
+      prices = this.fidelityFile.GetValue;
       [~,ia,ib] = intersect(this.timestamp,this.refTimestamp);
-      x = this.price(ia);
+      x = prices(ia);
 
       dx = diff(x);
       u(dx  > 0) = 1;
@@ -48,7 +37,8 @@ classdef CSI < handle
       d(dx  < 0) = 1;
       d(dx >= 0) = 0;
 
-      y = this.refPrice(ib);
+      refPrices = this.refFile.GetValue;
+      y = refPrices(ib);
 
       dy = diff(y);
       uref(dy  > 0) = 1;
@@ -74,6 +64,5 @@ classdef CSI < handle
       fprintf('Prob(Up|Up)=%.2f, Prob(Dn|Up)=%.2f, Prob(Up|Dn)=%.2f, Prob(Dn|Dn)=%.2f\n',s1,s2,s3,s4);
 
     endfunction
-
   endmethods %Public
 endclassdef
