@@ -5,6 +5,23 @@ classdef MovingAvg < handle
 
   methods (Static = true) % Public
 
+    function [r] = CMA(x,wndLen)
+      % Centered Moving Average (CMA)
+      % [r] = CMA(x,wndLen) where x=input vector, wndLen=length of window, r=output vector
+
+      iseven = mod(wndLen,2) == 0;
+      if iseven
+        wndLen = wndLen + 1;
+        w = ones(wndLen,1)/wndLen;
+        w(1) = 0.5*w(1);
+        w(end) = 0.5*w(end);
+      else
+        w = ones(1,wndLen)/wndLen;
+      endif
+
+      r = MovingAvg.WMA(x,w,wndLen);
+    endfunction
+
     function [r] = SMA(x,wlen)
       % calculates the Simple Moving Average
       % [r] = SMA(x,wlen) where x=input vector, wlen=length of window, r=output vector
@@ -28,8 +45,8 @@ classdef MovingAvg < handle
       % calculates the weighted Moving Average
       % https://en.wikipedia.org/wiki/Moving_average#Weighted_moving_average
       % [r] = WMA(x,w,wndLen) where x=input vector, w=weights, wndLen=length of window, r=output vector
-      n = size(x,2);
-      wgtLen = size(w,2);
+      n = length(x);
+      wgtLen = length(w);
       if wgtLen~=wndLen
         error('window length(%d) not equal to weighting vector length(%d). \n',wndLen,wgtLen);
       endif
@@ -55,7 +72,7 @@ classdef MovingAvg < handle
 
           ix1=max(i-lwhl,1);      % data index start
           ix2=min(i+rwhl,n);      % data index end
-          r(i) = (sum(x(ix1:ix2).*w(wix1:wix2)) / sum(w(wix1:wix2)));
+          r(i) = ( dot(x(ix1:ix2),w(wix1:wix2)) / sum(w(wix1:wix2)));
         endfor
       catch ME
           error('%s at file(%s), name(%s), line(%d), column(%d)\n',...
@@ -109,6 +126,5 @@ classdef MovingAvg < handle
             ME.message,ME.stack(end).file,ME.stack(end).name,ME.stack(end).line,ME.stack(end).column);
       end_try_catch
     endfunction
-
   endmethods
 endclassdef
