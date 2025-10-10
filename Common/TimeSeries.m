@@ -1,6 +1,6 @@
 classdef TimeSeries < handle
   % Time Series
-  % [1]
+  % [1] A First Course on Time Series Analysis, Examples with SAS (2006)
   % [2]
 
   methods (Static = true) % Public
@@ -63,6 +63,17 @@ classdef TimeSeries < handle
       ax = gca;
       [t,x] = Util.Aggregate(file.GetTimestamp,file.GetValue,dt);
       plot(ax,t,x,'--','Color',Color.Maroon,'MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+      hold off;
+    endfunction
+
+    function [] = PlotCorrelogram(x)
+      % [] = PlotCorrelogram(x) where x is random sequence. The random sequence is assumed
+      % to be trend adjusted, see [1], p.36.
+      figure;
+      hold on;
+      ax = gca;
+      r = TimeSeries.acvImpl(x)/TimeSeries.acvf(1,x);
+      plot(ax,[0:length(r)-1],r,'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
       hold off;
     endfunction
 
