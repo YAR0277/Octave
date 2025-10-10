@@ -5,6 +5,33 @@ classdef TimeSeries < handle
 
   methods (Static = true) % Public
 
+    function [r] = acf(k,x)
+      % [r(k)] = acf(k,x) autocorrelation function at k (lag) for sequence x.
+      r = TimeSeries.acvf(k,x)/TimeSeries.acvf(1,x);
+    endfunction
+
+    function [r] = acvf(k,x)
+      % [r(k)] = acvf(k,x) autocovariance function at k (lag) for sequence x.
+      acv = TimeSeries.acvImpl(x);
+      if k > 0 && k <= length(acv)
+        r = acv(k);
+      endif
+    endfunction
+
+    function [acv] = acvImpl(x)
+      % [acv] = acvImpl(x) autocovariance function of sequence x.
+      n = length(x);
+      xbar = mean(x);
+      acv = NaN(n,1);
+      for k=0:n-1 % lag variable
+        s = 0;
+        for t=1:n-k
+          s = s + (x(t) - xbar)*(x(t+k) - xbar);
+        endfor
+        acv(k+1) = s/n; % lag 0 is at acv(1), lag 1 is at acv(2), ...
+      endfor
+    endfunction
+
     function [t,x] = CalcSeasonal(file,wndLen)
       % [t,x] = CalcSeasonal(wndLen) where window length, wndLen=12, for example.
       if ~isa(file,'CsvFile') && ~isa(file,'Returns') && ~isa(file,'RSI') && ~isa(file,'StoOsc')
