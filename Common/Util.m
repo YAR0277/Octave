@@ -163,7 +163,11 @@ classdef Util < handle
     endfunction
 
     function [r,dt,fmt,szfmt] = GetDateTicksYear(t,numYears)
-      if numYears > 10
+      if numYears > 200
+        dt = 25; % every 5 years
+        fmt = 'yyyy';
+        szfmt = 4;
+      elseif numYears > 10
         dt = 5; % every 5 years
         fmt = 'yyyy';
         szfmt = 4;
