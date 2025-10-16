@@ -113,10 +113,16 @@ classdef TimeSeries < handle
       % [] = PlotCorrelogram(x) where x is random sequence. The random sequence is assumed
       % to be trend adjusted, see [1], p.36.
       figure;
-      hold on;
       ax = gca;
       r = this.acvImpl(x)/this.acvf(1,x);
       plot(ax,[0:length(r)-1],r,'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+      hold on;
+      % [2], p.36, mean = -1/n, variance = 1/n, stdev = 1/sqrt(n), draw lines at mean +/- 2 stds, i.e.
+      % -1/n + 2/sqrt(n) and -1/n - 2/sqrt(n)
+      mu = -1/length(x); % mean
+      sig = sqrt(1/length(x)); % stdev
+      this.AddDashedLine(ax,mu+2*sig);
+      this.AddDashedLine(ax,mu-2*sig);
       ylabel('ACF');
       xlabel('lag');
       grid on;
@@ -206,9 +212,29 @@ classdef TimeSeries < handle
       grid on;
       hold off;
     endfunction
+
+    function [] = Stats(this,x)
+      % calculates statistics
+      timestep = Util.GetTimeStep(this.timestamp);
+      d1 = datestr(this.timestamp(1));
+      d2 = datestr(this.timestamp(end));
+      n = length(x);
+      fprintf('Time Period: [%s,%s], Time Step: %s, Nr. Samples: %d\n',d1,d2,timestep,n);
+      [v_max,i_max] = max(x);
+      [v_min,i_min] = min(x);
+      fprintf('Range: [%.2f,%.2f], Mean %.2f, Stdev %.2f\n',v_min,v_max,mean(x),std(x));
+      fprintf('Min: %s, %.2f\n',datestr(this.timestamp(i_min),'mmm yyyy'),v_min);
+      fprintf('Max: %s, %.2f\n',datestr(this.timestamp(i_max),'mmm yyyy'),v_max);
+    endfunction
   endmethods
 
   methods (Access = private)
+
+    function [] = AddDashedLine(this,ax,yval)
+      limits = xlim(ax);
+      n = limits(2);
+      plot(ax,[0:n-1],yval*ones(n,1),'--','color',Color.Brown);
+    endfunction
 
     function [t,z] = CalcError(this,x,wndLen)
       % Removes trend and seasonal components from series
