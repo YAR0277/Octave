@@ -110,8 +110,8 @@ classdef FredFile < CsvFile
       TimeSeries.PlotAggregate(this,dt);
     endfunction
 
-    function [] = PlotSeasonal(this,wlen)
-      TimeSeries.PlotSeasonal(this,wlen);
+    function [] = PlotAdjusted(this,wlen)
+      TimeSeries.PlotAdjusted(this,wlen);
     endfunction
 
     function [] = PlotTrend(this,wlen)

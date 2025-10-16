@@ -15,6 +15,9 @@ classdef FidelityFile < CsvFile
   methods % Public
 
     function [obj] = FidelityFile()
+
+      addpath(genpath('../Finance')); % for readf
+
       obj = obj@CsvFile();
       obj.dataCol = 'Close'; % 'Open','High','Low','Close','pctChange','pctChangeAvg','Volume'
       obj.dataFolder = '../../../data/finance'; % financial data folder;
