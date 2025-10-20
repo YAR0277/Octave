@@ -61,6 +61,34 @@ classdef TimeSeries < handle
       endfor
     endfunction
 
+    function [r] = ccf(this,k,x,y)
+      % [r(k)] = acf(k,x) autocorrelation function at k (lag) for sequence x.
+      r = this.ccvf(k,x,y)/this.ccvf(1,x,y);
+    endfunction
+
+    function [r] = ccvf(this,k,x,y)
+      % [r(k)] = ccvf(k,x) cross covariance function at k (lag) for sequences x,y.
+      ccv = this.ccvImpl(x,y);
+      if k > 0 && k <= length(ccv)
+        r = ccv(k);
+      endif
+    endfunction
+
+    function [ccv] = ccvImpl(~,x,y)
+      % [ccv] = ccvImpl(x) cross covariance function of sequences x,y.
+      n = length(x);
+      xbar = mean(x);
+      ybar = mean(y);
+      ccv = NaN(n,1);
+      for k=0:n-1 % lag variable
+        s = 0;
+        for t=1:n-k
+          s = s + (x(t+k) - xbar)*(y(t) - ybar);
+        endfor
+        ccv(k+1) = s/n; % lag 0 is at ccv(1), lag 1 is at ccv(2), ...
+      endfor
+    endfunction
+
     function [t,m,s,z] = Decompose(this,wndLen)
       % Additive decomposition of time series: x = m + s + z, where m-trend, s-seasonal, z-error.
       % [t,m,s,z] = Decompose(wndLen) where window length, wndLen=12, for example.
@@ -109,12 +137,22 @@ classdef TimeSeries < handle
       hold off;
     endfunction
 
-    function [] = PlotCorrelogram(this,x)
-      % [] = PlotCorrelogram(x) where x is random sequence. The random sequence is assumed
-      % to be trend adjusted, see [1], p.36.
+    function [] = PlotCorrelogram(this,x,y)
+      % [] = PlotCorrelogram(x) or PlotCorrelogram(x,y), where x (and y) = random sequence(s).
+      % The random sequences are assumed to be trend adjusted, see [1], p.36.
+
+      if nargin == 2
+        r = this.acvImpl(x)/this.acvf(1,x);
+      elseif nargin == 3
+        r = this.ccvImpl(x,y)/this.ccvf(1,x,y);
+      else
+        fmt = ['call: PlotCorrelogram(x,y) where x (and y) = random sequence(s).','\n'];
+        fprintf(fmt);
+        return;
+      endif
+
       figure;
       ax = gca;
-      r = this.acvImpl(x)/this.acvf(1,x);
       plot(ax,[0:length(r)-1],r,'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
       hold on;
       % [2], p.36, mean = -1/n, variance = 1/n, stdev = 1/sqrt(n), draw lines at mean +/- 2 stds, i.e.
