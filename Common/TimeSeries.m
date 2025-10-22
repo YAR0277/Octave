@@ -163,6 +163,9 @@ classdef TimeSeries < handle
       this.AddDashedLine(ax,mu-2*sig);
       ylabel('ACF');
       xlabel('lag');
+      ymin = min(mu-2*sig,min(r));
+      ymax = max(mu+2*sig,max(r));
+      ylim([ymin-0.1 ymax+0.1]); % +/- a little bit to pad from edge
       grid on;
       grid minor;
       hold off;

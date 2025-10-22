@@ -221,8 +221,22 @@ classdef Util < handle
       endfor
     endfunction
 
-    function [r] = RemoveTrend(x)
-      r = diff(x);
+    function [r] = Diff(x,p)
+      % computes pth order difference of vector x
+      % [r] = Diff([1 4 7 8],2).
+      if nargin == 1
+        p = 1;
+      endif
+
+      if p >= length(x)
+        error('order of difference (%d) must be less than dimension of vector (%d). \n',p,length(x));
+      endif
+
+      if p == 1
+        r = diff(x);
+      else
+        r = Util.Diff(diff(x),p-1);
+      endif
     endfunction
 
     function [r] = Round(r)

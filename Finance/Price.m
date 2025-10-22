@@ -65,7 +65,7 @@ classdef Price < handle
       prExtrap = interp1(this.timestamp,price,datenum(date()),"extrap");
       fprintf('Price Extrap: (%s) %.2f \n',date(),prExtrap);
 
-      prDetrend = Util.RemoveTrend(price);
+      prDetrend = Util.Diff(price);
       pctLP = Util.Round(100*(2*std(prDetrend)/price(end)));
       fprintf('Price detrend: range: [%.2f,%.2f], mean (%.2f), 1σ (%.2f), 2σ (%.2f), 2σ of LP (%.2f%%)\n',...
         min(prDetrend),max(prDetrend),mean(prDetrend),std(prDetrend),2*std(prDetrend),pctLP);
@@ -127,7 +127,7 @@ classdef Price < handle
       hold off;
 
       subplot(2,1,2);
-      prDetrend = Util.RemoveTrend(price);
+      prDetrend = Util.Diff(price);
       plot(t(2:end),prDetrend,'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
 
       hold on;
