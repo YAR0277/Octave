@@ -4,18 +4,13 @@ classdef FredFile < CsvFile
   properties (Constant)
     COL_IDX_OBSERVATION_DATE = 1;
     COL_IDX_VALUE = 2;
-    COL_IDX_ID = 1;
-    COL_IDX_CATEGORY = 2;
-    COL_IDX_SEASONALITY = 3;
-    COL_IDX_UNIT = 4;
-    COL_IDX_TITLE = 5;
-    ROW_IDX_FIRSTDATA = 2;
   endproperties
 
   properties
     dataFolder
     dataDefinitionTable
     fileName
+    files
     flagRecession
     id
     observationDate
@@ -32,7 +27,13 @@ classdef FredFile < CsvFile
 
       obj = obj@CsvFile();
       obj.dataFolder = '../../../data/fred'; % FRED root data folder;
-      obj.SetDataDefinitionTable();
+      % https://search.brave.com/search?q=matlab+list+of+folders+and+files&summary=1&conversation=a7a1afd506077f07a51db2
+      myfiles=dir(fullfile(obj.dataFolder,'**','*'));
+      obj.files=myfiles(~[myfiles.isdir]);
+      obj.dataDefinitionTable = struct2table(obj.files);
+
+      ids = arrayfun(@(f) Util.RemoveFileExt(f), obj.dataDefinitionTable.name,'UniformOutput', false);
+      obj.dataDefinitionTable = addvars(obj.dataDefinitionTable,ids,'NewVariableNames',{'ids'});
       obj.flagRecession = 1;
 
       if nargin == 1
@@ -84,7 +85,7 @@ classdef FredFile < CsvFile
     end
 
     function [] = LoadId(this,id)
-      if this.GetRowIdx(FredFile.COL_IDX_ID,id)
+      if ismember(id,this.dataDefinitionTable.ids)
         this.id = id;
         this.SetFileName(id);
         this.SetFolder(id);
@@ -119,15 +120,14 @@ classdef FredFile < CsvFile
     endfunction
 
     function [] = ShowData(this)
-      % shows {id,category,title} from data definition table
-      ids = this.dataDefinitionTable(2:end,FredFile.COL_IDX_ID);
-      categories = this.dataDefinitionTable(2:end,FredFile.COL_IDX_CATEGORY);
-      titles = this.dataDefinitionTable(2:end,FredFile.COL_IDX_TITLE);
+      % shows {ids,category} from data definition table
+      ids = arrayfun(@(f) Util.RemoveFileExt(f), this.dataDefinitionTable.name,'UniformOutput', false);
+      categories = this.dataDefinitionTable.folder;
 
       % https://github.com/apjanke/octave-tablicious/blob/main/README.md
       % pkg install https://github.com/apjanke/octave-tablicious/releases/download/v0.4.5/tablicious-0.4.5.tar.gz
       % pkg load tablicious
-      T = table(ids,categories,titles);
+      T = table(ids,categories);
       % https://wiki.octave.org/Function_tableprint#Usage
       prettyprint(T);
     endfunction
@@ -137,12 +137,12 @@ classdef FredFile < CsvFile
       timestep = Util.GetTimeStep(this.timestamp);
       d1 = datestr(this.timestamp(1));
       d2 = datestr(this.timestamp(end));
-      y = this.value;
+      y = this.GetValue;
       n = length(y);
       fprintf('Time Period: [%s,%s], Time Step: %s, Nr. Samples: %d\n',d1,d2,timestep,n);
       [v_max,i_max] = max(y);
       [v_min,i_min] = min(y);
-      fprintf('Range: [%.2f,%.2f], Mean %.2f\n',v_min,v_max,mean(y));
+      fprintf('Range: [%.2f,%.2f], Mean %.2f\n',v_min,v_max,mean(y(~isnan(y))));
       fprintf('Min: %s, %.2f\n',datestr(this.timestamp(i_min),'mmm yyyy'),v_min);
       fprintf('Max: %s, %.2f\n',datestr(this.timestamp(i_max),'mmm yyyy'),v_max);
     endfunction
@@ -161,8 +161,7 @@ classdef FredFile < CsvFile
       datetick('x',fmt,'keepticks','keeplimits');
       xlim([t(1) t(end)]);
 
-      rowIdx = this.GetRowIdx(FredFile.COL_IDX_ID,this.id(1,:));
-      label_str = this.dataDefinitionTable(rowIdx,FredFile.COL_IDX_UNIT);
+      label_str = this.id;
       ylabel(label_str,'FontSize',Constant.YLabelFontSize);
 
       if strcmp(label_str,'thousands') == 1 % set yticklabels
@@ -177,7 +176,7 @@ classdef FredFile < CsvFile
       endif
       ylim([ylimits(1) ylimits(2)]);
 
-      title_str = this.dataDefinitionTable(rowIdx,FredFile.COL_IDX_TITLE);
+      title_str = this.id;
       title(title_str,'FontSize',Constant.TitleFontSize);
       grid on;
       hold off;
@@ -191,12 +190,6 @@ classdef FredFile < CsvFile
       lengths = t(ib) - t(ia);
     endfunction
 
-    function [r] = GetRowIdx(this,colIdx,val)
-      vals = this.dataDefinitionTable(FredFile.ROW_IDX_FIRSTDATA:end,colIdx);
-      [~,r] = ismember(val,vals);
-      r = r + 1; % add 1 for header
-    endfunction
-
     function [] = Load(this)
       fileName = fullfile(this.dataFolder,this.fileName);
       fid = fopen(fileName{:}, 'r');
@@ -205,28 +198,16 @@ classdef FredFile < CsvFile
       this.value = fin{FredFile.COL_IDX_VALUE};
     endfunction
 
-    function [] = SetDataDefinitionTable(this)
-      this.dataDefinitionTable = {'id','category','seasonality','unit','title'};
-      this.dataDefinitionTable(end+1,:)={'LNS13023570','employment','adjusted','Percent','New Entrants as a Percent of Total Unemployed'};
-      this.dataDefinitionTable(end+1,:)={'LNU03000002','employment','not adjusted','Thousands','Unemployed Women'};
-      this.dataDefinitionTable(end+1,:)={'APU0000708111','prices','not adjusted','U.S. Dollars','Average Price: Eggs, Grade A, Large (per dozen) in U.S. City'};
-      this.dataDefinitionTable(end+1,:)={'CPIUFDNS','prices','not adjusted','Index 1982-1984=100','Food in U.S. City Average'};
-      this.dataDefinitionTable(end+1,:)={'JHDUSRGDPBR','production','N/A','N/A','Dates of U.S. recessions as inferred by GDP-based recession indicator'};
-      this.dataDefinitionTable(end+1,:)={'UEMP27OV','unemployment','adjusted','Thousands of Persons','Long-term unemployment'};
-      this.dataDefinitionTable(end+1,:)={'MEUR','unemployment','adjusted','Percent','Unemployment Rate in Maine'};
-      this.dataDefinitionTable(end+1,:)={'MEURN','unemployment','not adjusted','Percent','Unemployment Rate in Maine'};
-    endfunction
-
     function [] = SetFileName(this,id)
       % sets fileName property
-      this.fileName = strcat(id,'.csv');
+      [~,rix] = ismember(id,this.dataDefinitionTable.ids);
+      this.fileName = this.dataDefinitionTable(rix,:).name;
     endfunction
 
     function [] = SetFolder(this,id)
       % append subfolder category to data folder
-      rowIdx = this.GetRowIdx(FredFile.COL_IDX_ID,id);
-      subFolder = this.dataDefinitionTable(rowIdx,FredFile.COL_IDX_CATEGORY);
-      this.dataFolder = fullfile(this.dataFolder,subFolder);
+      [~,rix] = ismember(id,this.dataDefinitionTable.ids);
+      this.dataFolder = this.dataDefinitionTable(rix,:).folder;
     endfunction
 
     function [] = SetTimestamp(this)

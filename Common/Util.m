@@ -108,6 +108,7 @@ classdef Util < handle
           fmt = 'YY-mm-dd';
           szfmt = 8;
           numYears = uint16((t(end)-t(1))/365);
+          [r,dt,fmt,szfmt] = Util.GetDateTicksDay(t,length(t));
         case 'week'
           dt = 10;
           fmt = 'YY-mm-dd';
@@ -139,6 +140,27 @@ classdef Util < handle
 ##      else
 ##        r(end) = t(end);
 ##      endif
+    endfunction
+
+    function [r,dt,fmt,szfmt] = GetDateTicksDay(t,numDays)
+      if numDays > 20
+        dt = int16(numDays/20); % every 5 years * 12 months/yr
+        fmt = 'YY-mm-dd';
+        szfmt = 8;
+      elseif numDays > 10
+        dt = int16(numDays/6);
+        fmt = 'YY-mm-dd';
+        szfmt = 8;
+      else
+        dt = 1;
+        fmt = 'YY-mm-dd';
+        szfmt = 8;
+      endif
+      if length(t) > Constant.MaxNumXTicks
+        r = t(1:dt:end);
+      else
+        r = t(1:1:end);
+      endif
     endfunction
 
     function [r,dt,fmt,szfmt] = GetDateTicksMonth(t,numYears)
@@ -237,6 +259,10 @@ classdef Util < handle
       else
         r = Util.Diff(diff(x),p-1);
       endif
+    endfunction
+
+    function [r] = RemoveFileExt(filename)
+      [~,r,~] = fileparts(filename{:});
     endfunction
 
     function [r] = Round(r)
