@@ -102,28 +102,29 @@ classdef Util < handle
     function [r,fmt] = GetDateTicks(t)
       % gets xticks and date format depending on timestep and timespan(numYears)
       timestep = Util.GetTimeStep(t);
+      numYears = uint16((t(end)-t(1))/365);
       switch timestep
         case 'day'
           dt = 15;
           fmt = 'YY-mm-dd';
           szfmt = 8;
-          numYears = uint16((t(end)-t(1))/365);
+##          numYears = uint16((t(end)-t(1))/365);
           [r,dt,fmt,szfmt] = Util.GetDateTicksDay(t,length(t));
         case 'week'
           dt = 10;
           fmt = 'YY-mm-dd';
           szfmt = 8;
-          numYears = uint16((t(end)-t(1))/52);
+##          numYears = uint16((t(end)-t(1))/52);
         case 'month'
-          numYears = uint16((t(end)-t(1))/12);
-          [r,dt,fmt,szfmt] = Util.GetDateTicksMonth(t,numYears);
+##          numYears = uint16((t(end)-t(1))/12);
+          [r,dt,fmt,szfmt] = Util.GetDateTicksMonth(t,length(t));
         case 'quarter'
           dt = 10;
           fmt = 'YY-mm';
           szfmt = 6;
           numYears = uint16((t(end)-t(1))/4);
         case 'year'
-          numYears = uint16(length(t));
+##          numYears = uint16(length(t));
           [r,dt,fmt,szfmt] = Util.GetDateTicksYear(t,numYears);
         otherwise
           error('invalid number timestep: %s. \n',timestep);
@@ -142,40 +143,15 @@ classdef Util < handle
 ##      endif
     endfunction
 
-    function [r,dt,fmt,szfmt] = GetDateTicksDay(t,numDays)
-      if numDays > 20
-        dt = int16(numDays/20); % every 5 years * 12 months/yr
-        fmt = 'YY-mm-dd';
-        szfmt = 8;
-      elseif numDays > 10
-        dt = int16(numDays/6);
-        fmt = 'YY-mm-dd';
-        szfmt = 8;
-      else
+    function [r,dt,fmt,szfmt] = GetDateTicksDay(t,numTimestamp)
+      fmt = 'YY-mm-dd';
+      szfmt = 8;
+      if numTimestamp > 12
+        dt = int16(numTimestamp/12); % every 5 years * 12 months/yr
+      elseif numTimestamp <=1
         dt = 1;
-        fmt = 'YY-mm-dd';
-        szfmt = 8;
-      endif
-      if length(t) > Constant.MaxNumXTicks
-        r = t(1:dt:end);
-      else
-        r = t(1:1:end);
-      endif
-    endfunction
-
-    function [r,dt,fmt,szfmt] = GetDateTicksMonth(t,numYears)
-      if numYears > 10
-        dt = 60; % every 5 years * 12 months/yr
-        fmt = 'yyyy';
-        szfmt = 4;
-      elseif numYears <=1
-        dt = 1;
-        fmt = 'mmm yyyy';
-        szfmt = 9;
       else
         dt = 12;
-        fmt = 'yyyy';
-        szfmt = 4;
       endif
       if length(t) > Constant.MaxNumXTicks
         r = t(1:dt:end);
@@ -184,19 +160,32 @@ classdef Util < handle
       endif
     endfunction
 
-    function [r,dt,fmt,szfmt] = GetDateTicksYear(t,numYears)
-      if numYears > 200
-        dt = 25; % every 5 years
-        fmt = 'yyyy';
-        szfmt = 4;
-      elseif numYears > 10
-        dt = 5; % every 5 years
-        fmt = 'yyyy';
-        szfmt = 4;
-      else
+    function [r,dt,fmt,szfmt] = GetDateTicksMonth(t,numTimestamp)
+      fmt = 'mmm yyyy';
+      szfmt = 8;
+      if numTimestamp > 12
+        dt = int16(numTimestamp/12);
+      elseif numTimestamp <=1
         dt = 1;
-        fmt = 'yyyy';
-        szfmt = 4;
+      else
+        dt = 12;
+      endif
+      if length(t) > Constant.MaxNumXTicks
+        r = t(1:dt:end);
+      else
+        r = t(1:1:end);
+      endif
+    endfunction
+
+    function [r,dt,fmt,szfmt] = GetDateTicksYear(t,numTimestamp)
+      fmt = 'yyyy';
+      szfmt = 4;
+      if numTimestamp > 12
+        dt = int16(numTimestamp/12);
+      elseif numTimestamp <=1
+        dt = 1;
+      else
+        dt = 12;
       endif
       if length(t) > Constant.MaxNumXTicks
         r = t(1:dt:end);
