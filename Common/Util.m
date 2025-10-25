@@ -8,6 +8,14 @@ classdef Util < handle
 
   methods (Static = true) % Public
 
+    function [] = AddDashedLine(ax,yval)
+      hold on;
+      limits = xlim(ax);
+      n = limits(2);
+      plot(ax,[0:n-1],yval*ones(n,1),'--','color',Color.Brown);
+      hold off;
+    endfunction
+
     function [t_out,x_out] = Aggregate(t_in,x_in,dt)
       % [t_out,x_out] = Aggregate(t_in,x_in,dt) where t_in=input times, x_in=input values, dt=12, for example.
       a = int16(0:dt:length(x_in));
@@ -100,32 +108,26 @@ classdef Util < handle
     endfunction
 
     function [r,fmt] = GetDateTicks(t)
-      % gets xticks and date format depending on timestep and timespan(numYears)
+      % gets xticks and date format depending on length of timestep
       timestep = Util.GetTimeStep(t);
-      numYears = uint16((t(end)-t(1))/365);
       switch timestep
         case 'day'
           dt = 15;
           fmt = 'YY-mm-dd';
           szfmt = 8;
-##          numYears = uint16((t(end)-t(1))/365);
           [r,dt,fmt,szfmt] = Util.GetDateTicksDay(t,length(t));
         case 'week'
           dt = 10;
           fmt = 'YY-mm-dd';
           szfmt = 8;
-##          numYears = uint16((t(end)-t(1))/52);
         case 'month'
-##          numYears = uint16((t(end)-t(1))/12);
           [r,dt,fmt,szfmt] = Util.GetDateTicksMonth(t,length(t));
         case 'quarter'
           dt = 10;
           fmt = 'YY-mm';
           szfmt = 6;
-          numYears = uint16((t(end)-t(1))/4);
         case 'year'
-##          numYears = uint16(length(t));
-          [r,dt,fmt,szfmt] = Util.GetDateTicksYear(t,numYears);
+          [r,dt,fmt,szfmt] = Util.GetDateTicksYear(t,length(t));
         otherwise
           error('invalid number timestep: %s. \n',timestep);
       endswitch

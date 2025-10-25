@@ -17,11 +17,10 @@ classdef ReturnsD2D < Returns
     endfunction
 
     function [t,y] = GetReturnData(this)
-
-      % calculates a vector of returns over all startDay <= timestamps <= endDay
+      % [t,y] = GetReturnData(), calculates a vector of returns over all startDay <= timestamps <= endDay
       ix = this.startDay <= this.timestamp & this.timestamp <= this.endDay;
       t = this.timestamp(ix);
-      price = this.data.(this.fidelityFile.dataCol);
+      price = this.fidelityFile.GetValue;
       x = price(ix);
 
       n = length(t);
@@ -37,10 +36,12 @@ classdef ReturnsD2D < Returns
     endfunction
 
     function [this] = SetEndDay(this,date)
+      % [] = SetEndDay(date) where date='2025-09-23'
       this.endDay = Util.GetDatenum(date);
     endfunction
 
     function [this] = SetStartDay(this,date)
+      % [] = SetStartDay(date) where date='2025-09-23'
       this.startDay = Util.GetDatenum(date);
     endfunction
 

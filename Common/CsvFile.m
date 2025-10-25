@@ -18,12 +18,14 @@ classdef CsvFile < handle
 
     function [r] = GetTimestamp(this)
       % [r] = GetTimestamp() returns timestamp.
-      r = this.timestamp;
+      ix = ~isnan(this.value);
+      r = this.timestamp(ix);
     endfunction
 
     function [r] = GetValue(this)
       % [r] = GetValue() returns value.
-      r = this.value;
+      ix = ~isnan(this.value);
+      r = this.value(ix);
     endfunction
 
     function [] = LoadId(this,id)

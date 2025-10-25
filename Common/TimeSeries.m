@@ -159,8 +159,8 @@ classdef TimeSeries < handle
       % -1/n + 2/sqrt(n) and -1/n - 2/sqrt(n)
       mu = -1/length(x); % mean
       sig = sqrt(1/length(x)); % stdev
-      this.AddDashedLine(ax,mu+2*sig);
-      this.AddDashedLine(ax,mu-2*sig);
+      Util.AddDashedLine(ax,mu+2*sig);
+      Util.AddDashedLine(ax,mu-2*sig);
       ylabel('ACF');
       xlabel('lag');
       ymin = min(mu-2*sig,min(r));
@@ -270,12 +270,6 @@ classdef TimeSeries < handle
   endmethods
 
   methods (Access = private)
-
-    function [] = AddDashedLine(this,ax,yval)
-      limits = xlim(ax);
-      n = limits(2);
-      plot(ax,[0:n-1],yval*ones(n,1),'--','color',Color.Brown);
-    endfunction
 
     function [t,z] = CalcError(this,x,wndLen)
       % Removes trend and seasonal components from series
