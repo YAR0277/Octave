@@ -62,6 +62,17 @@ classdef CsvFile < handle
       ts.PlotAggregate(dt);
     endfunction
 
+    function [] = PlotEWMA(this,alpha)
+      % [] = PlotEWMA(alpha), plots EWMA on existing plot with smoothing factor alpha, e.g. alpha=0.002.
+      t = this.GetTimestamp;
+      x = MovingAvg.EWMA(this.GetValue,alpha);
+      ax = gca;
+      hold on;
+      plot(ax,t,x,'--','color',Color.Brown);
+      Util.DoDateTicks(ax,t);
+      hold off;
+    endfunction
+
     function [] = PlotTrend(this,wlen)
       % [] = PlotTrend(wlen), plots trend with window length, e.g. wlen=12.
       ts = TimeSeries(this);

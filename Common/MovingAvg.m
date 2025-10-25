@@ -22,6 +22,20 @@ classdef MovingAvg < handle
       r = MovingAvg.WMA(x,w,wndLen);
     endfunction
 
+    function [s] = EWMA(x,alpha)
+    % Exponentially Weighted Moving Average (EWMA)
+    % [s] = EWMA(x,alpha) where x=input vector, alpha=smoothing factor (alpha=0->constant, alpha=1->no smoothing).
+      n = length(x);
+      s = zeros(n,1);
+      for k=1:n
+        if k==1
+          s(k) = x(k);
+        else
+          s(k) = alpha*x(k) + (1 - alpha)*s(k-1);
+        endif
+      endfor
+    endfunction
+
     function [r] = SMA(x,wlen)
       % calculates the Simple Moving Average
       % [r] = SMA(x,wlen) where x=input vector, wlen=length of window, r=output vector

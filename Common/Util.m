@@ -48,6 +48,13 @@ classdef Util < handle
       r = dataSorted(idx);
     endfunction
 
+    function [] = DoDateTicks(ax,t)
+      [xticks,fmt] = Util.GetDateTicks(t);
+      set(ax,"XTick",xticks);
+      datetick('x',fmt,'keepticks','keeplimits');
+      xlim([t(1) t(end)]);
+    endfunction
+
     function [r] = IQM(data)
       % https://en.wikipedia.org/wiki/Interquartile_mean
       lowerBound = Util.CalcPercentileValue(data,25);
