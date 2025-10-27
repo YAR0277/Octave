@@ -73,6 +73,26 @@ classdef CsvFile < handle
       hold off;
     endfunction
 
+    function [] = PlotRandomWalk(this,drift,stdev)
+      % [] = PlotRandomWalk(drift,stdev), plots a random walk with drift/stdev on existing plot.
+      t = this.GetTimestamp;
+      x = this.GetValue;
+      n = length(t);
+      s = Sinput;
+      s.Type = 'RandomWalk';
+      s.Initval = x(1);
+      s.Drift = drift;
+      s.Var = stdev^2;
+      s.Length = n;
+      r = RndSeq(s);
+      ax = gca;
+      hold on;
+      plot(ax,t,r.GetSample,'--','color',Color.Brown);
+      Util.DoDateTicks(ax,t);
+      ylim('auto');
+      hold off;
+    endfunction
+
     function [] = PlotTrend(this,wlen)
       % [] = PlotTrend(wlen), plots trend with window length, e.g. wlen=12.
       ts = TimeSeries(this);

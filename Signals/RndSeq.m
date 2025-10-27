@@ -38,9 +38,9 @@ classdef RndSeq < handle
     endfunction
 
     function [] = GenerateSequence(this)
-      this.X = zeros(this.sinput.height,this.sinput.length);
+      this.X = zeros(this.sinput.Height,this.sinput.Length);
       tic
-      for i=1:this.sinput.height
+      for i=1:this.sinput.Height
         this.X(i,:) = this.GetSample();
       endfor
       toc
@@ -64,7 +64,7 @@ classdef RndSeq < handle
     endfunction
 
     function [x] = GetSample(this)
-      switch this.sinput.type
+      switch this.sinput.Type
         case "Constant"
           x = this.GetSampleConstant();
         case "Bernoulli"
@@ -89,7 +89,7 @@ classdef RndSeq < handle
       endif
 
       figure;
-      switch this.sinput.type
+      switch this.sinput.Type
         case "Constant"
           this.PlotSampleConstant(this.x);
         case "Bernoulli"
@@ -150,32 +150,32 @@ classdef RndSeq < handle
       endif
 
       r = struct('mean',0,'variance',0);
-      switch this.sinput.type
+      switch this.sinput.Type
         case "Constant" % [2], (Ex.2.5)
           r.mean = 0;
-          r.variance = this.sinput.var;
+          r.variance = this.sinput.Var;
         case "RandomWalk" % [1], (P5.10)
-          r.mean = k*(this.sinput.prbSuccess - (1 - this.sinput.prbSuccess)); % k(p-q);
-          r.variance = 4*k*(this.sinput.prbSuccess*(1 - this.sinput.prbSuccess)); % 4kpq
+          r.mean = k*(this.sinput.PrbSuccess - (1 - this.sinput.PrbSuccess)); % k(p-q);
+          r.variance = 4*k*(this.sinput.PrbSuccess*(1 - this.sinput.PrbSuccess)); % 4kpq
         case "Wiener" % [1], 5.7
           r.mean = 0; % (5.62)
-          r.variance = (this.sinput.var)*k; % (5.63)
+          r.variance = (this.sinput.Var)*k; % (5.63)
         case "GaussMarkov"
           r.mean = 0; % (??)
           r.variance = 0; % ?? ()
         case "White"
           r.mean = 0;
-          r.variance = (this.sinput.var);
+          r.variance = (this.sinput.Var);
         otherwise
       endswitch
     endfunction
 
     function [] = PlotDistr(this)
-      switch this.sinput.type
+      switch this.sinput.Type
         case "RandomWalk" % [1], (P5.8)
           titleStr = 'Random Walk Distribution';
-          n = this.sinput.length;
-          p = this.sinput.prbSuccess;
+          n = this.sinput.Length;
+          p = this.sinput.PrbSuccess;
           x=-n:2:n;
           for k=1:numel(x)
             a = (n+x(k))/2;
@@ -192,7 +192,7 @@ classdef RndSeq < handle
   methods (Access = private)
 
     function [] = GenerateSample(this)
-        switch this.sinput.type
+        switch this.sinput.Type
           case "Constant"
             x = this.GetSampleConstant();
           case "Bernoulli"
@@ -212,39 +212,37 @@ classdef RndSeq < handle
 
     function [r] = GetSampleConstant(this)
       % generates a Constant sequence of length n.
-      n = this.sinput.length;
-      s2 = this.sinput.var;
+      n = this.sinput.Length;
+      s2 = this.sinput.Var;
       r = ones(n,1)*this.fcnNormRnd(0,sqrt(s2),1);
     endfunction
 
     function [r] = GetSampleBernoulli(this)
       % generates a Bernoulli sequence of length n with success probability p.
-      n = this.sinput.length;
-      p = this.sinput.prbSuccess;
+      n = this.sinput.Length;
+      p = this.sinput.PrbSuccess;
       r = this.fcnBernRnd(p,n);
     endfunction
 
-    function [r] = GetSampleRandomWalk(this)
-        z = this.GetSampleBernoulli();
-        % replace 0 -> -1
-        z(z==0) = z(z==0) - 1;
-        % a random walk is such that X(0) = 0, so set the first one to be zero.
-        n = this.sinput.length;
+    function [x] = GetSampleRandomWalk(this)
+        n = this.sinput.Length;
+        u = sqrt(this.sinput.Var);
+        w = this.fcnNormRnd(0,u,n);
         for i=1:n
           if i==1
-            r(i) = 0;
+            x(i) = this.sinput.Initval;
           else
-            r(i) = sum(z(1:i-1));
+            x(i) = x(i-1) + this.sinput.Drift + w(i); % Random walk with drift
           end
         endfor
     endfunction
 
     function [x] = GetSampleGaussMarkov(this)
       % generates Gauss-Markov sequence of length N, spacing dt.
-      n = this.sinput.length;
-      dt = this.sinput.timestep; % time interval between samples
-      s2 = this.sinput.var; % variance of the Markov process
-      beta = this.sinput.beta; % reciprocal time constant of the process
+      n = this.sinput.Length;
+      dt = this.sinput.Timestep; % time interval between samples
+      s2 = this.sinput.Var; % variance of the Markov process
+      beta = this.sinput.Beta; % reciprocal time constant of the process
       a = s2*(1-exp(-2*beta*dt));
       x = zeros(1,n);
       w = this.fcnNormRnd(0,sqrt(a),n);
@@ -259,16 +257,16 @@ classdef RndSeq < handle
 
     function [r] = GetSampleWhite(this)
     % generates a Gaussian White sequence from N(0,s2).
-      n = this.sinput.length;
-      s2 = this.sinput.var;
+      n = this.sinput.Length;
+      s2 = this.sinput.Var;
       r = this.fcnNormRnd(0,sqrt(s2),n); % white sequence N(0,s2)
     endfunction
 
     function [x] = GetSampleWiener(this)
       % generates Wiener sequence with variance s2.
-      n = this.sinput.length;
+      n = this.sinput.Length;
       x = zeros(1,n);
-      s2 = this.sinput.var;
+      s2 = this.sinput.Var;
       w = this.fcnNormRnd(0,sqrt(s2),n); % white sequence N(0,s2)
       for i=1:n
         if (i==1)

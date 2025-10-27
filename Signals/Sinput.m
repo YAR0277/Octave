@@ -2,54 +2,74 @@ classdef Sinput < handle
   % Input structure for Random Sequence class
 
   properties
-    length        % length of random sample
-    height        % number of random samples
-    prbSuccess    % probability of success in Bernoulli trials
-    beta          % time constant of Markov process
-    timestep      % time interval between samples in Markov process
-    type          % type of random sequence {'Constant','Bernoulli','GaussMarkov','RandomWalk','White','Wiener'}
-    var           % variance of sequence
+    Drift         % δ-drift factor for random walk: x(t) = x(t-1) + δ + w(t)
+    Initval       % initial value of sequence
+    Length        % length of random sample
+    Height        % number of random samples
+    PrbSuccess    % probability of success in Bernoulli trials
+    Beta          % time constant of Markov process
+    Timestep      % time interval between samples in Markov process
+    Type          % type of random sequence {'Constant','Bernoulli','GaussMarkov','RandomWalk','White','Wiener'}
+    Var           % variance of sequence
   endproperties
 
   methods % Public
 
     function [obj] = Sinput()
-      obj.length = 30;
-      obj.height = 100;
-      obj.prbSuccess = 0.5;
-      obj.beta = 1;
-      obj.timestep = 0.1;
-      obj.type = 'White';
-      obj.var = 1;
+      obj.Drift = 0;
+      obj.Initval = 0;
+      obj.Length = 30;
+      obj.Height = 100;
+      obj.PrbSuccess = 0.5;
+      obj.Beta = 1;
+      obj.Timestep = 0.1;
+      obj.Type = 'White';
+      obj.Var = 1;
     endfunction
 
-    function [] = SetHeight(this,n)
-      this.height = n;
+    function [r] = get.Drift(this)
+      r = this.Drift;
     endfunction
 
-    function [] = SetLength(this,n)
-      this.length = n;
+    function [] = set.Drift(this,x)
+      this.Drift = x;
     endfunction
 
-    function [] = SetPrbSuccess(this,p)
-      this.prbSuccess = p;
+    function [r] = get.Initval(this)
+      r = this.Initval;
     endfunction
 
-    function [] = SetBeta(this,b)
-      this.beta = b;
+    function [] = set.Initval(this,x)
+      this.Initval = x;
     endfunction
 
-    function [] = SetVar(this,s2)
-      this.var = s2;
+    function [] = set.Height(this,n)
+      this.Height = n;
     endfunction
 
-    function [] = SetTimestep(this,dt)
-      this.timestep = dt;
+    function [] = set.Length(this,n)
+      this.Length = n;
     endfunction
 
-    function [] = SetType(this,type)
+    function [] = set.PrbSuccess(this,p)
+      this.PrbSuccess = p;
+    endfunction
+
+    function [] = set.Beta(this,b)
+      this.Beta = b;
+    endfunction
+
+    function [] = set.Var(this,s2)
+      this.Var = s2;
+    endfunction
+
+    function [] = set.Timestep(this,dt)
+      this.Timestep = dt;
+    endfunction
+
+    function [] = set.Type(this,type)
       if ismember(type,{'Constant','Bernoulli','GaussMarkov','RandomWalk','White','Wiener'})
-        this.type = type;
+        this.Type = type;
       end
     endfunction
 
