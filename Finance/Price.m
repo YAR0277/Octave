@@ -44,14 +44,14 @@ classdef Price < handle
       fprintf('Symbol: %s\n',this.fidelityFile.symbol);
       t1 = this.timestamp(1);
       t2 = this.timestamp(end);
-      fprintf('Time Period: [%s,%s], Time Step: (%s), Nr. (%d)\n',datestr(t1),datestr(t2),this.timestep,numel(price));
+      fprintf('Time Period: [%s,%s], Time Step: %s, Nr.: %d\n',datestr(t1),datestr(t2),this.timestep,numel(price));
       fprintf('Price: range: [%.2f,%.2f], mean (%.2f), stdev (%.2f)\n',min(price),max(price),mean(price),std(price));
       fprintf('Price: last: %.2f, δP: %.2f\n',price(end),price(end)-price(end-1));
       fprintf('Price: last: max.-last (below ceiling): %.2f\n',max(price)-price(end));
       fprintf('Price: last: last-min. (above floor): %.2f\n',price(end)-min(price));
 
       dp = Util.Diff(price);
-      fprintf('Price differences: range: [%.2f,%.2f], mean (%.2f), stdev (%.2f), last (%.2f)\n',min(dp),max(dp),mean(dp),std(dp),dp(end));
+      fprintf('Price differences: range: [%.2f,%.2f], mean (%.2f), stdev (%.2f), µ-1σ (%.2f), last+(µ-1σ): %.2f\n',min(dp),max(dp),mean(dp),std(dp),mean(dp)-std(dp),price(end)+(mean(dp)-std(dp)));
       n = numel(dp);
       n1 = sum(dp > mean(dp) + std(dp) | dp < mean(dp) - std(dp));
       n2 = sum(dp > mean(dp) + 2*std(dp) | dp < mean(dp) - 2*std(dp));
@@ -59,8 +59,8 @@ classdef Price < handle
       id = dp < 0;
       iu = dp > 0;
       iz = dp == 0;
-      fprintf('Price differences < 0: Nr. (%d), mean: %.2f, IQM: %.2f, range: [%.2f,%.2f] \n',sum(id),mean(dp(id)),Util.IQM(dp(id)),min(dp(id)),max(dp(id)));
-      fprintf('Price differences > 0: Nr. (%d), mean: %.2f, IQM: %.2f, range: [%.2f,%.2f] \n',sum(iu),mean(dp(iu)),Util.IQM(dp(iu)),min(dp(iu)),max(dp(iu)));
+      fprintf('Price differences < 0: Nr. (%d), mean (%.2f), IQM (%.2f), range: [%.2f,%.2f], last+IQM: %.2f \n',sum(id),mean(dp(id)),Util.IQM(dp(id)),min(dp(id)),max(dp(id)),price(end)+Util.IQM(dp(id)));
+      fprintf('Price differences > 0: Nr. (%d), mean (%.2f), IQM (%.2f), range: [%.2f,%.2f], last+IQM: %.2f \n',sum(iu),mean(dp(iu)),Util.IQM(dp(iu)),min(dp(iu)),max(dp(iu)),price(end)+Util.IQM(dp(iu)));
       fprintf('Price differences = 0: Nr. (%d) \n',sum(iz));
 
       addpath(genpath('..'));
@@ -134,7 +134,7 @@ classdef Price < handle
       datetick('x',fmt,'keepticks','keeplimits');
       xlim([t(1) t(end)]);
 
-      ylabel('Price-Detrend','FontSize',Constant.YLabelFontSize);
+      ylabel('Price Differences','FontSize',Constant.YLabelFontSize);
 
       grid on;
       grid minor;
