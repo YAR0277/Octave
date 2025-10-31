@@ -2,6 +2,11 @@ classdef TimeSeries < handle
   % Time Series
   % [1] A First Course on Time Series Analysis, Examples with SAS (2006)
   % [2] Introductory Time Series with R
+  % [3] https://en.wikipedia.org/wiki/Partial_autocorrelation_function
+  % https://www.geeksforgeeks.org/machine-learning/understanding-partial-autocorrelation-functions-pacf-in-time-series-data/
+  % https://www.itl.nist.gov/div898/handbook/pmc/section4/pmc4463.htm
+  % https://www.youtube.com/watch?v=zXKZaRnU278
+  % https://www.youtube.com/watch?v=APt4QWmfx7k
 
   properties
     Error
@@ -20,6 +25,7 @@ classdef TimeSeries < handle
 
       obj.timestamp = obj.MakeColumnVector(file.GetTimestamp);
       obj.value = obj.MakeColumnVector(file.GetValue);
+      pkg load signal;
     endfunction
 
     function [r] = get.Error(this)
@@ -34,17 +40,15 @@ classdef TimeSeries < handle
       r = this.Trend;
     endfunction
 
-    function [r] = acf(this,k,x)
-      % [r(k)] = acf(k,x) autocorrelation function at k (lag) for sequence x.
-      r = this.acvf(k,x)/this.acvf(1,x);
+    function [r] = acf(this,x)
+      % [r(k)] = acf(x) autocorrelation function of k (lag) for sequence x.
+      acv = this.acvImpl(x);
+      r = acv/acv(1);
     endfunction
 
-    function [r] = acvf(this,k,x)
-      % [r(k)] = acvf(k,x) autocovariance function at k (lag) for sequence x.
-      acv = this.acvImpl(x);
-      if k > 0 && k <= length(acv)
-        r = acv(k);
-      endif
+    function [r] = acvf(this,x)
+      % [r(k)] = acf(x) autocovariance function of k (lag) for sequence x.
+      r = this.acvImpl(x);
     endfunction
 
     function [acv] = acvImpl(~,x)
@@ -61,17 +65,15 @@ classdef TimeSeries < handle
       endfor
     endfunction
 
-    function [r] = ccf(this,k,x,y)
-      % [r(k)] = acf(k,x) autocorrelation function at k (lag) for sequence x.
-      r = this.ccvf(k,x,y)/this.ccvf(1,x,y);
+    function [r] = ccf(this,x,y)
+      % [r(k)] = ccf(x) autocorrelation function of k (lag) for sequence x.
+      ccv = this.ccvImpl(x,y);
+      r = ccv/ccv(1);
     endfunction
 
-    function [r] = ccvf(this,k,x,y)
-      % [r(k)] = ccvf(k,x) cross covariance function at k (lag) for sequences x,y.
-      ccv = this.ccvImpl(x,y);
-      if k > 0 && k <= length(ccv)
-        r = ccv(k);
-      endif
+    function [r] = ccvf(this,x,y)
+      % [r(k)] = ccvf(x) cross covariance function of k (lag) for sequences x,y.
+      r = this.ccvImpl(x,y);
     endfunction
 
     function [ccv] = ccvImpl(~,x,y)
@@ -86,6 +88,29 @@ classdef TimeSeries < handle
           s = s + (x(t+k) - xbar)*(y(t) - ybar);
         endfor
         ccv(k+1) = s/n; % lag 0 is at ccv(1), lag 1 is at ccv(2), ...
+      endfor
+    endfunction
+
+    function [pacf] = pacf(this,x)
+    % [pacf(k)] = pacf(x) partial autocorrelation function of k (lag) for sequence x, see [3].
+      acf = this.acf(x);
+      % the first value, acf(1) corresponds to lag 0. But the pacf starts with lag 1, so remove lag 0.
+      acf = acf(2:end);
+      N = length(acf);
+      pacf = zeros(N,N);
+      for n=1:N
+        num = 0;
+        den = 0;
+        for k=1:n-1
+          num = num + pacf(n-1,k)*acf(n-k);
+          den = den + pacf(n-1,k)*acf(k);
+        endfor
+        % diagonal elements of pacf matrix
+        pacf(n,n) = (acf(n) - num)/(1 - den);
+        % now compute subdiagonal elements
+        for k=1:n-1
+          pacf(n,k) = pacf(n-1,k) - pacf(n,n)*pacf(n-1,n-k);
+        endfor
       endfor
     endfunction
 
@@ -142,9 +167,9 @@ classdef TimeSeries < handle
       % The random sequences are assumed to be trend adjusted, see [1], p.36.
 
       if nargin == 2
-        r = this.acvImpl(x)/this.acvf(1,x);
+        r = this.acf(x);
       elseif nargin == 3
-        r = this.ccvImpl(x,y)/this.ccvf(1,x,y);
+        r = this.ccf(x,y);
       else
         fmt = ['call: PlotCorrelogram(x,y) where x (and y) = random sequence(s).','\n'];
         fprintf(fmt);
@@ -165,6 +190,33 @@ classdef TimeSeries < handle
       xlabel('lag');
       ymin = min(mu-2*sig,min(r));
       ymax = max(mu+2*sig,max(r));
+      ylim([ymin-0.1 ymax+0.1]); % +/- a little bit to pad from edge
+      grid on;
+      grid minor;
+      hold off;
+    endfunction
+
+    function [] = PlotPACF(this,x)
+      % [] = PlotPACF(x) where x = random sequence.
+      % The random sequences are assumed to be trend adjusted, see [1], p.36.
+
+      pacf = this.pacf(x);
+      k = [1:size(pacf,1)]; % lags
+      x = diag(pacf);
+
+      figure;
+      ax = gca;
+      plot(ax,k,x,'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+      hold on;
+      % https://www.itl.nist.gov/div898/handbook/pmc/section4/pmc4463.htm, draw lines at +/- 2 stds
+      mu = -1/length(x); % mean
+      sig = sqrt(1/length(x)); % stdev
+      Util.AddDashedLine(ax,mu+2*sig);
+      Util.AddDashedLine(ax,mu-2*sig);
+      ylabel('PACF');
+      xlabel('lag');
+      ymin = min(mu-2*sig,min(x));
+      ymax = max(mu+2*sig,max(x));
       ylim([ymin-0.1 ymax+0.1]); % +/- a little bit to pad from edge
       grid on;
       grid minor;
