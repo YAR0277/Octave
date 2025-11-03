@@ -50,6 +50,20 @@ classdef ARMA < handle
 
     endfunction
 
+    function [r] = GetTimestamp(this)
+      r = [1:this.K];
+    end
+
+    function [r] = GetValue(this)
+      if (any(this.zAR) == 1)
+        r = this.zAR;
+      elseif (any(this.zMA) == 1)
+        r = this.zMA;
+      elseif (any(this.zARMA) == 1)
+        r = this.zARMA;
+      endif
+    end
+
     function [r] = DoAR(this,pAR)
 
       if nargin < 2 || isempty(pAR)
@@ -155,13 +169,7 @@ classdef ARMA < handle
         return;
       endif
 
-      if (any(this.zAR) == 1)
-        x = this.zAR;
-      elseif (any(this.zMA) == 1)
-        x = this.zMA;
-      elseif (any(this.zARMA) == 1)
-        x = this.zARMA;
-      endif
+      x = this.GetValue;
 
       fprintf('Number of sequence values: %d\n',size(x,1));
       fprintf('Sequence Range: [%.2f,%.2f]\n',min(x),max(x));
@@ -208,8 +216,8 @@ classdef ARMA < handle
 
     function [r] = GetNoise(this)
       s=Sinput;
-      s.SetLength(this.K);
-      s.SetType('White');
+      s.Length=this.K;
+      s.Type='White';
       rs=RndSeq(s);
       r= rs.GetSample();
     endfunction

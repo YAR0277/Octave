@@ -18,8 +18,10 @@ classdef TimeSeries < handle
 
   methods % Public
 
-    function [obj] = TimeSeries(file) % c'tor
-      if ~isa(file,'CsvFile') && ~isa(file,'Returns') && ~isa(file,'RSI') && ~isa(file,'StoOsc')
+    function [obj] = TimeSeries(file)
+      % [] = TimeSeries(file) c'tor for TimeSeries object, where file = ['CsvFile','Returns','RSI','StoOsc','ARMA'].
+      if ~isa(file,'CsvFile') && ~isa(file,'Returns') && ~isa(file,'RSI') && ~isa(file,'StoOsc') && ~isa(file,'ARMA')
+        error('Input argument to TimeSeries must be one of %s\n','[CsvFile,Returns,RSI,StoOsc,ARMA]');
         return;
       endif
 
