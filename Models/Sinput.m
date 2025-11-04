@@ -23,7 +23,7 @@ classdef Sinput < handle
       obj.PrbSuccess = 0.5;
       obj.Beta = 1;
       obj.Timestep = 0.1;
-      obj.Type = 'White';
+      obj.Type = 'WhiteNoise';
       obj.Var = 1;
     endfunction
 
@@ -68,7 +68,7 @@ classdef Sinput < handle
     endfunction
 
     function [] = set.Type(this,type)
-      if ismember(type,{'Constant','Bernoulli','GaussMarkov','RandomWalk','White','Wiener'})
+      if ismember(type,{'Constant','Bernoulli','GaussMarkov','RandomWalk','WhiteNoise','Wiener'})
         this.Type = type;
       end
     endfunction

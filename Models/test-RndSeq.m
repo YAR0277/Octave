@@ -2,23 +2,28 @@
 clear all;
 s=Sinput;
 
-s.SetType('Bernoulli');
-rs=RndSeq(s);
-rs.PlotSample;
+s.Type = 'Bernoulli';
+r=RndSeq(s);
+r.GenerateSample;
+r.PlotSample;
 
-s.SetType('GaussMarkov');
-rs=RndSeq(s);
-rs.PlotSample;
+s.Type = 'GaussMarkov';
+r=RndSeq(s);
+r.GenerateSample;
+r.PlotSample;
 
-s.SetType('RandomWalk');
-rs=RndSeq(s);
-rs.PlotSample;
+s.Type = 'RandomWalk';
+r=RndSeq(s);
+r.GenerateSample;
+r.PlotSample;
 
-s.SetType('White');
-rs=RndSeq(s);
-rs.PlotSample;
+s.Type = 'WhiteNoise';
+r=RndSeq(s);
+r.GenerateSample;
+r.PlotSample;
 
-s.SetType('Wiener');
-rs=RndSeq(s);
-rs.PlotSample;
+s.Type = 'Wiener';
+r=RndSeq(s);
+r.GenerateSample;
+r.PlotSample;
 
