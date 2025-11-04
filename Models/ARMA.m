@@ -7,166 +7,114 @@ classdef ARMA < handle
   % [3] Introduction to Random Signals, R.Brown
   %
   properties
-    K     % number of time steps, i.e. k=1,...,K.
-    pAR   % params AR
-    pMA   % params MA
-    x0    % initial condition vector px1
-    zAR   % output equation for AR process
-    zMA   % output equation for MA process
+    NumTimesteps % number of time steps, i.e. k=1,...,K.
+    ParamAR % AR parameters
+    ParamMA % MA parameters
+    Var % variance of Gaussian White Noise process
+    X0  % initial condition
     zARMA % values of ARMA process
   endproperties
 
   methods % Public
 
-    function obj = ARMA(varargin)
+    function obj = ARMA()
       % c'tor to create an ARMA object, inputs are optionally p and q.
 
-      switch nargin
-        case 0
-          obj.pAR = [1,1];
-          obj.pMA = 0;
-          obj.K = 100;
-        case 1
-          obj.pAR = varargin{1};
-          obj.pMA = 0;
-          obj.K = 100;
-        case 2
-          obj.pAR = varargin{1};
-          obj.pMA = varargin{2};
-          obj.K = 100;
-        case 3
-          obj.pAR = varargin{1};
-          obj.pMA = varargin{2};
-          obj.K = varargin{3};
-        otherwise
-          fmt = ['c''tor: ARMA() or ARMA(p,q) where p = order of AR, q = order of MA.','\n'];
-          fprintf(fmt);
-          return;
-      endswitch
-
-      obj.SetIC(zeros(length(obj.pAR),1)); % default IC
+      obj.ParamAR = [1];
+      obj.ParamMA = [];
+      obj.NumTimesteps = 100;
+      obj.Var = 1;
+      obj.X0 = zeros(length(obj.ParamAR),1);
 
       pkg load statistics;
+      pkg load tsa; % time series analysis
+    endfunction
 
+    function [r] = get.NumTimesteps(this)
+      r = this.NumTimesteps;
+    endfunction
+
+    function [] = set.NumTimesteps(this,n)
+      this.NumTimesteps = n;
+    endfunction
+
+    function [r] = get.ParamAR(this)
+      r = this.ParamAR;
+    endfunction
+
+    function [] = set.ParamAR(this,v)
+      this.ParamAR = v;
+      this.X0 = zeros(length(v),1);
+    endfunction
+
+    function [r] = get.ParamMA(this)
+      r = this.ParamMA;
+    endfunction
+
+    function [] = set.ParamMA(this,v)
+      this.ParamMA = v;
+      this.X0 = zeros(length(v),1);
+    endfunction
+
+    function [r] = get.Var(this)
+      r = this.Var;
+    endfunction
+
+    function [] = set.Var(this,v)
+      this.Var = v;
+    endfunction
+
+    function [r] = get.X0(this)
+      r = this.X0;
+    endfunction
+
+    function [] = set.X0(this,v)
+      this.X0 = v;
     endfunction
 
     function [r] = GetTimestamp(this)
-      r = [1:this.K];
+      % [r] = GetTimestamp() returns values of the time variable.
+      r = [1:this.NumTimesteps];
     end
 
     function [r] = GetValue(this)
-      if (any(this.zAR) == 1)
-        r = this.zAR;
-      elseif (any(this.zMA) == 1)
-        r = this.zMA;
-      elseif (any(this.zARMA) == 1)
-        r = this.zARMA;
-      endif
+      % [r] = GetValue() returns values of the random process.
+      r = this.zARMA;
     end
 
-    function [r] = DoAR(this,pAR)
-
-      if nargin < 2 || isempty(pAR)
-        fmt = ['call is \"DoAR(pAR)\" where pAR is a vector of params of the AR process .\n'];
-        fprintf(fmt);
-        return;
+    function [] = Calc(this)
+      % [] = Calc() calculates the random process.
+      if ~isempty(this.ParamAR) && ~isempty(this.ParamMA)
+        this.DoARMA;
+      elseif ~isempty(this.ParamAR) && isempty(this.ParamMA)
+        this.DoAR;
+      elseif isempty(this.ParamAR) && ~isempty(this.ParamMA)
+        this.DoMA;
       endif
-
-      this.Clear(); % ensures only 1 nonzero vector process vector (zAR,zMA,zARMA), used in Stats.
-
-      r = zeros(this.K,1); % result
-      n = length(pAR); % dimension of AR process
-      w = this.GetNoise();
-      A = this.GetMatrixAR(pAR);
-      B = [1;zeros(n-1,1)];
-      X = zeros(n,this.K); % state equation matrix
-
-      for k = 1:this.K
-        if k==1
-          X(:,k) = A*this.x0 + B*w(k);
-        else
-          X(:,k) = A*X(:,k-1) + B*w(k);
-        endif
-        r(k) = -pAR*X(:,k) + w(k);
-      endfor
-
-      this.zAR = r; % save for later
     endfunction
 
-    function [r] = DoMA(this,pMA)
-
-      if nargin < 2 || isempty(pMA)
-        fmt = ['call is \"DoMA(pMA)\" where pMA is a vector of params of the MA process .\n'];
-        fprintf(fmt);
-        return;
-      endif
-
-      this.Clear();
-
-      r = zeros(this.K,1); % result
-      n = length(pMA); % dimension of AR process
-      w = this.GetNoise();
-      A = this.GetMatrixMA(pMA);
-      B = [zeros(n-1,1);1];
-      X = zeros(n,this.K); % state equation matrix
-
-      for k = 1:this.K
-        if k==1
-          X(:,k) = A*this.x0 + B*w(k);
-        else
-          X(:,k) = A*X(:,k-1) + B*w(k);
-        endif
-        r(k) = pMA*X(:,k) + w(k);
-      endfor
-
-      this.zMA = r; % save for later
-    endfunction
-
-    function [] = DoARMA(this,pAR,pMA,v)
-
-      if nargin < 4
-        if isempty(pAR) || isempty(pMA)
-          fmt = ['call is \"DoARMA(pAR,pMA)\" where pAR (pMA) is a vector of params of the AR (MA) process, respectively .\n'];
-          fprintf(fmt);
-          return;
-        endif
-        v = 1; % default variance for Gaussian white sequence
-      endif
-
-      this.Clear();
-      this.zARMA = arma_rnd(pAR,pMA,v,this.K);
-
-    endfunction
-
-    function [] = SetIC(this,x0)
-      % the dimension of the initial condition, x0, must equal p.
-      this.x0 = x0;
+    function [] = Clear(this)
+      % [] = Clear() clears random process vectors.
+      this.zARMA = zeros(this.NumTimesteps,1);
     endfunction
 
     function [] = Plot(this)
-
+      % [] = Plot() plots random process.
       if (any(this.zAR) == 0) && (any(this.zMA) == 0) && (any(this.zARMA) == 0)
-        fmt = ['generate process data by calling DoAR, DoMA or DoARMA.\n'];
-        fprintf(fmt);
-        return;
+        error('generate process data by calling Calc');
       endif
 
-      if (any(this.zAR) == 1)
-        this.PlotAR;
-      elseif (any(this.zMA) == 1)
-        this.PlotMA;
-      elseif (any(this.zARMA) == 1)
-        this.PlotARMA;
-      endif
+      t = this.GetTimestamp;
+      x = this.GetValue;
+
+      this.DoPlot(t,x);
     endfunction
 
-    function [r] = Stats(this)
-      % calculates statistics of random process
+    function [] = Stats(this)
+      % [] = Stats() calculates statistics of random process.
 
       if (any(this.zAR) == 0) && (any(this.zMA) == 0) && (any(this.zARMA) == 0)
-        fmt = ['generate process data by calling DoAR, DoMA or DoARMA.\n'];
-        fprintf(fmt);
-        return;
+        error('generate process data by calling Calc');
       endif
 
       x = this.GetValue;
@@ -182,14 +130,93 @@ classdef ARMA < handle
 
   methods (Access = private)
 
-    function [] = Clear(this)
-      this.zAR = zeros(this.K,1);
-      this.zMA = zeros(this.K,1);
-      this.zARMA = zeros(this.K,1);
+    function [r] = DoAR(this)
+    % [] = DoAR() generate autoregression sequence.
+      ParamAR = this.ParamAR;
+      if isempty(ParamAR)
+        error('parameters for autoregression (ParamAR) empty.');
+      endif
+
+      this.Clear(); % ensures only 1 nonzero vector process vector (zAR,zMA,zARMA), used in Stats.
+
+      r = zeros(this.NumTimesteps,1); % result
+      n = length(ParamAR); % dimension of AR process
+      w = this.GetNoise();
+      A = this.GetMatrixAR(ParamAR);
+      B = [1;zeros(n-1,1)];
+      X = zeros(n,this.NumTimesteps); % state equation matrix
+
+      if size(A,2) ~= size(this.X0,1)
+        error('Matrix column dimension (%d) must equal initial condition row dimension (%d).',size(A,2),size(this.X0,1));
+      endif
+
+      for k = 1:this.NumTimesteps
+        if k==1
+          X(:,k) = A*this.X0 + B*w(k);
+        else
+          X(:,k) = A*X(:,k-1) + B*w(k);
+        endif
+        r(k) = -ParamAR*X(:,k) + w(k);
+      endfor
+
+      this.zARMA = r; % save for later
     endfunction
 
-    function [A] = GetMatrixAR(this,pAR)
-      n = length(pAR);
+    function [r] = DoMA(this)
+    % [] = DoMA() generate moving average sequence.
+      ParamMA = this.ParamMA;
+      if isempty(ParamMA)
+        error('parameters for moving average (ParamMA) empty.');
+      endif
+
+      this.Clear();
+
+      r = zeros(this.NumTimesteps,1); % result
+      n = length(ParamMA); % dimension of AR process
+      w = this.GetNoise();
+      A = this.GetMatrixMA(ParamMA);
+      B = [zeros(n-1,1);1];
+      X = zeros(n,this.NumTimesteps); % state equation matrix
+
+      for k = 1:this.NumTimesteps
+        if k==1
+          X(:,k) = A*this.X0 + B*w(k);
+        else
+          X(:,k) = A*X(:,k-1) + B*w(k);
+        endif
+        r(k) = ParamMA*X(:,k) + w(k);
+      endfor
+
+      this.zARMA = r; % save for later
+    endfunction
+
+    function [] = DoARMA(this)
+      % [] = DoARMA() generate ARMA sequence.
+      a = this.ParamAR;
+      b = this.ParamMA;
+      v = this.Var;
+      t = this.NumTimesteps;
+
+      if isempty(a) || isempty(b) || isempty(v)
+        error('some parameters for ARMA model empty.');
+      endif
+
+      this.Clear();
+      this.zARMA = arma_rnd(a,b,v,t);
+    endfunction
+
+    function [] = DoPlot(this,t,x)
+      figure;
+      hold on;
+      plot(t,x,'--.');
+      hold off;
+      grid on;
+      grid minor;
+    endfunction
+
+    function [A] = GetMatrixAR(this,ParamAR)
+      % see [2], p.17
+      n = length(ParamAR);
       A = zeros(n);
 
       if n==1
@@ -197,12 +224,13 @@ classdef ARMA < handle
         return;
       endif
 
-      A = [-pAR(1:n-1), -pAR(n);...
+      A = [-ParamAR(1:n-1), -ParamAR(n);...
            eye(n-1), zeros(n-1,1)];
     endfunction
 
-    function [A] = GetMatrixMA(this,pMA)
-      n = length(pMA);
+    function [A] = GetMatrixMA(this,ParamMA)
+      % see [2], p.17
+      n = length(ParamMA);
       A = zeros(n);
 
       if n==1
@@ -216,56 +244,11 @@ classdef ARMA < handle
 
     function [r] = GetNoise(this)
       s=Sinput;
-      s.Length=this.K;
+      s.Length=this.NumTimesteps;
       s.Type='White';
+      s.Var=this.Var;
       rs=RndSeq(s);
       r= rs.GetSample();
-    endfunction
-
-    function [] = PlotARMA(this)
-
-      if isempty(this.zARMA)
-        fmt = ['generate process data by calling DoARMA.\n'];
-        fprintf(fmt);
-        return;
-      endif
-
-      figure;
-      hold on;
-      plot([1:this.K],this.zARMA,'--.');
-      hold off;
-      grid on;
-      grid minor;
-    endfunction
-
-    function [] = PlotAR(this)
-      if isempty(this.zAR)
-        fmt = ['generate process data by calling DoAR.\n'];
-        fprintf(fmt);
-        return;
-      endif
-
-      figure;
-      hold on;
-      plot([1:this.K],this.zAR,'--.');
-      hold off;
-      grid on;
-      grid minor;
-    endfunction
-
-    function [] = PlotMA(this)
-      if isempty(this.zMA)
-        fmt = ['generate process data by calling DoMA.\n'];
-        fprintf(fmt);
-        return;
-      endif
-
-      figure;
-      hold on;
-      plot([1:this.K],this.zMA,'--.');
-      hold off;
-      grid on;
-      grid minor;
     endfunction
   endmethods % Private
 endclassdef
