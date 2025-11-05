@@ -46,6 +46,10 @@ classdef WhiteNoise < handle
       end
     endfunction
 
+    function [r] = GetSample(this)
+      r = this.x;
+    endfunction
+
     function [] = GenerateSequence(this)
       % [] = GenerateSequence() generates random process
       this.X = zeros(this.Sinput.Height,this.Sinput.Length);

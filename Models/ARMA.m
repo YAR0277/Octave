@@ -82,8 +82,8 @@ classdef ARMA < handle
       r = this.zARMA;
     end
 
-    function [] = Calc(this)
-      % [] = Calc() calculates the random process.
+    function [] = Generate(this)
+      % [] = Generate() calculates the random process.
       if ~isempty(this.ParamAR) && ~isempty(this.ParamMA)
         this.DoARMA;
       elseif ~isempty(this.ParamAR) && isempty(this.ParamMA)
@@ -100,8 +100,8 @@ classdef ARMA < handle
 
     function [] = Plot(this)
       % [] = Plot() plots random process.
-      if (any(this.zAR) == 0) && (any(this.zMA) == 0) && (any(this.zARMA) == 0)
-        error('generate process data by calling Calc');
+      if isempty(this.zARMA)
+        error('generate process data by calling Generate');
       endif
 
       t = this.GetTimestamp;
@@ -110,11 +110,25 @@ classdef ARMA < handle
       this.DoPlot(t,x);
     endfunction
 
+    function [] = PlotSample(this)
+      % [] = PlotSample() plots a sample of the random process.
+      if isempty(this.zARMA)
+        error('generate process data by calling Generate');
+      endif
+
+      t = this.GetTimestamp;
+      z = this.GetValue;
+      col = randi(size(z,2));
+      x = z(:,col);
+
+      this.DoPlot(t,x);
+    endfunction
+
     function [] = Stats(this)
       % [] = Stats() calculates statistics of random process.
 
-      if (any(this.zAR) == 0) && (any(this.zMA) == 0) && (any(this.zARMA) == 0)
-        error('generate process data by calling Calc');
+      if isempty(this.zARMA)
+        error('generate process data by calling Generate');
       endif
 
       x = this.GetValue;
@@ -247,8 +261,9 @@ classdef ARMA < handle
       s.Length=this.NumTimesteps;
       s.Type='White';
       s.Var=this.Var;
-      rs=RndSeq(s);
-      r= rs.GetSample();
+      w=WhiteNoise(s);
+      w.GenerateSample;
+      r=w.GetSample;
     endfunction
   endmethods % Private
 endclassdef
