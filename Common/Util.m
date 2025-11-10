@@ -48,11 +48,42 @@ classdef Util < handle
       r = dataSorted(idx);
     endfunction
 
+    function [r] = Diff(x,p)
+      % computes pth order difference of vector x
+      % [r] = Diff([1 4 7 8],2).
+      if nargin == 1
+        p = 1;
+      endif
+
+      if p >= length(x)
+        error('order of difference (%d) must be less than dimension of vector (%d). \n',p,length(x));
+      endif
+
+      if p == 1
+        r = diff(x);
+      else
+        r = Util.Diff(diff(x),p-1);
+      endif
+    endfunction
+
     function [] = DoDateTicks(ax,t)
       [xticks,fmt] = Util.GetDateTicks(t);
       set(ax,"XTick",xticks);
       datetick('x',fmt,'keepticks','keeplimits');
       xlim([t(1) t(end)]);
+    endfunction
+
+    function [beta,sigma,resid] = DoLinearLeastSquares(tvals,xvals)
+      % https://octave.sourceforge.io/octave/function/ols.html
+      x=[length(tvals), sum(tvals);sum(tvals),sum(tvals.*tvals)];
+      y=[sum(xvals);dot(tvals,xvals)];
+      [beta,sigma,resid]=ols(y,x);
+      resid = xvals - (beta(1) + beta(2)*tvals); % beta(1)=intercept, beta(2)=slope
+    endfunction
+
+    function [p,e_var,r,p_var,fit_var] = DoLinearRegression(x,y)
+      % https://octave.sourceforge.io/optim/function/LinearRegression.html
+      pkg load optim;
     endfunction
 
     function [r] = IQM(data)
@@ -62,11 +93,6 @@ classdef Util < handle
       dataSorted = sort(data,"ascend");
       ix = lowerBound <= dataSorted & dataSorted <= upperBound;
       r = mean(dataSorted(ix));
-    endfunction
-
-    function [p,e_var,r,p_var,fit_var] = DoLinearRegression(x,y)
-      % https://octave.sourceforge.io/optim/function/LinearRegression.html
-      pkg load optim;
     endfunction
 
     function [r] = GetAPR(t,y)
@@ -239,24 +265,6 @@ classdef Util < handle
       for i=1:length(fields)
         s.(fields{i}) = getfield(className,fields{i});
       endfor
-    endfunction
-
-    function [r] = Diff(x,p)
-      % computes pth order difference of vector x
-      % [r] = Diff([1 4 7 8],2).
-      if nargin == 1
-        p = 1;
-      endif
-
-      if p >= length(x)
-        error('order of difference (%d) must be less than dimension of vector (%d). \n',p,length(x));
-      endif
-
-      if p == 1
-        r = diff(x);
-      else
-        r = Util.Diff(diff(x),p-1);
-      endif
     endfunction
 
     function [r] = RemoveFileExt(filename)
