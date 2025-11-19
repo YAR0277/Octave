@@ -28,6 +28,7 @@ classdef Constant
     e = 0.08181919; % eccentricty
     a = 6378137;    % semi-major axis
     b = 6356752.3142; % semi-minor axis
+    radius_spherical_earth_km = 6372.795;
   endproperties
 
   properties (Constant)
