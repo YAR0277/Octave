@@ -25,9 +25,10 @@
 
 classdef Constant
   properties  (Constant = true)
-    e = 0.08181919; % eccentricty
-    a = 6378137;    % semi-major axis
-    b = 6356752.3142; % semi-minor axis
+    radius_equatorial_earth_mts = 6378137; % semi-major axis
+    radius_equatorial_earth_km = 6378.1370;
+    radius_polar_earth_mts = 6356752.3142; % semi-minor axis
+    radius_polar_earth_km = 6356.7523;
     radius_spherical_earth_km = 6372.795;
   endproperties
 
