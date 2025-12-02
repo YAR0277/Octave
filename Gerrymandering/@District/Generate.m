@@ -52,7 +52,7 @@ function [] = Generate(this)
         coordinates = polygon.item(j).getElementsByTagName("coordinates");
         numCoordinates = numCoordinates + coordinates.getLength();
         c0 = coordinates.item(0).getTextContent();
-        [_maxlon,_minlon,_maxlat,_minlat] = GetMaxMinCoordinate(c0);
+        [_maxlon,_minlon,_maxlat,_minlat] = this.GetMaxMinCoordinate(c0);
         maxlon(i+1) = max(_maxlon,maxlon(i+1));
         minlon(i+1) = min(_minlon,minlon(i+1));
         maxlat(i+1) = max(_maxlat,maxlat(i+1));
@@ -78,7 +78,7 @@ function [] = Generate(this)
       numCoordinates = coordinates.getLength();
       if numCoordinates == 1
         c0 = coordinates.item(0).getTextContent(); % get coordinates lon,lat,alt,... as single long cell string
-        [maxlon(i+1),minlon(i+1),maxlat(i+1),minlat(i+1)] = GetMaxMinCoordinate(c0);
+        [maxlon(i+1),minlon(i+1),maxlat(i+1),minlat(i+1)] = this.GetMaxMinCoordinate(c0);
 
         tmpAD = this.LookupDistrictArea(districtName);
         tmpName = this.LookupDistrictName(districtName);

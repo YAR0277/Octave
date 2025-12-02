@@ -35,11 +35,11 @@ classdef District < handle
       obj.XmlFile = 'NTAD_Congressional_Districts.xml';
     endfunction
 
-    []  = Best(this,nr);
+    []  = Best(this,nr,col);
     []  = Generate(this);
     []  = State(this,state);
     []  = Stats(this);
-    []  = Worst(this,nr);
+    []  = Worst(this,nr,col);
   endmethods
 
   methods (Access = 'private')
@@ -47,7 +47,7 @@ classdef District < handle
     [r] = CalcAreaSphericalEarth(this,maxlon,minlon,maxlat,minlat);
     [r] = CalcAreaSpheroidEarth(this,maxlon,minlon,maxlat,minlat);
     [r] = CheckDistrictName(this,districtName);
-    [maxlon,minlon,maxlat,minlat] = GetMaxMinCoordinate(this,c0);
+    [maxlon,minlon,maxlat,minlat] = GetMaxMinCoordinate(~,c0);
     [r] = LookupDistrictArea(this,districtName);
     [r] = LookupDistrictName(this,districtName);
     [T] = ReadCsvIntoTable(this,filename);
