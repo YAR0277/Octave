@@ -35,5 +35,60 @@ classdef GeoUtil < handle
       r = f(lat);
     endfunction
 
+    function [r] = authalic_latitude(lat)
+      % [r] = authalic_latitude(lat), where lat in [deg], r in [rad]
+      e = GeoUtil.e1();
+      q_p = ( (1-e^2) * ( (1/(1 - e^2)) - (1/(2*e))*log((1-e)/(1+e)) ) );
+
+      g = @(t) ( (1-e^2)*( (sind(t)./(1 - e^2*sind(t).^2)) - (1/(2*e)).*log((1-e.*sind(t))./(1+e.*sind(t))) ) );
+      q = g(lat);
+      r = asin(q./q_p);
+    endfunction
+
+    function [r] = authalic_radius_km()
+      % authalic radius in [km]
+      a = Constant.radius_equatorial_earth_km;
+      e = GeoUtil.e1();
+      q_p = ( (1-e^2) * ( (1/(1 - e^2)) - (1/(2*e))*log((1-e)/(1+e)) ) );
+      r = a*sqrt(q_p/2);
+    endfunction
+
+    function [r] = Deg2Rad(x)
+      r = (pi/180).*x;
+    endfunction
+
+    function [r] = Rad2Deg(x)
+      r = (180/pi).*x;
+    endfunction
+
+    function [d,m,s] = DD2DMS(dd)
+      % [d,m,s] = DD2DMS(dd), convert decimal degrees (DD) to degrees, minutes, seconds (DMS), ex -8.151278 -> -8°9'10".
+      val = abs(dd);
+      d = floor(val);
+      val = (val - d)*60;
+      m = floor(val);
+      s = (val - m)*60;
+
+      if (dd < 0)
+        if (d ~= 0)
+          d = -d;
+        elseif (m ~= 0)
+          m = -m;
+        else
+          s = -s;
+        endif
+      endif
+    endfunction
+
+    function [dd] = DMS2DD(d,m,s)
+      % [dd] = DMS2DD(d,m,s), convert degrees, minutes, seconds (DMS) to decimal degrees (DD), ex. -8°9'10" -> -8.151278.
+      if (d < 0 || m < 0 || s < 0)
+        sign = -1;
+      else
+        sign = 1;
+      endif
+      dd = sign*(abs(d) + abs(m)/60 + abs(s)/3600);
+    endfunction
+
   endmethods
 endclassdef
