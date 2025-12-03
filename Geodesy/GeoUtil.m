@@ -35,21 +35,27 @@ classdef GeoUtil < handle
       r = f(lat);
     endfunction
 
-    function [r] = authalic_latitude(lat)
+    function [r] = authalic_latitude(e,lat)
       % [r] = authalic_latitude(lat), where lat in [deg], r in [rad]
-      e = GeoUtil.e1();
-      q_p = ( (1-e^2) * ( (1/(1 - e^2)) - (1/(2*e))*log((1-e)/(1+e)) ) );
-
-      g = @(t) ( (1-e^2)*( (sind(t)./(1 - e^2*sind(t).^2)) - (1/(2*e)).*log((1-e.*sind(t))./(1+e.*sind(t))) ) );
+      if (e == 0)
+        q_p = 1;
+        g = @(t) ( sind(t) );
+      else
+        q_p = ( (1-e^2) * ( (1/(1 - e^2)) - (1/(2*e))*log((1-e)/(1+e)) ) );
+        g = @(t) ( (1-e^2)*( (sind(t)./(1 - e^2*sind(t).^2)) - (1/(2*e)).*log((1-e.*sind(t))./(1+e.*sind(t))) ) );
+      endif
       q = g(lat);
       r = asin(q./q_p);
     endfunction
 
-    function [r] = authalic_radius_km()
+    function [r] = authalic_radius_km(e)
       % authalic radius in [km]
+      if (e == 0)
+        q_p = 1;
+      else
+        q_p = ( (1-e^2) * ( (1/(1 - e^2)) - (1/(2*e))*log((1-e)/(1+e)) ) );
+      endif
       a = Constant.radius_equatorial_earth_km;
-      e = GeoUtil.e1();
-      q_p = ( (1-e^2) * ( (1/(1 - e^2)) - (1/(2*e))*log((1-e)/(1+e)) ) );
       r = a*sqrt(q_p/2);
     endfunction
 

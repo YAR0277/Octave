@@ -16,6 +16,7 @@ classdef District < handle
     CsvTable
 	  DataFolder
     DistrictTable % the main district table
+    Project % an instance of the Projection class
     XmlFile
   endproperties
 
@@ -32,20 +33,29 @@ classdef District < handle
       obj.CsvTable = [];
       obj.DataFolder = 'C:\Users\drdav\data\districts\';
       obj.DistrictTable = [];
+      obj.Project = Projection();
       obj.XmlFile = 'NTAD_Congressional_Districts.xml';
     endfunction
 
-    []  = Best(this,nr,col);
+    function [r] = get.Eccentricity(this)
+      r = this.Project.Eccentricity;
+    endfunction
+
+    function [] = set.Eccentricity(this,e)
+      this.Project.Eccentricity = e;
+    endfunction
+
+    []  = Bottom(this,nr,col);
+    [r] = CalcAreaFlatland(this,minlon,maxlon,minlat,maxlat);
     []  = Generate(this);
     []  = State(this,state);
     []  = Stats(this);
-    []  = Worst(this,nr,col);
+    []  = Top(this,nr,col);
   endmethods
 
   methods (Access = 'private')
-    [r] = CalcAreaRectangularGate(this,maxlon,minlon,maxlat,minlat);
-    [r] = CalcAreaSphericalEarth(this,maxlon,minlon,maxlat,minlat);
-    [r] = CalcAreaSpheroidEarth(this,maxlon,minlon,maxlat,minlat);
+    [r] = CalcAreaSphericalEarth(this,minlon,maxlon,minlat,maxlat);
+    [r] = CalcAreaSpheroidEarth(this,minlon,maxlon,minlat,maxlat);
     [r] = CheckDistrictName(this,districtName);
     [maxlon,minlon,maxlat,minlat] = GetMaxMinCoordinate(~,c0);
     [r] = LookupDistrictArea(this,districtName);

@@ -1,4 +1,4 @@
-function [area] = CalcAreaSpheroidEarth(~,maxlon,minlon,maxlat,minlat)
+function [area] = CalcAreaSpheroidEarth(~,minlon,maxlon,minlat,maxlat)
     a = Constant.radius_equatorial_earth_km;
     b = Constant.radius_polar_earth_km;
     e1 = GeoUtil.e1(); % first eccentricity earth

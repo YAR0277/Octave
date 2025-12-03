@@ -26,10 +26,10 @@ function [] = Generate(this)
   AD = zeros(numPlacemark,1); % AD = area of district
   AR_sphere = zeros(numPlacemark,1); % AR = area of rectangle
   AR_spheroid = zeros(numPlacemark,1);
-  AR_gate = zeros(numPlacemark,1);
+  AR_flatland = zeros(numPlacemark,1);
   RR_sphere = zeros(numPlacemark,1); % RR = ratio (wrt) rectangle
   RR_spheroid = zeros(numPlacemark,1);
-  RR_gate = zeros(numPlacemark,1);
+  RR_flatland = zeros(numPlacemark,1);
 
   for i=0:numPlacemark-1
     name = placemark.item(i).getElementsByTagName("name");
@@ -66,12 +66,12 @@ function [] = Generate(this)
       endif
       dname(i+1) = tmpName;
       AD(i+1) = tmpAD;
-      AR_sphere(i+1) = this.CalcAreaSphericalEarth(maxlon(i+1),minlon(i+1),maxlat(i+1),minlat(i+1));;
-      AR_spheroid(i+1) = this.CalcAreaSpheroidEarth(maxlon(i+1),minlon(i+1),maxlat(i+1),minlat(i+1));;
-      AR_gate(i+1) = this.CalcAreaRectangularGate(maxlon(i+1),minlon(i+1),maxlat(i+1),minlat(i+1));;
+      AR_sphere(i+1) = this.CalcAreaSphericalEarth(minlon(i+1),maxlon(i+1),minlat(i+1),maxlat(i+1));
+      AR_spheroid(i+1) = this.CalcAreaSpheroidEarth(minlon(i+1),maxlon(i+1),minlat(i+1),maxlat(i+1));
+      AR_flatland(i+1) = this.CalcAreaFlatland(minlon(i+1),maxlon(i+1),minlat(i+1),maxlat(i+1));
       RR_sphere(i+1) = AD(i+1)/AR_sphere(i+1);
       RR_spheroid(i+1) = AD(i+1)/AR_spheroid(i+1);
-      RR_gate(i+1) = AD(i+1)/AR_gate(i+1);
+      RR_flatland(i+1) = AD(i+1)/AR_flatland(i+1);
 
     else
       coordinates = placemark.item(i).getElementsByTagName("coordinates");
@@ -87,12 +87,12 @@ function [] = Generate(this)
         endif
         dname(i+1) = tmpName;
         AD(i+1) = tmpAD;
-        AR_sphere(i+1) = this.CalcAreaSphericalEarth(maxlon(i+1),minlon(i+1),maxlat(i+1),minlat(i+1));
-        AR_spheroid(i+1) = this.CalcAreaSpheroidEarth(maxlon(i+1),minlon(i+1),maxlat(i+1),minlat(i+1));
-        AR_gate(i+1) = this.CalcAreaRectangularGate(maxlon(i+1),minlon(i+1),maxlat(i+1),minlat(i+1));
+        AR_sphere(i+1) = this.CalcAreaSphericalEarth(minlon(i+1),maxlon(i+1),minlat(i+1),maxlat(i+1));
+        AR_spheroid(i+1) = this.CalcAreaSpheroidEarth(minlon(i+1),maxlon(i+1),minlat(i+1),maxlat(i+1));
+        AR_flatland(i+1) = this.CalcAreaFlatland(minlon(i+1),maxlon(i+1),minlat(i+1),maxlat(i+1));
         RR_sphere(i+1) = AD(i+1)/AR_sphere(i+1);
         RR_spheroid(i+1) = AD(i+1)/AR_spheroid(i+1);
-        RR_gate(i+1) = AD(i+1)/AR_gate(i+1);
+        RR_flatland(i+1) = AD(i+1)/AR_flatland(i+1);
       endif
     endif
   endfor
@@ -107,11 +107,11 @@ function [] = Generate(this)
   AD(ix) = [];
   AR_sphere(ix) = [];
   AR_spheroid(ix) = [];
-  AR_gate(ix) = [];
+  AR_flatland(ix) = [];
   RR_sphere(ix) = [];
   RR_spheroid(ix) = [];
-  RR_gate(ix) = [];
+  RR_flatland(ix) = [];
 
-  this.DistrictTable = table(dname,minlon,maxlon,minlat,maxlat,AD,AR_sphere,AR_spheroid,AR_gate,RR_sphere,RR_spheroid,RR_gate);
+  this.DistrictTable = table(dname,minlon,maxlon,minlat,maxlat,AD,AR_sphere,AR_spheroid,AR_flatland,RR_sphere,RR_spheroid,RR_flatland);
   toc
 endfunction

@@ -1,14 +1,14 @@
-function [] = Best(this,nr,col)
+function [] = Bottom(this,nr,col)
 
   T = this.DistrictTable; % short-hand
 
   % sort table according to col values
   [~,idx] = sort(T.(col));
   sT = T(idx,:);
+
   sCol = sT.(col);
 
-  n = size(sT,1);
-  idx = n-nr+1:n;
+  idx = 1:nr;
   for i=1:length(idx)
     fprintf('index(%d), district(%s), RR(%.4f)\n',idx(i),sT.dname{idx(i),1},sCol(idx(i)));
   endfor
