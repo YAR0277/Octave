@@ -16,6 +16,7 @@ classdef District < handle
     CsvTable
 	  DataFolder
     DistrictTable % the main district table
+    DistrictTableBackup
     Project % an instance of the Projection class
     XmlFile
   endproperties
@@ -33,8 +34,9 @@ classdef District < handle
       obj.CsvTable = [];
       obj.DataFolder = 'C:\Users\drdav\data\districts\';
       obj.DistrictTable = [];
+      obj.DistrictTableBackup = [];
       obj.Project = Projection();
-      obj.XmlFile = 'NTAD_Congressional_Districts.xml';
+      obj.XmlFile = 'NTAD_Congressional_Districts.xml'; % 'AK00.xml'
     endfunction
 
     function [r] = get.Eccentricity(this)
@@ -47,7 +49,10 @@ classdef District < handle
 
     []  = Bottom(this,nr,col);
     [r] = CalcAreaFlatland(this,minlon,maxlon,minlat,maxlat);
+    [p] = CalcPerimeter(~,x,y);
+    [dname,PD,PP_score] = CalcPolsbyPopper(this);
     []  = Generate(this);
+    []  = RemoveState(this,state);
     []  = State(this,state);
     []  = Stats(this);
     []  = Top(this,nr,col);
@@ -57,6 +62,7 @@ classdef District < handle
     [r] = CalcAreaSphericalEarth(this,minlon,maxlon,minlat,maxlat);
     [r] = CalcAreaSpheroidEarth(this,minlon,maxlon,minlat,maxlat);
     [r] = CheckDistrictName(this,districtName);
+    [lats,lons] = GetCoordinate(~,c0);
     [maxlon,minlon,maxlat,minlat] = GetMaxMinCoordinate(~,c0);
     [r] = LookupDistrictArea(this,districtName);
     [r] = LookupDistrictName(this,districtName);
