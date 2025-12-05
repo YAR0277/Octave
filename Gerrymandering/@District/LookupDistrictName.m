@@ -4,5 +4,6 @@ function [r] = LookupDistrictName(this,districtName)
   ix = find(this.CsvTable.officeid == districtName);
   if ~isempty(ix)
     r = this.CsvTable.officeid(ix);
+    r = char(r);
   endif
 endfunction

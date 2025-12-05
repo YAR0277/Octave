@@ -12,6 +12,7 @@ classdef District < handle
 % [2] https://www.tutorialspoint.com/xerces/xerces_dom_parse_document.htm
 
   properties
+    CsvDistrictTable
     CsvFileDistrict
     CsvTable
 	  DataFolder
@@ -30,6 +31,7 @@ classdef District < handle
       addpath(genpath('../Common/')); % Constant
       addpath(genpath('../Geodesy/')); % GeoUtil
 
+      obj.CsvDistrictTable = 'DistrictTable.csv';
       obj.CsvFileDistrict = 'NTAD_Congressional_Districts_abridged.csv';
       obj.CsvTable = [];
       obj.DataFolder = 'C:\Users\drdav\data\districts\';
@@ -56,6 +58,7 @@ classdef District < handle
     []  = State(this,state);
     []  = Stats(this);
     []  = Top(this,nr,col);
+    []  = Write2Csv(this);
   endmethods
 
   methods (Access = 'private')

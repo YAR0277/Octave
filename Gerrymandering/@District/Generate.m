@@ -69,7 +69,7 @@ function [] = Generate(this)
 
       tmpAD = this.LookupDistrictArea(districtName);
       tmpName = this.LookupDistrictName(districtName);
-      if length(char(tmpName)) < 4 || tmpAD == 0
+      if length(tmpName) < 4 || tmpAD == 0
         continue;
       endif
       dname(i+1) = tmpName;
@@ -97,7 +97,7 @@ function [] = Generate(this)
 
         tmpAD = this.LookupDistrictArea(districtName);
         tmpName = this.LookupDistrictName(districtName);
-        if length(char(tmpName)) < 4 || tmpAD == 0
+        if length(tmpName) < 4 || tmpAD == 0
           continue;
         endif
         dname(i+1) = tmpName;
