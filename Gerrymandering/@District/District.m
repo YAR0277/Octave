@@ -51,6 +51,8 @@ classdef District < handle
 
     []  = Bottom(this,nr,col);
     [r] = CalcAreaFlatland(this,minlon,maxlon,minlat,maxlat);
+    [r] = CalcAreaSphericalEarth(this,minlon,maxlon,minlat,maxlat);
+    [r] = CalcAreaSpheroidEarth(this,minlon,maxlon,minlat,maxlat);
     [p] = CalcPerimeter(~,x,y);
     [dname,PD,PP_score] = CalcPolsbyPopper(this);
     []  = Generate(this);
@@ -62,8 +64,6 @@ classdef District < handle
   endmethods
 
   methods (Access = 'private')
-    [r] = CalcAreaSphericalEarth(this,minlon,maxlon,minlat,maxlat);
-    [r] = CalcAreaSpheroidEarth(this,minlon,maxlon,minlat,maxlat);
     [r] = CheckDistrictName(this,districtName);
     [lats,lons] = GetCoordinate(~,c0);
     [maxlon,minlon,maxlat,minlat] = GetMaxMinCoordinate(~,c0);

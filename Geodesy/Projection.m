@@ -6,16 +6,18 @@ classdef Projection < handle
   % [2] https://en.wikipedia.org/wiki/Equal_Earth_projection
 
   properties
-    Eccentricity           % eccentricity
+    Eccentricity  % eccentricity
+    Lon0          % longitude mapped to the y-axis (x=0) in the xy-plane
   endproperties
 
   methods % Public
 
     function obj = Projection()
 
-      addpath(genpath('../Geodesy/')); % GeoUtil
+      addpath(genpath('../Common/')); % Constant
 
       obj.Eccentricity = GeoUtil.e1();
+      obj.Lon0 = -90; % 90°W
     endfunction
 
     function [r] = get.Eccentricity(this)
@@ -26,20 +28,27 @@ classdef Projection < handle
       this.Eccentricity = e;
     endfunction
 
-    function [x,y] = EqualEarth(this,lat,lon)
-      % [x,y] = EqualEarth(lat,lon), lat,lon[°], and x,y[km] - flat-space rectangular coordinates
+    function [r] = get.Lon0(this)
+      r = this.Lon0;
+    endfunction
+
+    function [r] = set.Lon0(this,lon)
+      this.Lon0 = lon;
+    endfunction
+
+    function [x,y] = EqualEarth(this,lon,lat)
+      % [x,y] = EqualEarth(lon,lat), lon,lat[°], and x,y[km] - flat-space rectangular coordinates
       % an equal-area pseudocylindrical projection, [1],[2]
       A1 = +1.340264;
       A2 = -0.081106;
       A3 = +0.000893;
       A4 = +0.003796;
       M = sqrt(3)/2;
-      lon0 = -90.0; % 90°W
       authalicLat = GeoUtil.authalic_latitude(this.Eccentricity,lat); % lat[°], authalicLat[rad]
       paramLat = asin(M*sin(authalicLat)); % paramLat[rad]
       sigma = (A1 + 3*A2*paramLat.^2 + 7*A3*paramLat.^6 + 9*A4*paramLat.^8);
       Factor = (cos(paramLat))./(M.*sigma);
-      x = GeoUtil.Deg2Rad(lon-lon0).*Factor;
+      x = GeoUtil.Deg2Rad(lon-this.Lon0).*Factor;
       y = (A1*paramLat + A2*paramLat.^3 + A3*paramLat.^7 + A4*paramLat.^9);
 
       authalicRadius = GeoUtil.authalic_radius_km(this.Eccentricity);

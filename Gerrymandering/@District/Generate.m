@@ -25,12 +25,12 @@ function [] = Generate(this)
   minlat = +1e3*ones(numPlacemark,1);
   AD = zeros(numPlacemark,1); % AD = area of district
   PD = zeros(numPlacemark,1); % PD = perimeter of district
-  AR_sphere = zeros(numPlacemark,1); % AR = area of rectangle
-  AR_spheroid = zeros(numPlacemark,1);
-  AR_flatland = zeros(numPlacemark,1);
-  RR_sphere = zeros(numPlacemark,1); % RR = ratio (wrt) rectangle
-  RR_spheroid = zeros(numPlacemark,1);
-  RR_flatland = zeros(numPlacemark,1);
+  AE_sphere = zeros(numPlacemark,1); % AE = area of envelope
+  AE_spheroid = zeros(numPlacemark,1);
+  AE_flatland = zeros(numPlacemark,1);
+  ER_sphere = zeros(numPlacemark,1); % ER = envelope ratio
+  ER_spheroid = zeros(numPlacemark,1);
+  ER_flatland = zeros(numPlacemark,1);
   PP_score = zeros(numPlacemark,1); % Polsby-Popper score
 
   for i=0:numPlacemark-1
@@ -74,15 +74,17 @@ function [] = Generate(this)
       endif
       dname(i+1) = tmpName;
       AD(i+1) = tmpAD;
-      [x,y] = this.Project.EqualEarth(lat,lon);
+      [x,y] = this.Project.EqualEarth(lon,lat);
       PD(i+1) = this.CalcPerimeter(x,y);
-      AR_sphere(i+1) = this.CalcAreaSphericalEarth(minlon(i+1),maxlon(i+1),minlat(i+1),maxlat(i+1));
-      AR_spheroid(i+1) = this.CalcAreaSpheroidEarth(minlon(i+1),maxlon(i+1),minlat(i+1),maxlat(i+1));
-      AR_flatland(i+1) = this.CalcAreaFlatland(minlon(i+1),maxlon(i+1),minlat(i+1),maxlat(i+1));
-      RR_sphere(i+1) = AD(i+1)/AR_sphere(i+1);
-      RR_spheroid(i+1) = AD(i+1)/AR_spheroid(i+1);
-      RR_flatland(i+1) = AD(i+1)/AR_flatland(i+1);
+      envelope = Envelope([minlon(i+1),minlat(i+1)],[maxlon(i+1),maxlat(i+1)]);
+      AE_sphere(i+1) = envelope.CalcAreaSphere();
+      AE_spheroid(i+1) = envelope.CalcArea();
+      AE_flatland(i+1) = envelope.CalcAreaFlatland();
+      ER_sphere(i+1) = AD(i+1)/AE_sphere(i+1);
+      ER_spheroid(i+1) = AD(i+1)/AE_spheroid(i+1);
+      ER_flatland(i+1) = AD(i+1)/AE_flatland(i+1);
       PP_score(i+1) = 4*pi*(AD(i+1)/PD(i+1)^2);
+      clear envelope;
 
     else
       coordinates = placemark.item(i).getElementsByTagName("coordinates");
@@ -102,15 +104,17 @@ function [] = Generate(this)
         endif
         dname(i+1) = tmpName;
         AD(i+1) = tmpAD;
-        [x,y] = this.Project.EqualEarth(lat,lon);
+        [x,y] = this.Project.EqualEarth(lon,lat);
         PD(i+1) = this.CalcPerimeter(x,y);
-        AR_sphere(i+1) = this.CalcAreaSphericalEarth(minlon(i+1),maxlon(i+1),minlat(i+1),maxlat(i+1));
-        AR_spheroid(i+1) = this.CalcAreaSpheroidEarth(minlon(i+1),maxlon(i+1),minlat(i+1),maxlat(i+1));
-        AR_flatland(i+1) = this.CalcAreaFlatland(minlon(i+1),maxlon(i+1),minlat(i+1),maxlat(i+1));
-        RR_sphere(i+1) = AD(i+1)/AR_sphere(i+1);
-        RR_spheroid(i+1) = AD(i+1)/AR_spheroid(i+1);
-        RR_flatland(i+1) = AD(i+1)/AR_flatland(i+1);
+        envelope = Envelope([minlon(i+1),minlat(i+1)],[maxlon(i+1),maxlat(i+1)]);
+        AE_sphere(i+1) = envelope.CalcAreaSphere();
+        AE_spheroid(i+1) = envelope.CalcArea();
+        AE_flatland(i+1) = envelope.CalcAreaFlatland();
+        ER_sphere(i+1) = AD(i+1)/AE_sphere(i+1);
+        ER_spheroid(i+1) = AD(i+1)/AE_spheroid(i+1);
+        ER_flatland(i+1) = AD(i+1)/AE_flatland(i+1);
         PP_score(i+1) = 4*pi*(AD(i+1)/PD(i+1)^2);
+        clear envelope;
       endif
     endif
   endfor
@@ -124,14 +128,14 @@ function [] = Generate(this)
   minlat(ix) = [];
   AD(ix) = [];
   PD(ix) = [];
-  AR_sphere(ix) = [];
-  AR_spheroid(ix) = [];
-  AR_flatland(ix) = [];
-  RR_sphere(ix) = [];
-  RR_spheroid(ix) = [];
-  RR_flatland(ix) = [];
+  AE_sphere(ix) = [];
+  AE_spheroid(ix) = [];
+  AE_flatland(ix) = [];
+  ER_sphere(ix) = [];
+  ER_spheroid(ix) = [];
+  ER_flatland(ix) = [];
   PP_score(ix) = [];
 
-  this.DistrictTable = table(dname,minlon,maxlon,minlat,maxlat,AD,PD,AR_sphere,AR_spheroid,AR_flatland,RR_sphere,RR_spheroid,RR_flatland,PP_score);
+  this.DistrictTable = table(dname,minlon,maxlon,minlat,maxlat,AD,PD,AE_sphere,AE_spheroid,AE_flatland,ER_sphere,ER_spheroid,ER_flatland,PP_score);
   toc
 endfunction

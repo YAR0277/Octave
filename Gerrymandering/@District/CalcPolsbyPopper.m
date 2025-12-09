@@ -58,7 +58,7 @@ function [dname,PD,PP_score] = CalcPolsbyPopper(this)
       endif
       dname(i+1) = tmpName;
       AD(i+1) = tmpAD;
-      [x,y] = this.Project.EqualEarth(lat,lon);
+      [x,y] = this.Project.EqualEarth(lon,lat);
       PD(i+1) = this.CalcPerimeter(x,y);
       PP_score(i+1) = 4*pi*(AD(i+1)/PD(i+1)^2);
 
@@ -76,7 +76,7 @@ function [dname,PD,PP_score] = CalcPolsbyPopper(this)
         endif
         dname(i+1) = tmpName;
         AD(i+1) = tmpAD;
-        [x,y] = this.Project.EqualEarth(lat,lon);
+        [x,y] = this.Project.EqualEarth(lon,lat);
         PD(i+1) = this.CalcPerimeter(x,y);
         PP_score(i+1) = 4*pi*(AD(i+1)/PD(i+1)^2);
       endif
