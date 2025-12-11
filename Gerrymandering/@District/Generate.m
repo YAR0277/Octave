@@ -25,12 +25,12 @@ function [] = Generate(this)
   minlat = +1e3*ones(numPlacemark,1);
   AD = zeros(numPlacemark,1); % AD = area of district
   PD = zeros(numPlacemark,1); % PD = perimeter of district
-  AE_sphere = zeros(numPlacemark,1); % AE = area of envelope
-  AE_spheroid = zeros(numPlacemark,1);
+  AE = zeros(numPlacemark,1); % AE = area of envelope
+  AE_sphere = zeros(numPlacemark,1);
   AE_flatland = zeros(numPlacemark,1);
-  ER_sphere = zeros(numPlacemark,1); % ER = envelope ratio
-  ER_spheroid = zeros(numPlacemark,1);
-  ER_flatland = zeros(numPlacemark,1);
+  GE_score = zeros(numPlacemark,1); % geodetic envelope score
+  GE_sphere = zeros(numPlacemark,1);
+  GE_flatland = zeros(numPlacemark,1);
   PP_score = zeros(numPlacemark,1); % Polsby-Popper score
 
   for i=0:numPlacemark-1
@@ -77,12 +77,12 @@ function [] = Generate(this)
       [x,y] = this.Project.EqualEarth(lon,lat);
       PD(i+1) = this.CalcPerimeter(x,y);
       envelope = Envelope([minlon(i+1),minlat(i+1)],[maxlon(i+1),maxlat(i+1)]);
+      AE(i+1) = envelope.CalcArea();
       AE_sphere(i+1) = envelope.CalcAreaSphere();
-      AE_spheroid(i+1) = envelope.CalcArea();
       AE_flatland(i+1) = envelope.CalcAreaFlatland();
-      ER_sphere(i+1) = AD(i+1)/AE_sphere(i+1);
-      ER_spheroid(i+1) = AD(i+1)/AE_spheroid(i+1);
-      ER_flatland(i+1) = AD(i+1)/AE_flatland(i+1);
+      GE_score(i+1) = AD(i+1)/AE(i+1);
+      GE_sphere(i+1) = AD(i+1)/AE_sphere(i+1);
+      GE_flatland(i+1) = AD(i+1)/AE_flatland(i+1);
       PP_score(i+1) = 4*pi*(AD(i+1)/PD(i+1)^2);
       clear envelope;
 
@@ -107,12 +107,12 @@ function [] = Generate(this)
         [x,y] = this.Project.EqualEarth(lon,lat);
         PD(i+1) = this.CalcPerimeter(x,y);
         envelope = Envelope([minlon(i+1),minlat(i+1)],[maxlon(i+1),maxlat(i+1)]);
+        AE(i+1) = envelope.CalcArea();
         AE_sphere(i+1) = envelope.CalcAreaSphere();
-        AE_spheroid(i+1) = envelope.CalcArea();
         AE_flatland(i+1) = envelope.CalcAreaFlatland();
-        ER_sphere(i+1) = AD(i+1)/AE_sphere(i+1);
-        ER_spheroid(i+1) = AD(i+1)/AE_spheroid(i+1);
-        ER_flatland(i+1) = AD(i+1)/AE_flatland(i+1);
+        GE_score(i+1) = AD(i+1)/AE(i+1);
+        GE_sphere(i+1) = AD(i+1)/AE_sphere(i+1);
+        GE_flatland(i+1) = AD(i+1)/AE_flatland(i+1);
         PP_score(i+1) = 4*pi*(AD(i+1)/PD(i+1)^2);
         clear envelope;
       endif
@@ -128,14 +128,14 @@ function [] = Generate(this)
   minlat(ix) = [];
   AD(ix) = [];
   PD(ix) = [];
+  AE(ix) = [];
   AE_sphere(ix) = [];
-  AE_spheroid(ix) = [];
   AE_flatland(ix) = [];
-  ER_sphere(ix) = [];
-  ER_spheroid(ix) = [];
-  ER_flatland(ix) = [];
+  GE_score(ix) = [];
+  GE_sphere(ix) = [];
+  GE_flatland(ix) = [];
   PP_score(ix) = [];
 
-  this.DistrictTable = table(dname,minlon,maxlon,minlat,maxlat,AD,PD,AE_sphere,AE_spheroid,AE_flatland,ER_sphere,ER_spheroid,ER_flatland,PP_score);
+  this.DistrictTable = table(dname,minlon,maxlon,minlat,maxlat,AD,PD,AE,AE_sphere,AE_flatland,GE_score,GE_sphere,GE_flatland,PP_score);
   toc
 endfunction

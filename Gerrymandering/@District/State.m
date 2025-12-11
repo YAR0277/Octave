@@ -20,12 +20,12 @@ function [] = State(this,state)
   idx(isnan(idx)) = [];
 
   for i=1:length(idx)
-    fprintf('index(%d), district(%s), RR_sphere(%.4f), RR_spheroid(%.4f), RR_flatland(%.4f), PP_score(%.4f)\n',...
-      idx(i),T.dname{idx(i),1},T.RR_sphere(idx(i)),T.RR_spheroid(idx(i)),T.RR_flatland(idx(i)),T.PP_score(idx(i)));
+    fprintf('index(%d), district(%s), GE_score(%.4f), GE_sphere(%.4f), GE_flatland(%.4f), PP_score(%.4f)\n',...
+      idx(i),T.dname{idx(i),1},T.GE_score(idx(i)),T.GE_sphere(idx(i)),T.GE_flatland(idx(i)),T.PP_score(idx(i)));
   endfor
   fprintf('state(%s), number of districts(%d)\n',state,length(idx));
-  fprintf('PP_score: range([%.4f,%.4f]), mean(%.4f)\n',min(T.PP_score(idx)),max(T.PP_score(idx)),mean(T.PP_score(idx)));
-  fprintf('RR_spheroid: range([%.4f,%.4f]), mean(%.4f)\n',min(T.RR_spheroid(idx)),max(T.RR_spheroid(idx)),mean(T.RR_spheroid(idx)));
-  fprintf('RR_sphere: range([%.4f,%.4f]), mean(%.4f)\n',min(T.RR_sphere(idx)),max(T.RR_sphere(idx)),mean(T.RR_sphere(idx)));
-  fprintf('RR_flatland: range([%.4f,%.4f]), mean(%.4f)\n',min(T.RR_flatland(idx)),max(T.RR_flatland(idx)),mean(T.RR_flatland(idx)));
+  fprintf('PP: range([%.4f,%.4f]), mean(%.4f)\n',min(T.PP_score(idx)),max(T.PP_score(idx)),mean(T.PP_score(idx)));
+  fprintf('GE: range([%.4f,%.4f]), mean(%.4f)\n',min(T.GE_score(idx)),max(T.GE_score(idx)),mean(T.GE_score(idx)));
+  fprintf('GE_sphere: range([%.4f,%.4f]), mean(%.4f)\n',min(T.GE_sphere(idx)),max(T.GE_sphere(idx)),mean(T.GE_sphere(idx)));
+  fprintf('GE_flatland: range([%.4f,%.4f]), mean(%.4f)\n',min(T.GE_flatland(idx)),max(T.GE_flatland(idx)),mean(T.GE_flatland(idx)));
 endfunction

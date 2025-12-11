@@ -19,6 +19,7 @@ classdef District < handle
     DistrictTable % the main district table
     DistrictTableBackup
     Project % an instance of the Projection class
+    StateTable % filled by States.m
     XmlFile
   endproperties
 
@@ -38,6 +39,7 @@ classdef District < handle
       obj.DistrictTable = [];
       obj.DistrictTableBackup = [];
       obj.Project = Projection();
+      obj.StateTable = [];
       obj.XmlFile = 'NTAD_Congressional_Districts.xml'; % 'AK00.xml'
     endfunction
 
