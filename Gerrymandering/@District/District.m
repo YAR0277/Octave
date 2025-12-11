@@ -52,14 +52,13 @@ classdef District < handle
     endfunction
 
     []  = Bottom(this,nr,col);
-    [r] = CalcAreaFlatland(this,minlon,maxlon,minlat,maxlat);
-    [r] = CalcAreaSphericalEarth(this,minlon,maxlon,minlat,maxlat);
-    [r] = CalcAreaSpheroidEarth(this,minlon,maxlon,minlat,maxlat);
     [p] = CalcPerimeter(~,x,y);
     [dname,PD,PP_score] = CalcPolsbyPopper(this);
-    []  = Generate(this);
+    []  = GenDistrictTable(this);
+    []  = GenStateTable(this);
     []  = RemoveState(this,state);
     []  = State(this,state);
+    []  = States(this,col);
     []  = Stats(this);
     []  = Top(this,nr,col);
     []  = Write2Csv(this);

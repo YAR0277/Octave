@@ -1,4 +1,4 @@
-function [] = Generate(this)
+function [] = GenDistrictTable(this)
   tic
 
   javaaddpath("C:\\Octave\\xerces\\xml-apis.jar");
