@@ -19,8 +19,18 @@ classdef GeoUtil < handle
       r = sqrt(r);
     endfunction
 
+    function [r] = Rlon(lat)
+      % [r] = Rlon(lat), where lat in [deg], r in [km]
+      r = GeoUtil.RN(lat)*cosd(lat);
+    endfunction
+
+    function [r] = Rlat(lat)
+      % [r] = Rlat(lat), where lat in [deg], r in [km]
+      r = GeoUtil.RM(lat);
+    endfunction
+
     function [r] = RN(lat)
-      % normal radius
+      % normal radius [r] = RN(lat), where lat in [deg], r in [km]
       a = Constant.radius_equatorial_earth_km;
       e = GeoUtil.e1();
       f = @(t) (a) ./ ((1 - e^2.*sind(t).^2).^(1/2));
@@ -28,7 +38,7 @@ classdef GeoUtil < handle
     endfunction
 
     function [r] = RM(lat)
-      % normal radius
+      % meridian radius [r] = RM(lat), where lat in [deg], r in [km]
       a = Constant.radius_equatorial_earth_km;
       e = GeoUtil.e1();
       f = @(t) (a.*(1-e^2)) ./ ((1 - e^2.*sind(t).^2).^(3/2));

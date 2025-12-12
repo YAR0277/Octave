@@ -57,8 +57,13 @@ classdef Envelope < handle
 
     function [r] = CalcAreaFlatland(this)
     % calculates the area of the envelope after projection onto the xy-plane
-      [x,y] = this.Project.EqualEarth([this.MinLon,this.MaxLon],[this.MinLat,this.MaxLat]);
-      r = diff(x)*diff(y);
+      [x1,y1] = this.Project.EqualEarth(this.MinLon,this.MinLat);
+      [x2,y2] = this.Project.EqualEarth(this.MaxLon,this.MinLat);
+      [x3,y3] = this.Project.EqualEarth(this.MaxLon,this.MaxLat);
+      [x4,y4] = this.Project.EqualEarth(this.MinLon,this.MaxLat);
+      a = [x2-x1,y2-y1]; % form vectors a,b
+      b = [x4-x1,y4-y1];
+      r = abs(a(1)*b(2) - a(2)*b(1)); % area of parallelogram is a cross b.
     endfunction
 
     function [r] = CalcAreaSphere(this)
