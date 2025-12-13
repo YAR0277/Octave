@@ -54,6 +54,8 @@ classdef District < handle
     []  = Bottom(this,nr,col);
     [p] = CalcPerimeter(~,x,y);
     [dname,PD,PP_score] = CalcPolsbyPopper(this);
+    []  = CmpAreaFlatland(this);
+    []  = CmpAreaSphere(this);
     []  = GenDistrictTable(this);
     []  = GenStateTable(this);
     []  = RemoveState(this,state);
