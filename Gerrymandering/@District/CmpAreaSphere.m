@@ -5,17 +5,17 @@ function [] = CmpAreaSphere(this)
   this.RemoveState('HI');
 
   T = this.DistrictTable; % short-hand
-  [~,idx] = sort(T.minlat);
+  [~,idx] = sort(T.midlat);
   sT = T(idx,:);
 
   n = height(sT);
   dAE = sT.AE - sT.AE_sphere;
   [x,ix] = min(dAE);
-  fprintf('min value (%.f) occurs at index (%d)\n',x,ix);
+  fprintf('min value (%.4f) occurs at index (%d)\n',x,ix);
   sT{ix,:}
 
   [x,ix] = max(dAE);
-  fprintf('max value (%.f) occurs at index (%d)\n',x,ix);
+  fprintf('max value (%.4f) occurs at index (%d)\n',x,ix);
   sT{ix,:}
 
   figure;

@@ -23,6 +23,7 @@ function [] = GenDistrictTable(this)
   minlon = +1e3*ones(numPlacemark,1);
   maxlat = -1e3*ones(numPlacemark,1);
   minlat = +1e3*ones(numPlacemark,1);
+  midlat = +1e3*ones(numPlacemark,1);
   AD = zeros(numPlacemark,1); % AD = area of district
   PD = zeros(numPlacemark,1); % PD = perimeter of district
   AE = zeros(numPlacemark,1); % AE = area of envelope
@@ -66,6 +67,7 @@ function [] = GenDistrictTable(this)
       minlon(i+1) = min(lon);
       maxlat(i+1) = max(lat);
       minlat(i+1) = min(lat);
+      midlat(i+1) = median([min(lat),max(lat)]);
 
       tmpAD = this.LookupDistrictArea(districtName);
       tmpName = this.LookupDistrictName(districtName);
@@ -96,6 +98,7 @@ function [] = GenDistrictTable(this)
         minlon(i+1) = min(lon);
         maxlat(i+1) = max(lat);
         minlat(i+1) = min(lat);
+        midlat(i+1) = median([min(lat),max(lat)]);
 
         tmpAD = this.LookupDistrictArea(districtName);
         tmpName = this.LookupDistrictName(districtName);
@@ -126,6 +129,7 @@ function [] = GenDistrictTable(this)
   minlon(ix) = [];
   maxlat(ix) = [];
   minlat(ix) = [];
+  midlat(ix) = [];
   AD(ix) = [];
   PD(ix) = [];
   AE(ix) = [];
@@ -136,6 +140,6 @@ function [] = GenDistrictTable(this)
   GE_flatland(ix) = [];
   PP_score(ix) = [];
 
-  this.DistrictTable = table(dname,minlon,maxlon,minlat,maxlat,AD,PD,AE,AE_sphere,AE_flatland,GE_score,GE_sphere,GE_flatland,PP_score);
+  this.DistrictTable = table(dname,minlon,maxlon,minlat,maxlat,midlat,AD,PD,AE,AE_sphere,AE_flatland,GE_score,GE_sphere,GE_flatland,PP_score);
   toc
 endfunction

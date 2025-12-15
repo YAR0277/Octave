@@ -8,7 +8,7 @@ function [] = States(this,col)
   sCol = sU.(col);
   n = size(sU,1);
   for i=1:n
-    fprintf('index(%d), state(%s), score(%.4f)\n',i,sU.stateAbbreviation{i,1},sCol(i));
+    fprintf('index(%d), state(%s), numDistricts(%d), score(%.4f)\n',i,sU.stateAbbreviation{i,1},sU.numDistricts(i),sCol(i));
   endfor
 
 endfunction
