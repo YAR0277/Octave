@@ -24,5 +24,18 @@ function [] = CmpAreaFlatland(this)
   xlabel('District Number');
   ylabel('Area Difference (km^2)');
 
+  re = abs(sT.AE - sT.AE_flatland) ./ sT.AE; % re - relative error
+  rep = 100*re; % rep - relative error percent
+  [x,ix] = min(rep);
+  fprintf('min relative error in percent (%.4f) occurs at index (%d)\n',x,ix);
+  [x,ix] = max(rep);
+  fprintf('max relative error in percent (%.4f) occurs at index (%d)\n',x,ix);
+
+  figure;
+  plot(1:n,rep,'--.');
+  grid on;
+  xlabel('District Number');
+  ylabel('Relative Error in Percent');
+
   this.Restore;
 endfunction

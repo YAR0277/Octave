@@ -11,11 +11,11 @@ function [] = CmpAreaSphere(this)
   n = height(sT);
   dAE = sT.AE - sT.AE_sphere;
   [x,ix] = min(dAE);
-  fprintf('min value (%.4f) occurs at index (%d)\n',x,ix);
+  fprintf('min value (%.4f) occurs at latitude (%.4f)\n',x,sT.midlat(ix));
   sT{ix,:}
 
   [x,ix] = max(dAE);
-  fprintf('max value (%.4f) occurs at index (%d)\n',x,ix);
+  fprintf('max value (%.4f) occurs at latitude (%.4f)\n',x,sT.midlat(ix));
   sT{ix,:}
 
   figure;
@@ -23,6 +23,19 @@ function [] = CmpAreaSphere(this)
   grid on;
   xlabel('District Number');
   ylabel('Area Difference (km^2)');
+
+  re = abs(sT.AE - sT.AE_sphere) ./ sT.AE; % re - relative error
+  rep = 100*re; % rep - relative error percent
+  [x,ix] = min(rep);
+  fprintf('min relative error in percent (%.4f) occurs at latitude (%.4f)\n',x,sT.midlat(ix));
+  [x,ix] = max(rep);
+  fprintf('max relative error in percent (%.4f) occurs at latitude (%.4f)\n',x,st.midlat(ix));
+
+  figure;
+  plot(1:n,rep,'--.');
+  grid on;
+  xlabel('District Number');
+  ylabel('Relative Error in Percent');
 
   this.Restore;
 endfunction
