@@ -5,17 +5,18 @@ function [] = CmpAreaSphere(this)
   this.RemoveState('HI');
 
   T = this.DistrictTable; % short-hand
-  [~,idx] = sort(T.midlat);
+  [~,idx] = sort(T.midlat); % sort table according to midlat values
   sT = T(idx,:);
+  sCol = sT.midlat;
 
   n = height(sT);
   dAE = sT.AE - sT.AE_sphere;
   [x,ix] = min(dAE);
-  fprintf('min value (%.4f) occurs at latitude (%.4f)\n',x,sT.midlat(ix));
+  fprintf('min value (%.4f) occurs at latitude (%.4f), district (%s)\n',x,sT.midlat(ix),sT.dname{ix,1});
   sT{ix,:}
 
   [x,ix] = max(dAE);
-  fprintf('max value (%.4f) occurs at latitude (%.4f)\n',x,sT.midlat(ix));
+  fprintf('max value (%.4f) occurs at latitude (%.4f), district (%s)\n',x,sT.midlat(ix),sT.dname{ix,1});
   sT{ix,:}
 
   figure;

@@ -29,7 +29,7 @@ classdef Constant
     radius_equatorial_earth_km = 6378.1370;
     radius_polar_earth_mts = 6356752.3142; % semi-minor axis
     radius_polar_earth_km = 6356.7523;
-    radius_spherical_earth_km = 6372.795;
+    radius_spherical_earth_km = 6371;
   endproperties
 
   properties (Constant)

@@ -29,6 +29,7 @@ function [] = GenDistrictTable(this)
   AE = zeros(numPlacemark,1); % AE = area of envelope
   AE_sphere = zeros(numPlacemark,1);
   AE_flatland = zeros(numPlacemark,1);
+  AE_girard = zeros(numPlacemark,1);
   GE_score = zeros(numPlacemark,1); % geodetic envelope score
   GE_sphere = zeros(numPlacemark,1);
   GE_flatland = zeros(numPlacemark,1);
@@ -82,6 +83,7 @@ function [] = GenDistrictTable(this)
       AE(i+1) = envelope.CalcArea();
       AE_sphere(i+1) = envelope.CalcAreaSphere();
       AE_flatland(i+1) = envelope.CalcAreaFlatland();
+      AE_girard(i+1) = envelope.CalcAreaGirard();
       GE_score(i+1) = AD(i+1)/AE(i+1);
       GE_sphere(i+1) = AD(i+1)/AE_sphere(i+1);
       GE_flatland(i+1) = AD(i+1)/AE_flatland(i+1);
@@ -113,6 +115,7 @@ function [] = GenDistrictTable(this)
         AE(i+1) = envelope.CalcArea();
         AE_sphere(i+1) = envelope.CalcAreaSphere();
         AE_flatland(i+1) = envelope.CalcAreaFlatland();
+        AE_girard(i+1) = envelope.CalcAreaGirard();
         GE_score(i+1) = AD(i+1)/AE(i+1);
         GE_sphere(i+1) = AD(i+1)/AE_sphere(i+1);
         GE_flatland(i+1) = AD(i+1)/AE_flatland(i+1);
@@ -135,11 +138,12 @@ function [] = GenDistrictTable(this)
   AE(ix) = [];
   AE_sphere(ix) = [];
   AE_flatland(ix) = [];
+  AE_girard(ix) = [];
   GE_score(ix) = [];
   GE_sphere(ix) = [];
   GE_flatland(ix) = [];
   PP_score(ix) = [];
 
-  this.DistrictTable = table(dname,minlon,maxlon,minlat,maxlat,midlat,AD,PD,AE,AE_sphere,AE_flatland,GE_score,GE_sphere,GE_flatland,PP_score);
+  this.DistrictTable = table(dname,minlon,maxlon,minlat,maxlat,midlat,AD,PD,AE,AE_sphere,AE_flatland,AE_girard,GE_score,GE_sphere,GE_flatland,PP_score);
   toc
 endfunction

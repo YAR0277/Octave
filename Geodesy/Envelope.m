@@ -58,18 +58,29 @@ classdef Envelope < handle
     function [r] = CalcAreaFlatland(this)
     % calculates the area of the envelope after projection onto the xy-plane
       [x1,y1] = this.Project.EqualEarth(this.MinLon,this.MinLat);
-      [x2,y2] = this.Project.EqualEarth(this.MaxLon,this.MinLat);
-      [x3,y3] = this.Project.EqualEarth(this.MaxLon,this.MaxLat);
-      [x4,y4] = this.Project.EqualEarth(this.MinLon,this.MaxLat);
-      a = [x2-x1,y2-y1]; % form vectors a,b
-      b = [x4-x1,y4-y1];
-      r = abs(a(1)*b(2) - a(2)*b(1)); % area of parallelogram is a cross b.
+      [x2,y1] = this.Project.EqualEarth(this.MaxLon,this.MinLat);
+      [x3,y2] = this.Project.EqualEarth(this.MaxLon,this.MaxLat);
+      [x4,y2] = this.Project.EqualEarth(this.MinLon,this.MaxLat);
+      r = 0.5 * ( -y1*(x2-x1) + x2*(y2-y1) - y1*(x3-x2) - y2*(x4-x3) + x4*(y1-y2) - y2*(x1-x4) );
     endfunction
 
     function [r] = CalcAreaSphere(this)
     % calculates the area of the envelope assuming earth is a sphere
       R = Constant.radius_spherical_earth_km;
       r = R^2*(sind(this.MaxLat)-sind(this.MinLat))*(this.MaxLon-this.MinLon)*(pi/180);
+    endfunction
+
+    function [r] = CalcAreaGirard(this)
+      A = struct('lon',this.MinLon,'lat',this.MinLat);
+      B = struct('lon',this.MaxLon,'lat',this.MinLat);
+      C = struct('lon',this.MaxLon,'lat',this.MaxLat);
+      D = struct('lon',this.MinLon,'lat',this.MaxLat);
+      [psiBA,psiAB] = GeoUtil.CalcAzimuthAngles(A,B);
+      excessLargeTriangle = abs(psiBA) + abs(psiAB) + GeoUtil.Deg2Rad(B.lon-A.lon);
+      [psiDC,psiCD] = GeoUtil.CalcAzimuthAngles(C,D);
+      excellSmallTriangle = abs(psiDC) + abs(psiCD) + GeoUtil.Deg2Rad(C.lon-D.lon);
+      R = Constant.radius_spherical_earth_km;
+      r = ((excessLargeTriangle - pi) - (excellSmallTriangle - pi))*R^2; % Girard's formula
     endfunction
 
     function [x,y] = EqualEarth(this)

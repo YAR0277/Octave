@@ -1,7 +1,26 @@
 classdef GeoUtil < handle
   % geodesy utilities class
 
+  % references
+  % [1] Earth-Referenced Aircraft Navigation and Surveillance Analysis, Volpe
+  %
   methods (Static = true) % Public
+
+    function [psiBA,psiAB] = CalcAzimuthAngles(A,B)
+      % find azimuth angles at A and B of the great circle arc connecting the two points,[1].
+      if ~isstruct(A) || ~isstruct(B)
+        return; % return if A,B are not structs
+      endif
+
+      if ~all(isfield(A,{'lon','lat'})) || ~all(isfield(B,{'lon','lat'}))
+        return; % return if either A,B does not have 'lon', 'lat'
+      endif
+
+      % Volpe Eq 86
+      psiBA = atan2( cosd(B.lat)*sind(B.lon-A.lon), sind(B.lat)*cosd(A.lat) - cosd(B.lat)*sind(A.lat)*cosd(B.lon-A.lon) );
+      % Volpe Eq 87
+      psiAB = atan2( cosd(A.lat)*sind(A.lon-B.lon), sind(A.lat)*cosd(B.lat) - cosd(A.lat)*sind(B.lat)*cosd(A.lon-B.lon) );
+    endfunction
 
     function [r] = e1()
       % first eccentricity of the earth
