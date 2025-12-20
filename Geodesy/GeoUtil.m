@@ -6,6 +6,14 @@ classdef GeoUtil < handle
   %
   methods (Static = true) % Public
 
+    function [r] = CalcAzimuth(p,q)
+      % find azimuth/heading angle (°) w.r.t. North Pole, -180 < r <= 180.
+      de = q(1)-p(1); % delta East
+      dn = q(2)-p(2); % delat North
+      r = atan2(de,dn);
+      r = GeoUtil.Rad2Deg(r);
+    endfunction
+
     function [psiBA,psiAB] = CalcAzimuthAngles(A,B)
       % find azimuth angles at A and B of the great circle arc connecting the two points,[1].
       if ~isstruct(A) || ~isstruct(B)

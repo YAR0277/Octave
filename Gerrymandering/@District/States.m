@@ -2,6 +2,10 @@ function [] = States(this,col)
   % col is one of the columns of StateTable, usually either 'meanGE' or 'meanPP'
 
   U = this.StateTable; % short-hand
+  if isempty(U)
+    error('StateTable is empty, please run GenStateTable');
+  endif
+
   [~,idx] = sort(U.(col));
   sU = U(idx,:);
 

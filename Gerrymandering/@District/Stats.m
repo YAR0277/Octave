@@ -19,6 +19,6 @@ function [] = Stats(this)
   hist(T.PP_score,50,'facecolor',Color.Magenta,'facealpha',.5,'edgecolor','none');
   box off;
   axis tight;
-  legend('GE','PP','location','northeast');
+  legend('Geodetic Envelope','Polsby-Popper','location','northeast');
   legend boxoff;
 endfunction

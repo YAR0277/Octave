@@ -1,4 +1,4 @@
-function [] = CmpAreaSphere(this)
+function [] = CmpAreaGirard(this)
   % compares area of envelope (AE) calculated with ellipsoidal to spherical geometry.
 
   this.RemoveState('AK');
@@ -10,7 +10,7 @@ function [] = CmpAreaSphere(this)
   sCol = sT.midlat;
 
   n = height(sT);
-  dAE = sT.AE - sT.AE_sphere;
+  dAE = sT.AE - sT.AE_girard;
   [x,ix] = min(dAE);
   fprintf('min value (%.4f) occurs at latitude (%.4f), district (%s)\n',x,sT.midlat(ix),sT.dname{ix,1});
   sT{ix,:}
@@ -25,7 +25,7 @@ function [] = CmpAreaSphere(this)
   xlabel('District Number');
   ylabel('Area Difference (km^2)');
 
-  re = abs(sT.AE - sT.AE_sphere) ./ sT.AE; % re - relative error
+  re = abs(sT.AE - sT.AE_girard) ./ sT.AE; % re - relative error
   rep = 100*re; % rep - relative error percent
   [x,ix] = min(rep);
   fprintf('min relative error in percent (%.4f) occurs at latitude (%.4f)\n',x,sT.midlat(ix));
