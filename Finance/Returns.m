@@ -7,7 +7,6 @@ classdef Returns < handle
     timestamp     % t - timestamp of prices
     timestep      % time interval of price data {'day','week','month','quarter'}
     flgPlotType   % 1='stem', 2='bar', 3='line'
-    flgPctChange  % pctChange flag: 1=use pctChange (default), otherwise calc rate of return
     volume        % volume data
   endproperties
 
@@ -26,7 +25,6 @@ classdef Returns < handle
       obj.fidelityFile = fidelityFile;
       obj.timestamp = fidelityFile.GetTimestamp;
       obj.timestep = Util.GetTimeStep(obj.timestamp);
-      obj.flgPctChange = 1;
       obj.flgPlotType = 3;
       obj.volume = fidelityFile.GetVolume;
     endfunction
@@ -40,14 +38,9 @@ classdef Returns < handle
     end
 
     function [t,y] = GetReturnData(this)
-      if this.flgPctChange
-        t = this.timestamp;
-        y = this.fidelityFile.GetPctChange;
-      else
-        this.Calc(); % calculate returns just in case they haven't been calculated
-        t = this.timestamp(1:end-1); % n price values => n-1 returns
-        y = this.returns;
-      endif
+      this.CalcPctChange(); % calculate returns just in case they haven't been calculated
+      t = this.timestamp(1:end-1); % n price values => n-1 returns
+      y = this.returns;
     endfunction
 
     function [r] = Plot(this)
@@ -95,18 +88,14 @@ classdef Returns < handle
 
     function [r] = Stats(this)
       % calculates statistics on returns
-      if this.flgPctChange
-        this.DoStats(this.timestamp(1),this.timestamp(end),this.fidelityFile.GetPctChange);
-      else
-        this.DoStats(this.timestamp(1),this.timestamp(end),this.returns);
-      endif
+      [t,y] = this.GetReturnData();
+      this.DoStats(t(1),t(end),y);
     endfunction
   endmethods % Public
 
   methods (Access = private)
 
-    function [] = Calc(this)
-      % calculates rate of returns
+    function [] = CalcPctChange(this)
 
       price = this.fidelityFile.GetValue;
       if numel(price) < 2 % at least 2 to get a return

@@ -12,8 +12,8 @@ function [s] = readf(fidelityFile)
   timestampCol=1; % col 1 is for timestamp
   firstDataRow=2; % row 1 is for header
 
-  % Date,Open,High,Low,Close,% Change,% Change vs Average,Volume
-  s = struct('Date',0,'Open',0,'High',0,'Low',0,'Close',0,'pctChange',0,'pctChangeAvg',0,'Volume',0);
+  % Date,Open,High,Low,Close,Volume
+  s = struct('Date',0,'Open',0,'High',0,'Low',0,'Close',0,'Volume',0);
 
   % Date values
   if fidelityFile.descendFlag
@@ -35,14 +35,6 @@ function [s] = readf(fidelityFile)
   s=SetData(fidelityFile,s,fieldname,GetData(data,firstDataRow,ixCol));
 
   fieldname = 'Close';
-  ixCol = find(strcmp(fieldnames(s),fieldname));
-  s=SetData(fidelityFile,s,fieldname,GetData(data,firstDataRow,ixCol));
-
-  fieldname = 'pctChange';
-  ixCol = find(strcmp(fieldnames(s),fieldname));
-  s=SetData(fidelityFile,s,fieldname,GetData(data,firstDataRow,ixCol));
-
-  fieldname = 'pctChangeAvg';
   ixCol = find(strcmp(fieldnames(s),fieldname));
   s=SetData(fidelityFile,s,fieldname,GetData(data,firstDataRow,ixCol));
 

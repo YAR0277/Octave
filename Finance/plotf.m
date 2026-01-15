@@ -41,8 +41,6 @@ function [r] = GetLabelY(fidelityFile)
   switch fidelityFile.dataCol
     case {'Open','High','Low','Close'}
       r = 'Price ($)';
-    case {'pctChange','pctChangeAvg'}
-      r = 'Price Change (%)';
     case 'Volume'
       r = 'Number';
     otherwise

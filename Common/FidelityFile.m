@@ -19,7 +19,7 @@ classdef FidelityFile < CsvFile
       addpath(genpath('../Finance')); % for readf
 
       obj = obj@CsvFile();
-      obj.dataCol = 'Close'; % 'Open','High','Low','Close','pctChange','pctChangeAvg','Volume'
+      obj.dataCol = 'Close'; % 'Open','High','Low','Close','Volume'
       obj.dataFolder = '../../../data/finance'; % financial data folder;
       obj.dateFormat = 'yyyy-mm-dd';
       obj.descendFlag = 0; % data is in ascending order: oldest -> newest
@@ -29,10 +29,6 @@ classdef FidelityFile < CsvFile
 
     function [r] = GetTimestamp(this)
       r = this.data.Date;
-    end
-
-    function [r] = GetPctChange(this)
-      r = this.data.pctChange;
     end
 
     function [r] = GetValue(this)
