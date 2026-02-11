@@ -16,6 +16,7 @@ classdef Price < handle
         return;
       endif
 
+      pkg load image; % imregionalmax, imregionalmin
       obj.fidelityFile = fidelityFile;
       obj.timestamp = fidelityFile.GetTimestamp; %obj.data.Date;
       obj.timestep = Util.GetTimeStep(obj.timestamp);
@@ -71,9 +72,54 @@ classdef Price < handle
       fprintf('Price Extrap: (%s) %.2f \n',date(),prExtrap);
 
       vol = this.volume;
-      fprintf('Volume: range: [%d,%d], last value (%d), percentile (%.2f%%)\n',min(vol),max(vol),vol(end),Util.CalcPercentile(vol,vol(end)));
+      fprintf('Volume: range: [%d,%d], last price (%d), percentile (%.2f%%)\n',min(vol),max(vol),vol(end),Util.CalcPercentile(vol,vol(end)));
     endfunction
 
+    function [r] = WhenToBuy(this)
+      price = this.GetPrices();
+      tol = std(price);
+      idxMax = imregionalmax(price);
+      idxMin = imregionalmin(price);
+      [idxMin,idxMax] = this.FilterNoiseFromLocalMaxMin(idxMin,idxMax,price,tol);
+
+      t=this.timestamp;
+      x=this.GetPrices();
+
+      figure;
+      plot(t,x,'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+
+      [xticks,fmt] = Util.GetDateTicks(this.timestamp);
+      ax = gca;
+      set(ax,"XTick",xticks);
+      datetick('x',fmt,'keepticks','keeplimits');
+      xlim([t(1) t(end)]);
+
+      tmax = t(idxMax);
+      xmax = x(idxMax);
+      smax = Util.GetSignal(tmax(2:end),xmax(2:end));
+      hold on;
+      plot(tmax(2:end),smax,'--','Color',Color.Green,'MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+
+      tmin = t(idxMin);
+      xmin = x(idxMin);
+      smin = Util.GetSignal(tmin(2:end),xmin(2:end));
+      hold on;
+      plot(tmin(2:end),smin,'--','Color',Color.Red,'MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+
+      ylabel('Price','FontSize',Constant.YLabelFontSize);
+
+      grid on;
+      grid minor;
+      hold off;
+
+      t1 = this.timestamp(1);
+      t2 = this.timestamp(end);
+      fprintf('Time Period: [%s,%s], Time Step: %s, Nr.: %d\n',datestr(t1),datestr(t2),this.timestep,numel(price));
+      buyLineExtrap = interp1(tmin(2:end),smin,datenum(date()),"extrap");
+      fprintf('Buy Line Extrap: (%s) %.2f \n',date(),buyLineExtrap);
+      fprintf('Buy Price Range: [%.2f,%.2f]\n',buyLineExtrap-tol,buyLineExtrap+tol);
+      fprintf('Price Std. Dev: (%.2f) \n',tol);
+    endfunction
   endmethods % Public
 
   methods (Access = private)
@@ -139,6 +185,58 @@ classdef Price < handle
       grid on;
       grid minor;
       hold off;
+    endfunction
+
+    function [idxMin,idxMax] = FilterNoiseFromLocalMaxMin(this,idxMin,idxMax,price,tol)
+      % removes local maxes or mins when they are noise. A noisy extrema
+      % is the second of two consecutive extrema when they differ by less than tol.
+      lastMaxMin = struct('type','none','index',0,'price',0);
+      currMaxMin = lastMaxMin;
+
+      n = length(idxMin);
+      for i=2:n
+        if idxMax(i)==0 && idxMin(i)==0
+          continue; % neither max nor min continue
+        elseif idxMax(i)==1 && idxMin(i)==1
+          error('data point at index %d cannot be both max and min',i);
+        elseif idxMax(i)==0 && idxMin(i)==1 % local min
+          currMaxMin.type = 'min'; currMaxMin.index = i; currMaxMin.price = price(i);
+        elseif idxMax(i)==1 && idxMin(i)==0 % local max
+          currMaxMin.type = 'max'; currMaxMin.index = i; currMaxMin.price = price(i);
+        endif
+
+        if lastMaxMin.index==0
+          lastMaxMin = currMaxMin;
+          continue;
+        endif
+
+        if strcmpi(lastMaxMin.type,'max')==1 && strcmpi(currMaxMin.type,'min')==1
+          if abs(lastMaxMin.price-currMaxMin.price) <= tol
+            idxMin(currMaxMin.index) = 0; % currMaxMin is noise, remove it from idxMins
+          else
+            lastMaxMin = currMaxMin;
+          endif
+
+        elseif strcmpi(lastMaxMin.type,'min')==1 && strcmpi(currMaxMin.type,'max')==1
+          if abs(lastMaxMin.price-currMaxMin.price) <= tol
+            idxMax(currMaxMin.index) = 0; % currMaxMin is noise, remove it from idxMaxs
+          else
+            lastMaxMin = currMaxMin;
+          endif
+
+        elseif strcmpi(lastMaxMin.type,'min')==1 && strcmpi(currMaxMin.type,'min')==1
+          if currMaxMin.price <= lastMaxMin.price
+            idxMin(lastMaxMin.index) = 0; % lastMaxMin is noise, remove it from idxMins
+            lastMaxMin = currMaxMin;
+          endif
+
+        elseif strcmpi(lastMaxMin.type,'max')==1 && strcmpi(currMaxMin.type,'max')==1
+          if currMaxMin.price >= lastMaxMin.price
+            idxMax(lastMaxMin.index) = 0; % lastMaxMin is noise, remove it from idxMaxs
+            lastMaxMin = currMaxMin;
+          endif
+        endif
+      endfor
     endfunction
   endmethods % Private
 endclassdef
