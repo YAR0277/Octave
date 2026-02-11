@@ -14,9 +14,9 @@ function [] = Stats(this)
   fprintf('PP_score:mean(%.4f), std(%.4f)\n',mean(T.PP_score),std(T.PP_score));
 
   % https://www.mathworks.com/matlabcentral/answers/197264-plotting-multiple-histograms-in-one-figure
-  hist(T.GE_score,50,'facecolor',Color.Brown,'facealpha',.5,'edgecolor','none');
+  hist(T.GE_score,50,'facecolor',Color.Grey,'facealpha',.5,'edgecolor','none');
   hold on;
-  hist(T.PP_score,50,'facecolor',Color.Magenta,'facealpha',.5,'edgecolor','none');
+  hist(T.PP_score,50,'facecolor',Color.LightGrey,'facealpha',.5,'edgecolor','none');
   box off;
   axis tight;
   legend('Geodetic Envelope','Polsby-Popper','location','northeast');

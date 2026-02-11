@@ -20,7 +20,7 @@ function [] = CmpAreaSphere(this)
   sT{ix,:}
 
   figure;
-  plot(1:n,dAE,'--.');
+  plot(1:n,dAE,'--.','Color',Color.Grey);
   grid on;
   xlabel('District Number');
   ylabel('Area Difference (km^2)');
@@ -33,7 +33,7 @@ function [] = CmpAreaSphere(this)
   fprintf('max relative error in percent (%.4f) occurs at latitude (%.4f)\n',x,sT.midlat(ix));
 
   figure;
-  plot(1:n,rep,'--.');
+  plot(1:n,rep,'--.','Color',Color.Grey);
   grid on;
   xlabel('District Number');
   ylabel('Relative Error in Percent');

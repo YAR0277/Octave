@@ -14,9 +14,9 @@ function [] = CmpAreaCDF(this,col)
 
   figure;
   hold on;
-  plot(x1,F1,'--.');
-  plot(x2,F2,'--.');
-  plot(x3,F3,'--.');
+  plot(x1,F1,'-','Color',Color.Grey);
+  plot(x2,F2,'--.','Color',Color.LightGrey);
+  plot(x3,F3,'--.','Color',Color.Grey);
 
   grid on;
   legend('Projection','Spherical Approximation','Spherical Geometry');
