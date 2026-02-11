@@ -75,9 +75,19 @@ classdef Price < handle
       fprintf('Volume: range: [%d,%d], last price (%d), percentile (%.2f%%)\n',min(vol),max(vol),vol(end),Util.CalcPercentile(vol,vol(end)));
     endfunction
 
-    function [r] = WhenToBuy(this)
+    function [r] = WhenToBuy(varargin)
+      % call is either 1) WhenToBuy() - no params, tol=std(price) or 2) WhenToBuy(10) - tol as parameter
+      this = varargin{1}; % first param for a class method is 'this'
       price = this.GetPrices();
-      tol = std(price);
+      switch nargin
+        case 1
+          tol = std(price); % default case, no params
+        case 2
+          tol = varargin{2}; % tol given as parameter
+        otherwise
+          error('invalid number of arguments %d. \n',nargin);
+      endswitch
+
       idxMax = imregionalmax(price);
       idxMin = imregionalmin(price);
       [idxMin,idxMax] = this.FilterNoiseFromLocalMaxMin(idxMin,idxMax,price,tol);
@@ -118,7 +128,7 @@ classdef Price < handle
       buyLineExtrap = interp1(tmin(2:end),smin,datenum(date()),"extrap");
       fprintf('Buy Line Extrap: (%s) %.2f \n',date(),buyLineExtrap);
       fprintf('Buy Price Range: [%.2f,%.2f]\n',buyLineExtrap-tol,buyLineExtrap+tol);
-      fprintf('Price Std. Dev: (%.2f) \n',tol);
+      fprintf('Price Std. Dev: (%.2f), tol (%.2f)\n',std(price),tol);
     endfunction
   endmethods % Public
 
