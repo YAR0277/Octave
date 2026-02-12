@@ -76,24 +76,23 @@ classdef Price < handle
     endfunction
 
     function [r] = WhenToBuy(varargin)
-      % call is either 1) WhenToBuy() - no params, tol=std(price) or 2) WhenToBuy(10) - tol as parameter
+      % call is either 1) WhenToBuy() - no params, tol=std(x) or 2) WhenToBuy(10) - tol as parameter
       this = varargin{1}; % first param for a class method is 'this'
-      price = this.GetPrices();
+      x = this.GetPrices();
       switch nargin
         case 1
-          tol = std(price); % default case, no params
+          tol = std(x); % default case, no params
         case 2
           tol = varargin{2}; % tol given as parameter
         otherwise
           error('invalid number of arguments %d. \n',nargin);
       endswitch
 
-      idxMax = imregionalmax(price);
-      idxMin = imregionalmin(price);
-      [idxMin,idxMax] = this.FilterNoiseFromLocalMaxMin(idxMin,idxMax,price,tol);
+      idxMax = imregionalmax(x);
+      idxMin = imregionalmin(x);
+      [idxMin,idxMax] = this.FilterNoiseFromLocalMaxMin(idxMin,idxMax,x,tol);
 
       t=this.timestamp;
-      x=this.GetPrices();
 
       figure;
       plot(t,x,'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
@@ -124,11 +123,53 @@ classdef Price < handle
 
       t1 = this.timestamp(1);
       t2 = this.timestamp(end);
-      fprintf('Time Period: [%s,%s], Time Step: %s, Nr.: %d\n',datestr(t1),datestr(t2),this.timestep,numel(price));
+      fprintf('Time Period: [%s,%s], Time Step: %s, Nr.: %d\n',datestr(t1),datestr(t2),this.timestep,numel(x));
       buyLineExtrap = interp1(tmin(2:end),smin,datenum(date()),"extrap");
       fprintf('Buy Line Extrap: (%s) %.2f \n',date(),buyLineExtrap);
       fprintf('Buy Price Range: [%.2f,%.2f]\n',buyLineExtrap-tol,buyLineExtrap+tol);
-      fprintf('Price Std. Dev: (%.2f), tol (%.2f)\n',std(price),tol);
+      fprintf('Price Last: (%.2f)\n',x(end));
+      fprintf('Price Std. Dev: (%.2f), tol (%.2f)\n',std(x),tol);
+
+      if buyLineExtrap-tol < x(end) && x(end) < buyLineExtrap+tol
+        r = 1;
+      else
+        r = 0;
+      endif
+    endfunction
+
+    function [r] = WhenToBuyBatch(varargin)
+      this = varargin{1}; % first param for a class method is 'this'
+      x = this.GetPrices();
+      switch nargin
+        case 1
+          tol = std(x); % default case, no params
+        case 2
+          tol = varargin{2}; % tol given as parameter
+        otherwise
+          error('invalid number of arguments %d. \n',nargin);
+      endswitch
+
+      idxMax = imregionalmax(x);
+      idxMin = imregionalmin(x);
+      [idxMin,idxMax] = this.FilterNoiseFromLocalMaxMin(idxMin,idxMax,x,tol);
+
+      t=this.timestamp;
+
+      tmax = t(idxMax);
+      xmax = x(idxMax);
+      smax = Util.GetSignal(tmax(2:end),xmax(2:end));
+
+      tmin = t(idxMin);
+      xmin = x(idxMin);
+      smin = Util.GetSignal(tmin(2:end),xmin(2:end));
+
+      buyLineExtrap = interp1(tmin(2:end),smin,datenum(date()),"extrap");
+
+      if buyLineExtrap-tol < x(end) && x(end) < buyLineExtrap+tol
+        r = 1;
+      else
+        r = 0;
+      endif
     endfunction
   endmethods % Public
 
