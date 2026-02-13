@@ -2,7 +2,7 @@ classdef Price < handle
   % class to handle prices of financial data
 
   properties
-    fidelityFile  % Reference to FidelityFile class
+    InFile        % Reference to FidelityFile or YahooFile class
     timestamp     % t - timestamp of prices
     timestep      % time interval of price data {'day','week','month','quarter'}
     volume        % volume data
@@ -10,28 +10,28 @@ classdef Price < handle
 
   methods % Public
 
-    function obj = Price(fidelityFile)
+    function obj = Price(inFile)
       % c'tor to create a Price object, input is an FidelityFile object.
-      if ~isa(fidelityFile, 'FidelityFile')
-        return;
+      if ~isa(inFile, 'FidelityFile') && ~isa(inFile, 'YahooFile')
+        error('Invalid input file class (%s)\n',class(inFile));;
       endif
 
       pkg load image; % imregionalmax, imregionalmin
-      obj.fidelityFile = fidelityFile;
-      obj.timestamp = fidelityFile.GetTimestamp; %obj.data.Date;
+      obj.InFile = inFile;
+      obj.timestamp = inFile.GetTimestamp; %obj.data.Date;
       obj.timestep = Util.GetTimeStep(obj.timestamp);
-      obj.volume = fidelityFile.GetVolume; %obj.data.Volume;
+      obj.volume = inFile.GetVolume; %obj.data.Volume;
     endfunction
 
     function [r] = GetPrices(this)
-      r = this.fidelityFile.data.(this.fidelityFile.dataCol);
+      r = this.InFile.Data.(this.InFile.DataCol);
     endfunction
 
     function [r] = Plot(this)
       figure;
       this.DoPlot();
       ## https://stackoverflow.com/questions/67171470/easy-waybuiltin-function-to-put-main-title-in-plot-in-octave
-      S = axes('visible','off','title',this.fidelityFile.symbol,'FontSize',16);
+      S = axes('visible','off','title',this.InFile.Symbol,'FontSize',16);
     endfunction
 
     function [r] = Stats(this)
@@ -42,7 +42,7 @@ classdef Price < handle
         return;
       endif
 
-      fprintf('Symbol: %s\n',this.fidelityFile.symbol);
+      fprintf('Symbol: %s\n',this.InFile.Symbol);
       t1 = this.timestamp(1);
       t2 = this.timestamp(end);
       fprintf('Time Period: [%s,%s], Time Step: %s, Nr.: %d\n',datestr(t1),datestr(t2),this.timestep,numel(price));
@@ -79,9 +79,10 @@ classdef Price < handle
       % call is either 1) WhenToBuy() - no params, tol=std(x) or 2) WhenToBuy(10) - tol as parameter
       this = varargin{1}; % first param for a class method is 'this'
       x = this.GetPrices();
+      [lt0,gt0] = this.GetIQM(x);
       switch nargin
         case 1
-          tol = std(x); % default case, no params
+          tol = gt0 - lt0; % default case
         case 2
           tol = varargin{2}; % tol given as parameter
         otherwise
@@ -126,11 +127,12 @@ classdef Price < handle
       fprintf('Time Period: [%s,%s], Time Step: %s, Nr.: %d\n',datestr(t1),datestr(t2),this.timestep,numel(x));
       buyLineExtrap = interp1(tmin(2:end),smin,datenum(date()),"extrap");
       fprintf('Buy Line Extrap: (%s) %.2f \n',date(),buyLineExtrap);
-      fprintf('Buy Price Range: [%.2f,%.2f]\n',buyLineExtrap-tol,buyLineExtrap+tol);
+      fprintf('Buy Price Range: [%.2f,%.2f]\n',buyLineExtrap+lt0,buyLineExtrap+gt0);
       fprintf('Price Last: (%.2f)\n',x(end));
       fprintf('Price Std. Dev: (%.2f), tol (%.2f)\n',std(x),tol);
+      fprintf('IQM negatives: (%.2f), IQM positives (%.2f)\n',lt0,gt0);
 
-      if buyLineExtrap-tol < x(end) && x(end) < buyLineExtrap+tol
+      if x(end) < buyLineExtrap+gt0
         r = 1;
       else
         r = 0;
@@ -140,9 +142,10 @@ classdef Price < handle
     function [r] = WhenToBuyBatch(varargin)
       this = varargin{1}; % first param for a class method is 'this'
       x = this.GetPrices();
+      [lt0,gt0] = this.GetIQM(x);
       switch nargin
         case 1
-          tol = std(x); % default case, no params
+          tol = gt0 - lt0; % default case
         case 2
           tol = varargin{2}; % tol given as parameter
         otherwise
@@ -165,7 +168,7 @@ classdef Price < handle
 
       buyLineExtrap = interp1(tmin(2:end),smin,datenum(date()),"extrap");
 
-      if buyLineExtrap-tol < x(end) && x(end) < buyLineExtrap+tol
+      if x(end) < buyLineExtrap+gt0
         r = 1;
       else
         r = 0;
@@ -288,6 +291,16 @@ classdef Price < handle
           endif
         endif
       endfor
+    endfunction
+
+    function [lt0,gt0] = GetIQM(this,x)
+      % returns IQM for negative (lt0) and positive (gt0) price changes
+      dx = Util.Diff(x);
+      id = dx < 0;
+      iu = dx > 0;
+      iz = dx == 0;
+      lt0 = Util.IQM(dx(id));
+      gt0 = Util.IQM(dx(iu));
     endfunction
   endmethods % Private
 endclassdef

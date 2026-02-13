@@ -1,5 +1,5 @@
-classdef FidelityFile < CsvFile
-  % Input structure for financial functions plotf, readf and classes
+classdef YahooFile < CsvFile
+  % Duplicate of FidelityFile
 
   properties
     Data
@@ -13,7 +13,7 @@ classdef FidelityFile < CsvFile
 
   methods % Public
 
-    function [obj] = FidelityFile()
+    function [obj] = YahooFile()
 
       addpath(genpath('../Finance')); % for readf
 

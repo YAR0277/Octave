@@ -1,46 +1,49 @@
-% readf(fidelityFile) - function to read financial data using FidelityFile
-function [s] = readf(fidelityFile)
-  % fidelityFile - instance of FidelityFile
+% readf(inFile) - function to read financial data using FidelityFile
+function [s] = readf(inFile)
+  % inFile - instance of FidelityFile or YahooFile
 
   pkg load io;
 
-  if ~isa(fidelityFile, 'FidelityFile')
-    return;
+  if ~isa(inFile, 'FidelityFile') && ~isa(inFile, 'YahooFile')
+    error('Invalid input file class (%s)\n',class(inFile));
   endif
 
-  data=csv2cell(fullfile(fidelityFile.dataFolder,fidelityFile.fileName));
+  if isa(inFile, 'FidelityFile')
+    s = struct('Date',0,'Open',0,'High',0,'Low',0,'Close',0,'Volume',0);
+  elseif isa(inFile, 'YahooFile')
+    s = struct('Date',0,'Close',0,'High',0,'Low',0,'Open',0,'Volume',0);
+  endif
+
+  data=csv2cell(fullfile(inFile.DataFolder,inFile.FileName));
   timestampCol=1; % col 1 is for timestamp
   firstDataRow=2; % row 1 is for header
 
-  % Date,Open,High,Low,Close,Volume
-  s = struct('Date',0,'Open',0,'High',0,'Low',0,'Close',0,'Volume',0);
-
   % Date values
-  if fidelityFile.descendFlag
-    s.Date=datenum(flip(data(firstDataRow:end,timestampCol)),fidelityFile.dateFormat);
+  if inFile.DescendFlag
+    s.Date=datenum(flip(data(firstDataRow:end,timestampCol)),inFile.DateFormat);
   else
-    s.Date=datenum(data(firstDataRow:end,timestampCol),fidelityFile.dateFormat);
+    s.Date=datenum(data(firstDataRow:end,timestampCol),inFile.DateFormat);
   endif
 
   fieldname = 'Open';
   ixCol = find(strcmp(fieldnames(s),fieldname));
-  s=SetData(fidelityFile,s,fieldname,GetData(data,firstDataRow,ixCol));
+  s=SetData(inFile,s,fieldname,GetData(data,firstDataRow,ixCol));
 
   fieldname = 'High';
   ixCol = find(strcmp(fieldnames(s),fieldname));
-  s=SetData(fidelityFile,s,fieldname,GetData(data,firstDataRow,ixCol));
+  s=SetData(inFile,s,fieldname,GetData(data,firstDataRow,ixCol));
 
   fieldname = 'Low';
   ixCol = find(strcmp(fieldnames(s),fieldname));
-  s=SetData(fidelityFile,s,fieldname,GetData(data,firstDataRow,ixCol));
+  s=SetData(inFile,s,fieldname,GetData(data,firstDataRow,ixCol));
 
   fieldname = 'Close';
   ixCol = find(strcmp(fieldnames(s),fieldname));
-  s=SetData(fidelityFile,s,fieldname,GetData(data,firstDataRow,ixCol));
+  s=SetData(inFile,s,fieldname,GetData(data,firstDataRow,ixCol));
 
   fieldname = 'Volume';
   ixCol = find(strcmp(fieldnames(s),fieldname));
-  s=SetData(fidelityFile,s,fieldname,uint32(GetData(data,firstDataRow,ixCol)));
+  s=SetData(inFile,s,fieldname,uint32(GetData(data,firstDataRow,ixCol)));
 
 endfunction
 
@@ -55,8 +58,8 @@ function [r] = GetData(data,firstRow,col)
   r = cell2mat(data(firstRow:end,col));
 endfunction
 
-function [s] = SetData(fidelityFile,s,fieldname,v)
-  if fidelityFile.descendFlag
+function [s] = SetData(inFile,s,fieldname,v)
+  if inFile.DescendFlag
     s.(fieldname) = flip(v);
   else
     s.(fieldname) = v;
