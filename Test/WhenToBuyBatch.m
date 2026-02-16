@@ -1,25 +1,44 @@
 clear all;
 
-addpath('C:/Users/drdav/Projects/Octave/Common');
-addpath('C:/Users/drdav/Projects/Octave/Finance');
+##baseFolder = fileparts(fileparts(fileparts(pwd()))); % for debugging in Octave
+
+baseFolder = fileparts(fileparts(pwd()));
+projectsFolder = fullfile(baseFolder,'Projects');
+octaveFolder = fullfile(projectsFolder,'Octave');
+
+addpath(fullfile(octaveFolder,'Common'));
+addpath(fullfile(octaveFolder,'Finance'));
+addpath(fullfile(octaveFolder,'Test'));
+
+batchFolder = fullfile(projectsFolder,'Batch');
+
+# 1. ETFs
+fid_read = fopen(fullfile(batchFolder,'ETF.txt'), 'r');
+tickers = textscan(fid_read, '%s');
+fclose(fid_read);
+tickernames = tickers{1};   % Cell array of strings
 
 f=YahooFile;
-f.DataFolder = 'C:/Users/drdav/data/finance';
+f.DataFolder = fullfile(fullfile(baseFolder,'data'),'finance');
 f.SetFolder('etf');
 
-fid = fopen('WhenToBuyBatchResult.txt','w');
+fid_write = fopen(fullfile(batchFolder,'WhenToBuyBatchResult.txt'),'w');
+DoWhenToBuy(fid_write,f,tickernames);
+fclose(fid_write);
 
-filenames={'IVV-d.csv','IWB-d.csv'};
-n = numel(filenames);
-r = zeros(n,1);
+# 2. Equities
+fid_read = fopen(fullfile(batchFolder,'Equity.txt'), 'r');
+tickers = textscan(fid_read, '%s');
+fclose(fid_read);
+tickernames = tickers{1};   % Cell array of strings
 
-for i=1:n
-	f.LoadFile(filenames{i});
-	p=Price(f);
-  x=p.GetPrices;
-	r(i)=p.WhenToBuyBatch;
-	fprintf(fid, 'file: (%s), result: (%d), last price (%.2f)\n',filenames{i},r(i),x(end));
-	clear p;
-endfor
-fclose(fid);
+clear f;
+f=YahooFile;
+f.DataFolder = fullfile(fullfile(baseFolder,'data'),'finance');
+f.SetFolder('equity');
+
+fid_write = fopen(fullfile(batchFolder,'WhenToBuyBatchResult.txt'),'a');
+DoWhenToBuy(fid_write,f,tickernames);
+fclose(fid_write);
+
 
