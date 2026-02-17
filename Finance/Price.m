@@ -75,8 +75,8 @@ classdef Price < handle
       fprintf('Volume: range: [%d,%d], last price (%d), percentile (%.2f%%)\n',min(vol),max(vol),vol(end),Util.CalcPercentile(vol,vol(end)));
     endfunction
 
-    function [r] = WhenToBuy(varargin)
-      % call is either 1) WhenToBuy() - no params, tol=std(x) or 2) WhenToBuy(10) - tol as parameter
+    function [r] = WhatToBuy(varargin)
+      % call is either 1) WhatToBuy() - no params, tol=std(x) or 2) WhatToBuy(10) - tol as parameter
       this = varargin{1}; % first param for a class method is 'this'
       x = this.GetPrices();
       [lt0,gt0] = this.GetIQM(x);
@@ -139,7 +139,7 @@ classdef Price < handle
       endif
     endfunction
 
-    function [r,buyLineExtrap] = WhenToBuyBatch(varargin)
+    function [r,buyLineExtrap] = WhatToBuyBatch(varargin)
       this = varargin{1}; % first param for a class method is 'this'
       x = this.GetPrices();
       [lt0,gt0] = this.GetIQM(x);

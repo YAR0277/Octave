@@ -22,8 +22,8 @@ f=YahooFile;
 f.DataFolder = fullfile(fullfile(baseFolder,'data'),'finance');
 f.SetFolder('etf');
 
-fid_write = fopen(fullfile(batchFolder,'WhenToBuyBatchResult.txt'),'w');
-DoWhenToBuy(fid_write,f,tickernames);
+fid_write = fopen(fullfile(batchFolder,'WhatToBuyBatchResult.txt'),'w');
+DoWhatToBuy(fid_write,f,tickernames);
 fclose(fid_write);
 
 # 2. Equities
@@ -37,8 +37,8 @@ f=YahooFile;
 f.DataFolder = fullfile(fullfile(baseFolder,'data'),'finance');
 f.SetFolder('equity');
 
-fid_write = fopen(fullfile(batchFolder,'WhenToBuyBatchResult.txt'),'a');
-DoWhenToBuy(fid_write,f,tickernames);
+fid_write = fopen(fullfile(batchFolder,'WhatToBuyBatchResult.txt'),'a');
+DoWhatToBuy(fid_write,f,tickernames);
 fclose(fid_write);
 
 
