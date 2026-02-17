@@ -139,7 +139,7 @@ classdef Price < handle
       endif
     endfunction
 
-    function [r] = WhenToBuyBatch(varargin)
+    function [r,buyLineExtrap] = WhenToBuyBatch(varargin)
       this = varargin{1}; % first param for a class method is 'this'
       x = this.GetPrices();
       [lt0,gt0] = this.GetIQM(x);
