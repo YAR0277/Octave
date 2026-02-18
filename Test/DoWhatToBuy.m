@@ -10,8 +10,10 @@ function [] = DoWhatToBuy(fid,f,tickernames)
     p=Price(f);
     x=p.GetPrices;
     [r(i),buyLineExtrap(i)]=p.WhatToBuyBatch;
-    fprintf(fid, 'file: (%s), result: (%d), last price (%.2f), buy line extrap (%.2f)\n',...
-      filename,r(i),x(end),buyLineExtrap(i));
+    returns=Returns(f);
+    [num,ror,apr]=returns.WhatToBuyBatch;
+    fprintf(fid, 'file: (%s), result: (%d), last price (%.2f), buy line extrap (%.2f), Nr. (%d), ROR (%.2f), APR (%.2f)\n',...
+      filename,r(i),x(end),buyLineExtrap(i),num,ror,apr);
     clear p;
   endfor
 endfunction

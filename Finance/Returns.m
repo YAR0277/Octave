@@ -138,6 +138,13 @@ classdef Returns < handle
       [t,y,z] = this.GetReturnData();
       this.DoStats(t(1),t(end),y,z);
     endfunction
+
+    function [num,ror,apr] = WhatToBuyBatch(this)
+      [t,y,z] = this.GetReturnData();
+      num = numel(y);
+      ror = sum(z);
+      apr = Util.GetAPR(this.timestamp,z);
+    endfunction
   endmethods % Public
 
   methods (Access = private)
@@ -167,7 +174,7 @@ classdef Returns < handle
 
       fprintf('Time Period: [%s,%s], Time Step: %s, Nr. Samples: %d\n',datestr(t1),datestr(t2),this.timestep,numel(y));
       fprintf('Returns: range: [%.2f%%,%.2f%%], mean: %.2f%%, std. dev.: %.2f%%\n',min(y),max(y),mean(y),std(y));
-      fprintf('Returns: total: %.2f%%, APR=%.2f%%\n',sum(z),Util.GetAPR(this.timestamp,z));
+      fprintf('Returns: sum: %.2f%%, APR=%.2f%%\n',sum(z),Util.GetAPR(this.timestamp,z));
       tol = 0;
       % returns gt, ls tolerance
       ix1 = y >= tol;
