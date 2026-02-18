@@ -13,7 +13,7 @@ classdef Price < handle
     function obj = Price(inFile)
       % c'tor to create a Price object, input is an FidelityFile object.
       if ~isa(inFile, 'FidelityFile') && ~isa(inFile, 'YahooFile')
-        error('Invalid input file class (%s)\n',class(inFile));;
+        error('Invalid input file class (%s)\n',class(inFile));
       endif
 
       pkg load image; % imregionalmax, imregionalmin

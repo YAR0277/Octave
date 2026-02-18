@@ -32,6 +32,26 @@ classdef Util < handle
       x_out(n) = mean( x_in(a(end)+1:end) );
     endfunction
 
+    function [r] = CalcPctChange(x)
+
+      if numel(x) < 2 % at least 2 to get a return
+        return;
+      endif
+
+      dx = diff(x);
+      r = Util.Round(( dx./ x(1:end-1) )*100); % as a percent, rounded to 2 decimal places
+    endfunction
+
+    function [r] = CalcPctChangeLog(x)
+
+      if numel(x) < 2 % at least 2 to get a return
+        return;
+      endif
+
+      dx = diff(log(x));
+      r = Util.Round(dx*100); % as a percent, rounded to 2 decimal places
+    endfunction
+
     function [r] = CalcPercentile(data,value)
       data = data(:)';
       value = value(:);
@@ -97,16 +117,17 @@ classdef Util < handle
 
     function [r] = GetAPR(t,y)
       timestep = Util.GetTimeStep(t);
-      r = mean(y);
+      n = length(t);
+      r = sum(y);
       switch timestep
         case 'day'
-          r = r*(365);
+          r = r*(360/n);
         case 'week'
-          r = r*(52);
+          r = r*(52/n);
         case 'month'
-          r = r*(12);
+          r = r*(12/n);
         case 'quarter'
-          r = r*(4);
+          r = r*(4/n);
         otherwise
       endswitch
     endfunction

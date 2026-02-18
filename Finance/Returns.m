@@ -2,11 +2,16 @@ classdef Returns < handle
   % class to compute rate of returns of financial data
 
   properties
-    fidelityFile  % Reference to FidelityFile class
-    returns       % rate of return
+    Acceleration
+    InFile        % Reference to FidelityFile class
+    rateOfReturn  % rate of return
+    rateOfReturnApproximate  % rate of return using natural log approximation
     timestamp     % t - timestamp of prices
     timestep      % time interval of price data {'day','week','month','quarter'}
-    flgPlotType   % 1='stem', 2='bar', 3='line'
+    PlotType      % 1='stem', 2='bar', 3='line', 4='line with velocity & acceleration'
+    startDay      % calculate returns starting at startDay
+    endDay        % calculate returns vis-a-vis endDay
+    Velocity
     volume        % volume data
   endproperties
 
@@ -16,17 +21,46 @@ classdef Returns < handle
 
   methods % Public
 
-    function obj = Returns(fidelityFile)
+    function obj = Returns(inFile)
       % c'tor to create a Returns object, input is an FidelityFile object.
-      if ~isa(fidelityFile, 'FidelityFile')
-        return;
+      if ~isa(inFile, 'FidelityFile') && ~isa(inFile, 'YahooFile')
+        error('Invalid input file class (%s)\n',class(inFile));
       endif
 
-      obj.fidelityFile = fidelityFile;
-      obj.timestamp = fidelityFile.GetTimestamp;
+      obj.InFile = inFile;
+      obj.timestamp = inFile.GetTimestamp;
       obj.timestep = Util.GetTimeStep(obj.timestamp);
-      obj.flgPlotType = 3;
-      obj.volume = fidelityFile.GetVolume;
+      obj.PlotType = 3;
+      obj.startDay = obj.timestamp(1);
+      obj.endDay = Util.GetDatenumToday();
+      obj.volume = inFile.GetVolume;
+      obj.SetReturnData;
+    endfunction
+
+    function [r] = get.PlotType(this)
+      r = this.PlotType;
+    endfunction
+
+    function [] = set.PlotType(this,y)
+      this.PlotType = y;
+    endfunction
+
+    function [r] = get.Acceleration(this)
+      r = diff(this.rateOfReturn);
+    endfunction
+
+    function [r] = get.Velocity(this)
+      r = this.rateOfReturn;
+    endfunction
+
+    function [this] = set.EndDay(this,date)
+      % [] = EndDay(date) where date='2025-09-23'
+      this.endDay = Util.GetDatenum(date);
+    endfunction
+
+    function [this] = set.StartDay(this,date)
+      % [] = StartDay(date) where date='2025-09-23'
+      this.startDay = Util.GetDatenum(date);
     endfunction
 
     function [r] = GetTimestamp(this)
@@ -34,24 +68,37 @@ classdef Returns < handle
     end
 
     function [r] = GetValue(this)
-      [~,r] = this.GetReturnData;
+      r = this.RateOfReturn;
     end
 
-    function [t,y] = GetReturnData(this)
-      this.CalcPctChange(); % calculate returns just in case they haven't been calculated
+    function [t,y,z] = GetReturnData(this)
       t = this.timestamp(1:end-1); % n price values => n-1 returns
-      y = this.returns;
+      y = this.rateOfReturn;
+      z = this.rateOfReturnApproximate;
+    endfunction
+
+    function [] = SetReturnData(this)
+
+      ix = this.startDay <= this.timestamp & this.timestamp <= this.endDay;
+      t = this.timestamp(ix);
+      price = this.InFile.GetValue;
+      x = price(ix);
+
+      this.rateOfReturn = Util.CalcPctChange(x);
+      this.rateOfReturnApproximate = Util.CalcPctChangeLog(x);
     endfunction
 
     function [r] = Plot(this)
       % plots returns
-      switch this.flgPlotType
+      switch this.PlotType
         case 1
           this.PlotStem();
         case 2
           this.PlotBar();
         case 3
           this.PlotLine();
+        case 4
+          this.PlotLineEx();
         otherwise
           this.PlotBar();
       endswitch
@@ -67,7 +114,7 @@ classdef Returns < handle
 
     function [r] = Subplot(this)
       % plots returns, used in subplot command (see plotf.m).
-      [t,y] = this.GetReturnData();
+      [t,y,z] = this.GetReturnData();
       if length(t) < Constant.MinLengthReturns || length(y) < Constant.MinLengthReturns
         return;
       endif
@@ -81,30 +128,19 @@ classdef Returns < handle
       xlim([t(1) t(end)]);
 
       ylabel('Rate of Return(%)','FontSize',14);
-      title(this.fidelityFile.symbol,'FontSize',16);
+      title(this.InFile.symbol,'FontSize',16);
       grid on;
       grid minor;
     endfunction
 
     function [r] = Stats(this)
       % calculates statistics on returns
-      [t,y] = this.GetReturnData();
-      this.DoStats(t(1),t(end),y);
+      [t,y,z] = this.GetReturnData();
+      this.DoStats(t(1),t(end),y,z);
     endfunction
   endmethods % Public
 
   methods (Access = private)
-
-    function [] = CalcPctChange(this)
-
-      price = this.fidelityFile.GetValue;
-      if numel(price) < 2 % at least 2 to get a return
-        return;
-      endif
-
-      dp = diff(price);
-      this.returns = Util.Round(( dp./ price(1:end-1) )*100); % as a percent, rounded to 2 decimal places
-    endfunction
 
   function [] = DoLabels(this,dt,dx)
       t = [this.returns.firstDay];
@@ -122,30 +158,16 @@ classdef Returns < handle
       text(t,x,labels,'FontWeight','bold','FontSize',9);
     endfunction
 
-    function [] = DoVolatility(this)
-
-      y = [this.returns.rateOfReturn];
-      vol = std(y); % standard deviation = volatility
-      num = numel(y);
-      tvals=arrayfun(@(s) Util.GetDatenumYear(s),[this.returns(:).year]);
-
-      hold on;
-      plot(tvals,(0+vol)*ones(num,1),'r--');
-      plot(tvals,(0-vol)*ones(num,1),'r--');
-      hold off;
-    endfunction
-
-    function [r] = DoStats(this,t1,t2,y)
+    function [r] = DoStats(this,t1,t2,y,z)
       % calculates statistics on returns
       if isempty(y)
         fprintf('No return data available.\n');
         return;
       endif
 
-      fprintf('Symbol: %s\n',this.fidelityFile.symbol);
       fprintf('Time Period: [%s,%s], Time Step: %s, Nr. Samples: %d\n',datestr(t1),datestr(t2),this.timestep,numel(y));
       fprintf('Returns: range: [%.2f%%,%.2f%%], mean: %.2f%%, std. dev.: %.2f%%\n',min(y),max(y),mean(y),std(y));
-      fprintf('Returns: total: %.2f%%, APR=%.2f%%\n',sum(y),Util.GetAPR(this.timestamp,y));
+      fprintf('Returns: total: %.2f%%, APR=%.2f%%\n',sum(z),Util.GetAPR(this.timestamp,z));
       tol = 0;
       % returns gt, ls tolerance
       ix1 = y >= tol;
@@ -164,7 +186,7 @@ classdef Returns < handle
     function [] = PlotBar(this)
       % plot returns as bar plot
 
-      [t,y] = this.GetReturnData();
+      [t,y,z] = this.GetReturnData();
       if isempty(t) || isempty(y)
         fprintf('No return data found to plot.\n');
         return;
@@ -180,21 +202,22 @@ classdef Returns < handle
       xlim([t(1) t(end)]);
 
       ylabel('Rate of Return (%)','FontSize',16);
-      title(this.fidelityFile.symbol,'FontSize',16);
       grid on;
     endfunction
 
     function [] = PlotLine(this)
       % plot returns as line plot
 
-      [t,y] = this.GetReturnData();
+      [t,y,z] = this.GetReturnData();
       if length(t) < Constant.MinLengthReturns || length(y) < Constant.MinLengthReturns
         fprintf('Length of return data (l.t. %d) insufficient to plot.\n',Constant.MinLengthReturns);
         return;
       endif
 
       figure;
+      hold on;
       plot(t,y,'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+      plot(t,z,'o','Color',Color.Brown);
 
       [xticks,fmt] = Util.GetDateTicks(t); %this.GetTimeTicks(t);
       ax = gca;
@@ -203,14 +226,40 @@ classdef Returns < handle
       xlim([t(1) t(end)]);
 
       ylabel('Rate of Return(%)','FontSize',14);
-      title(this.fidelityFile.symbol,'FontSize',16);
       grid on;
+      hold off;
+    endfunction
+
+    function [] = PlotLineEx(this)
+      % plot returns as line plot
+
+      [t,y,z] = this.GetReturnData();
+      if length(t) < Constant.MinLengthReturns || length(y) < Constant.MinLengthReturns
+        fprintf('Length of return data (l.t. %d) insufficient to plot.\n',Constant.MinLengthReturns);
+        return;
+      endif
+
+      figure;
+      hold on;
+      plot(t,this.Velocity,'--.','Color',Color.Magenta,'MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+      plot(t(1:end-1),this.Acceleration,'--','Color',Color.Brown);
+
+      [xticks,fmt] = Util.GetDateTicks(t); %this.GetTimeTicks(t);
+      ax = gca;
+      set(ax,"XTick",xticks);
+      datetick('x',fmt,'keepticks','keeplimits');
+      xlim([t(1) t(end)]);
+
+      ylabel('Rate of Return(%)','FontSize',14);
+      legend('velocity','acceleration');
+      grid on;
+      hold off;
     endfunction
 
     function [] = PlotStem(this)
       % plots returns as stem plot
 
-      [t,y] = this.GetReturnData();
+      [t,y,z] = this.GetReturnData();
       if isempty(t) || isempty(y)
         fprintf('No return data found to plot.\n');
         return;
@@ -226,7 +275,6 @@ classdef Returns < handle
       xlim([t(1) t(end)]);
 
       ylabel('Rate of Return (%)','FontSize',16);
-      title(this.fidelityFile.symbol,'FontSize',16);
       grid on;
       grid minor;
     endfunction
