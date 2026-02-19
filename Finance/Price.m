@@ -23,6 +23,16 @@ classdef Price < handle
       obj.volume = inFile.GetVolume; %obj.data.Volume;
     endfunction
 
+    function [lt0,gt0] = GetIQM(this,x)
+      % returns IQM for negative (lt0) and positive (gt0) price changes
+      dx = Util.Diff(x);
+      id = dx < 0;
+      iu = dx > 0;
+      iz = dx == 0;
+      lt0 = Util.IQM(dx(id));
+      gt0 = Util.IQM(dx(iu));
+    endfunction
+
     function [r] = GetPrices(this)
       r = this.InFile.Data.(this.InFile.DataCol);
     endfunction
@@ -291,16 +301,6 @@ classdef Price < handle
           endif
         endif
       endfor
-    endfunction
-
-    function [lt0,gt0] = GetIQM(this,x)
-      % returns IQM for negative (lt0) and positive (gt0) price changes
-      dx = Util.Diff(x);
-      id = dx < 0;
-      iu = dx > 0;
-      iz = dx == 0;
-      lt0 = Util.IQM(dx(id));
-      gt0 = Util.IQM(dx(iu));
     endfunction
   endmethods % Private
 endclassdef
