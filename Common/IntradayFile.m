@@ -1,0 +1,49 @@
+classdef IntradayFile < YahooFile
+  % Handles intraday data in YahooFile
+
+  methods % Public
+
+    function [obj] = IntradayFile()
+
+      addpath(genpath('../Finance')); % for readf
+
+      obj = obj@YahooFile();
+      obj.DateFormat = 'yyyy-mm-dd HH:MM:SS';
+    endfunction
+
+    function [] = Plot(this)
+      % [] = Plot
+      t = this.GetTimestamp;
+      x = this.GetValue;
+      if isempty(x)
+        fprintf('No data to plot.\n');
+        return;
+      endif
+      this.DoPlot(t,x);
+    endfunction
+  endmethods %Public
+
+  methods (Access = private)
+
+    function [] = DoPlot(this,t,x)
+      figure;
+      hold on;
+      tod = (t-floor(t))*86400; % time of day is seconds since midnight
+      plot(tod,x,'--.','Color',Color.LightGrey);
+
+      m = MovingAvg.CMA(x,6); % trend, 6*5min = 30min
+      plot(tod,m,'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+
+      xt = get(gca, 'xtick');
+      labels = arrayfun(@(x) sprintf('%02d:%02d', ...
+                      floor(x/60), round(mod(x,60))), ...
+                      xt, 'UniformOutput', false);
+      set(gca, 'xticklabel', labels);
+
+      label_str = "Values";
+      ylabel(label_str,'FontSize',Constant.YLabelFontSize);
+      grid on;
+      hold off;
+    endfunction
+  endmethods
+endclassdef
