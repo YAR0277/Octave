@@ -36,12 +36,10 @@ classdef IntradayFile < YahooFile
 
       xt = get(gca, 'xtick');
       labels = arrayfun(@(x) sprintf('%02d:%02d', ...
-                      floor(x/60), round(mod(x,60))), ...
+                      floor(x/3600),floor(mod(x,3600)/60)), ...
                       xt, 'UniformOutput', false);
       set(gca, 'xticklabel', labels);
 
-      label_str = "Values";
-      ylabel(label_str,'FontSize',Constant.YLabelFontSize);
       grid on;
       hold off;
     endfunction
