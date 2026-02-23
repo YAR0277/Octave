@@ -91,7 +91,7 @@ classdef YahooFile < CsvFile
       if exist(fullfile(this.DataFolder,this.FileName),'file')
         this.Data = readf(this);
       else
-        fprintf('file (%s) does not exist. \n',this.fileName);
+        fprintf('file (%s) does not exist. \n',this.FileName);
       endif
     endfunction
 
