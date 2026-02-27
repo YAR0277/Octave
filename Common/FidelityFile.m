@@ -4,7 +4,6 @@ classdef FidelityFile < CsvFile
   properties
     Data
     DataCol
-    DataFolder
     DateFormat
     DescendFlag
     FileName
@@ -19,7 +18,6 @@ classdef FidelityFile < CsvFile
 
       obj = obj@CsvFile();
       obj.DataCol = 'Close'; % 'Open','High','Low','Close','Volume'
-      obj.DataFolder = '../../../data/finance'; % financial data folder;
       obj.DateFormat = 'yyyy-mm-dd';
       obj.DescendFlag = 0; % data is in ascending order: oldest -> newest
       obj.FileName = '';
@@ -32,14 +30,6 @@ classdef FidelityFile < CsvFile
 
     function [] = set.DataCol(this,dataCol)
       this.DataCol = dataCol;
-    endfunction
-
-    function [r] = get.DataFolder(this)
-      r = this.DataFolder;
-    endfunction
-
-    function [] = set.DataFolder(this,dataFolder)
-      this.DataFolder = dataFolder;
     endfunction
 
     function [r] = get.DateFormat(this)
@@ -112,23 +102,6 @@ classdef FidelityFile < CsvFile
 
     function [] = PlotTrend(this,wlen)
       TimeSeries.PlotTrend(this,wlen);
-    endfunction
-
-    function [] = SetFolder(this,type)
-      % appends DataFolder with type
-      if ismember(type,{"bond","equity","etf","index"})
-        this.DataFolder = fullfile(this.DataFolder,type);
-      end
-    endfunction
-
-    function [] = ShowFiles(this)
-      % shows all files in DataFolder
-      files = dir(fullfile(this.DataFolder,'*.csv'));
-      for k=1:length(files)
-        if ~files(k).isdir
-          fprintf('%-30s %10d bytes   %s\n', files(k).name, files(k).bytes, files(k).date);
-        endif
-      endfor
     endfunction
   endmethods %Public
 

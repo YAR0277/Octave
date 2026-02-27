@@ -12,7 +12,6 @@ classdef SidcFile < CsvFile
   endproperties
 
   properties
-    dataFolder
     fileName
     observationDate
     timestamp
@@ -26,7 +25,6 @@ classdef SidcFile < CsvFile
       addpath(genpath('../Common')); % for class Constant
 
       obj = obj@CsvFile();
-      obj.dataFolder = '../../../data/sidc'; % SIDC root data folder;
     endfunction
 
     function [r] = GetTimestamp(this)
@@ -39,8 +37,8 @@ classdef SidcFile < CsvFile
 
     function [] = LoadFile(this,fileName)
       this.SetFile(fileName);
-      if exist(fullfile(this.dataFolder,this.fileName),'file')
-        fid = fopen(fullfile(this.dataFolder,this.fileName), 'r');
+      if exist(fullfile(this.DataFolder,this.fileName),'file')
+        fid = fopen(fullfile(this.DataFolder,this.fileName), 'r');
         fin = textscan(fid,"%s,%f,%f,%d,%d", 'Delimiter', ',', 'HeaderLines', 1);
         this.observationDate = cell2mat(fin{SidcFile.COL_IDX_OBSERVATION_DATE});
         this.value = fin{SidcFile.COL_IDX_VALUE};
@@ -72,11 +70,6 @@ classdef SidcFile < CsvFile
     function [] = SetFile(this,fileName)
       % sets fileName property
       this.fileName = fileName;
-    endfunction
-
-    function [] = ShowFiles(this)
-      % shows all files in dataFolder
-      dir(fullfile(this.dataFolder,'*.csv'))
     endfunction
 
     function [] = Stats(this)
@@ -119,6 +112,12 @@ classdef SidcFile < CsvFile
 
     function [] = SetTimestamp(this)
       this.timestamp = datenum(this.observationDate,'yyyy');
+    endfunction
+  endmethods
+
+  methods (Static)
+    function [r] = GetDataFolder()
+      r = fullfile(CsvFile.BaseFolder,"data/sidc");
     endfunction
   endmethods
 endclassdef

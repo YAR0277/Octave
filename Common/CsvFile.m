@@ -1,9 +1,13 @@
 classdef CsvFile < handle
   % No Interfaces in Octave (yet)
 
+  properties (Constant)
+    BaseFolder = fileparts(fileparts(fileparts(pwd())));
+  endproperties
+
   properties
     dataDefinitionTable
-    dataFolder
+    DataFolder
     files
     id
     timestamp
@@ -99,6 +103,13 @@ classdef CsvFile < handle
       ts.PlotTrend(wlen);
     endfunction
 
+    function [] = SetFolder(this,type)
+      % appends DataFolder with type
+      if ismember(type,{"bond","equity","etf","index"})
+        this.DataFolder = fullfile(CsvFile.GetDataFolder,type);
+      end
+    endfunction
+
     function [] = ShowData(this)
       % [] = ShowData(), shows {ids,category} from data definition table
       ids = this.dataDefinitionTable.ids;
@@ -110,6 +121,16 @@ classdef CsvFile < handle
       T = table(ids,categories);
       % https://wiki.octave.org/Function_tableprint#Usage
       prettyprint(T);
+    endfunction
+
+    function [] = ShowFiles(this)
+      % shows all files in DataFolder
+      files = dir(fullfile(this.DataFolder,'*.csv'));
+      for k=1:length(files)
+        if ~files(k).isdir
+          fprintf('%-30s %10d bytes   %s\n', files(k).name, files(k).bytes, files(k).date);
+        endif
+      endfor
     endfunction
 
     function [] = Stats(this)
@@ -125,6 +146,12 @@ classdef CsvFile < handle
       fprintf('Range: [%.2f,%.2f], Mean %.2f\n',v_min,v_max,mean(y(~isnan(y))));
       fprintf('Min: %s, %.2f\n',datestr(this.timestamp(i_min),'mmm yyyy'),v_min);
       fprintf('Max: %s, %.2f\n',datestr(this.timestamp(i_max),'mmm yyyy'),v_max);
+    endfunction
+  endmethods
+
+  methods (Static)
+    function [r] = GetDataFolder()
+      r = fullfile(CsvFile.BaseFolder,"data/finance");
     endfunction
   endmethods
 endclassdef
