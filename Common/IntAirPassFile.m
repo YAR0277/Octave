@@ -10,6 +10,7 @@ classdef IntAirPassFile < CsvFile
   endproperties
 
   properties
+    dataFolder
     fileName
     month
     timestamp
@@ -24,6 +25,7 @@ classdef IntAirPassFile < CsvFile
       addpath(genpath('../Common')); % for class Constant
 
       obj = obj@CsvFile();
+      obj.dataFolder = '../../../data/sandbox'; % data folder;
     endfunction
 
     function [r] = GetTimestamp(this)
@@ -36,8 +38,8 @@ classdef IntAirPassFile < CsvFile
 
     function [] = LoadFile(this,fileName)
       this.SetFile(fileName);
-      if exist(fullfile(this.DataFolder,this.fileName),'file')
-        fid = fopen(fullfile(this.DataFolder,this.fileName), 'r');
+      if exist(fullfile(this.dataFolder,this.fileName),'file')
+        fid = fopen(fullfile(this.dataFolder,this.fileName), 'r');
         fin = textscan(fid,"%d,%s,%d", 'Delimiter', ',', 'HeaderLines', 1);
         this.year = fin{IntAirPassFile.COL_IDX_YEAR};
         this.month = cell2mat(fin{IntAirPassFile.COL_IDX_MONTH});
@@ -70,6 +72,11 @@ classdef IntAirPassFile < CsvFile
     function [] = SetFile(this,fileName)
       % sets fileName property
       this.fileName = fileName;
+    endfunction
+
+    function [] = ShowFiles(this)
+      % shows all files in dataFolder
+      dir(fullfile(this.dataFolder,'*.csv'))
     endfunction
 
     function [] = Stats(this)
@@ -112,12 +119,6 @@ classdef IntAirPassFile < CsvFile
 
     function [] = SetTimestamp(this)
       this.timestamp = datenum(strcat(num2str(this.year),strcat('-',this.month)),'yyyy-mmm');
-    endfunction
-  endmethods
-
-  methods (Static)
-    function [r] = GetDataFolder()
-      r = fullfile(CsvFile.BaseFolder,"data/sandbox");
     endfunction
   endmethods
 endclassdef
