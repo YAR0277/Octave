@@ -116,7 +116,7 @@ classdef YahooFile < CsvFile
 
     function [] = SetFolder(this,type)
       % appends DataFolder with type
-      if ismember(type,{"bond","equity","etf","index"})
+      if ismember(type,{"bond","equity","etf","index","intraday"})
         this.DataFolder = fullfile(this.DataFolder,type);
       end
     endfunction

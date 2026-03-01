@@ -9,7 +9,7 @@ function [] = DoPlot(ticker)
 
   z=IntradayFile;
   z.DataFolder = fullfile(fullfile(baseFolder,'data'),'finance');
-  z.SetFolder('etf');
+  z.SetFolder('intraday');
   filename = strcat(ticker,'-i.csv');
   z.LoadFile(filename);
   z.Plot;
