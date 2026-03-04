@@ -3,7 +3,7 @@ classdef Util < handle
   % https://www.mathworks.com/matlabcentral/answers/182131-percentile-of-a-value-based-on-array-of-data
 
   properties (Constant)
-
+    RootFolder = fileparts(fileparts(pwd())); % assumes calling from Batch folder
   endproperties
 
   methods (Static = true) % Public
@@ -294,6 +294,10 @@ classdef Util < handle
 
     function [r] = Round(r)
       r = round(r.*100)./100; % round to nearest 2 decimal places
+    endfunction
+
+    function [r] = RootDataFolder()
+      r = fullfile(Util.RootFolder,'data','finance');
     endfunction
 
     function [] = SaveStruct(className,folderName,fileName)

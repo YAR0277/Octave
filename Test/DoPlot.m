@@ -1,6 +1,8 @@
 function [] = DoPlot(ticker)
 
-  baseFolder = fileparts(fileparts(pwd()));
+##  baseFolder = fileparts(fileparts(fileparts(pwd()))); % for debugging in Octave
+
+  baseFolder = fileparts(fileparts(pwd())); % assumes calling from Batch folder
   projectsFolder = fullfile(baseFolder,'Projects');
   octaveFolder = fullfile(projectsFolder,'Octave');
 
@@ -8,7 +10,6 @@ function [] = DoPlot(ticker)
   addpath(fullfile(octaveFolder,'Finance'));
 
   z=IntradayFile;
-  z.DataFolder = fullfile(fullfile(baseFolder,'data'),'finance');
   z.SetFolder('intraday');
   filename = strcat(ticker,'-i.csv');
   z.LoadFile(filename);

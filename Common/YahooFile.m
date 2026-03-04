@@ -19,7 +19,7 @@ classdef YahooFile < CsvFile
 
       obj = obj@CsvFile();
       obj.DataCol = 'Close'; % 'Open','High','Low','Close','Volume'
-      obj.DataFolder = '../../../data/finance'; % financial data folder;
+      obj.DataFolder = fullfile(Util.RootDataFolder,'etf'); % default data folder is etf;
       obj.DateFormat = 'yyyy-mm-dd';
       obj.DescendFlag = 0; % data is in ascending order: oldest -> newest
       obj.FileName = '';
@@ -117,7 +117,7 @@ classdef YahooFile < CsvFile
     function [] = SetFolder(this,type)
       % appends DataFolder with type
       if ismember(type,{"bond","equity","etf","index","intraday"})
-        this.DataFolder = fullfile(this.DataFolder,type);
+        this.DataFolder = fullfile(Util.RootDataFolder,type);
       end
     endfunction
 
