@@ -2,10 +2,6 @@ classdef Util < handle
   % parent utilities class
   % https://www.mathworks.com/matlabcentral/answers/182131-percentile-of-a-value-based-on-array-of-data
 
-  properties (Constant)
-    RootFolder = fileparts(fileparts(pwd())); % assumes calling from Batch folder
-  endproperties
-
   methods (Static = true) % Public
 
     function [] = AddDashedLine(ax,yval)
@@ -294,6 +290,10 @@ classdef Util < handle
 
     function [r] = Round(r)
       r = round(r.*100)./100; % round to nearest 2 decimal places
+    endfunction
+
+    function [r] = RootFolder()
+      r = fileparts(fileparts(fileparts(fileparts(which('Util')))));
     endfunction
 
     function [r] = RootDataFolder()
