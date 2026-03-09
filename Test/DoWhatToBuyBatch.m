@@ -1,4 +1,4 @@
-function [] = DoWhatToBuy(fid,f,tickernames)
+function [] = DoWhatToBuyBatch(fid,f,tickernames)
   n = numel(tickernames);
   r = zeros(n,1);
   buyLineExtrap = zeros(n,1);

@@ -1,8 +1,6 @@
 clear all;
 
-##baseFolder = fileparts(fileparts(fileparts(pwd()))); % for debugging in Octave
-
-baseFolder = fileparts(fileparts(pwd())); % assumes calling from Batch folder
+baseFolder = fileparts(fileparts(fileparts(fileparts(mfilename('fullpath')))));
 projectsFolder = fullfile(baseFolder,'Projects');
 octaveFolder = fullfile(projectsFolder,'Octave');
 
@@ -19,11 +17,11 @@ fclose(fid_read);
 tickernames = tickers{1};   % Cell array of strings
 
 f=YahooFile;
-f.DataFolder = fullfile(fullfile(baseFolder,'data'),'finance');
+f.DataFolder = fullfile(baseFolder,'data','finance');
 f.SetFolder('etf');
 
 fid_write = fopen(fullfile(batchFolder,'WhatToBuyBatchResult.txt'),'w');
-DoWhatToBuy(fid_write,f,tickernames);
+DoWhatToBuyBatch(fid_write,f,tickernames);
 fclose(fid_write);
 
 # 2. Equities
@@ -38,7 +36,7 @@ f.DataFolder = fullfile(fullfile(baseFolder,'data'),'finance');
 f.SetFolder('equity');
 
 fid_write = fopen(fullfile(batchFolder,'WhatToBuyBatchResult.txt'),'a');
-DoWhatToBuy(fid_write,f,tickernames);
+DoWhatToBuyBatch(fid_write,f,tickernames);
 fclose(fid_write);
 
 
