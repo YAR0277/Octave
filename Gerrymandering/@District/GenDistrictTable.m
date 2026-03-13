@@ -1,8 +1,8 @@
 function [] = GenDistrictTable(this)
   tic
 
-  javaaddpath("C:\\Octave\\xerces\\xml-apis.jar");
-  javaaddpath("C:\\Octave\\xerces\\xercesImpl.jar");
+  javaaddpath("C:\\Octave\\xerces\\xerces-2_11_0\\xml-apis.jar");
+  javaaddpath("C:\\Octave\\xerces\\xerces-2_11_0\\xercesImpl.jar");
 
   this.CsvTable = this.ReadCsvIntoTable(this.CsvFileDistrict);
   if size(this.CsvTable,1) == 0
@@ -40,7 +40,7 @@ function [] = GenDistrictTable(this)
     districtName = name.item(0).getTextContent();
 
     if this.CheckDistrictName(districtName) == 0
-      fprintf('Invalid distrct (%s)\n', districtName);
+      fprintf('Invalid district (%s)\n', districtName);
       continue;
     endif
 
