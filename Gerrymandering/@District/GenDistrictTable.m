@@ -1,8 +1,10 @@
 function [] = GenDistrictTable(this)
   tic
 
-  javaaddpath("C:\\Octave\\xerces\\xerces-2_11_0\\xml-apis.jar");
-  javaaddpath("C:\\Octave\\xerces\\xerces-2_11_0\\xercesImpl.jar");
+  if ispc
+    javaaddpath("C:\\Octave\\xerces\\xerces-2_11_0\\xml-apis.jar");
+    javaaddpath("C:\\Octave\\xerces\\xerces-2_11_0\\xercesImpl.jar");
+  endif
 
   this.CsvTable = this.ReadCsvIntoTable(this.CsvFileDistrict);
   if size(this.CsvTable,1) == 0

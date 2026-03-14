@@ -29,18 +29,18 @@ classdef District < handle
       pkg load io;
       pkg load tablicious;
 
-      addpath(genpath('../Common/')); % Constant
-      addpath(genpath('../Geodesy/')); % GeoUtil
+      addpath(fullfile(fileparts(fileparts(fileparts(mfilename('fullpath')))),'Common')); % Constant
+      addpath(fullfile(fileparts(fileparts(fileparts(mfilename('fullpath')))),'Common')); % GeoUtil
 
       obj.CsvDistrictTable = 'DistrictTable.csv';
-      obj.CsvFileDistrict = 'NTAD_Congressional_Districts_abridged.csv';
+      obj.CsvFileDistrict = 'NTAD_Congressional_Districts_abridged.csv';%'VA_Proposed_Districts.csv';
       obj.CsvTable = [];
-      obj.DataFolder = 'C:\Users\drdav\data\districts\';
       obj.DistrictTable = [];
       obj.DistrictTableBackup = [];
       obj.Project = Projection();
       obj.StateTable = [];
-      obj.XmlFile = 'NTAD_Congressional_Districts.xml'; % 'AK00.xml'
+      obj.XmlFile = 'NTAD_Congressional_Districts.xml';%'VA_Proposed_Districts.xml';%'AK00.xml'
+      obj.SetDataFolder;
     endfunction
 
     function [r] = get.Eccentricity(this)
@@ -73,5 +73,13 @@ classdef District < handle
     [r] = LookupDistrictArea(this,districtName);
     [r] = LookupDistrictName(this,districtName);
     [T] = ReadCsvIntoTable(this,filename);
+
+    function [] = SetDataFolder(this)
+      if ispc
+        this.DataFolder = 'C:\Users\drdav\data\districts\';
+      else
+        this.DataFolder = '/home/david/data/districts';
+      endif
+    endfunction
   endmethods
 endclassdef

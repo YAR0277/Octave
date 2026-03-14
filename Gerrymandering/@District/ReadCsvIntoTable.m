@@ -13,7 +13,7 @@ function [T] = ReadCsvIntoTable(this,filename)
     f7 = cell2mat(fin{7}); % PARTY
     party = string(f7(:,:));
     T = table(objectid,aland,awater,intptlat,intptlon,officeid,party);
-  catch
+  catch ME
     error('%s at file(%s), name(%s), line(%d), column(%d)\n',...
       ME.message,ME.stack(end).file,ME.stack(end).name,ME.stack(end).line,ME.stack(end).column);
   end_try_catch
