@@ -20,7 +20,7 @@ f=YahooFile;
 f.DataFolder = fullfile(baseFolder,'data','finance');
 f.SetFolder('etf');
 
-fid_write = fopen(fullfile(batchFolder,'WhatToBuyBatchResult.txt'),'w');
+fid_write = fopen(fullfile(batchFolder,'WhatToBuyBatchResult.csv'),'w');
 DoWhatToBuyBatch(fid_write,f,tickernames);
 fclose(fid_write);
 
