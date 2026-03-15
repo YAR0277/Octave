@@ -114,16 +114,18 @@ classdef Price < handle
       datetick('x',fmt,'keepticks','keeplimits');
       xlim([t(1) t(end)]);
 
+      hold on;
+      [vals,coeffs] = Util.GetSignal(t,x);
+      plot(t,vals,'--','Color',Color.Brown);
+
       tmax = t(idxMax);
       xmax = x(idxMax);
       smax = Util.GetSignal(tmax(2:end),xmax(2:end));
-      hold on;
       plot(tmax(2:end),smax,'--','Color',Color.Green,'MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
 
       tmin = t(idxMin);
       xmin = x(idxMin);
       smin = Util.GetSignal(tmin(2:end),xmin(2:end));
-      hold on;
       plot(tmin(2:end),smin,'--','Color',Color.Red,'MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
 
       ylabel('Price','FontSize',Constant.YLabelFontSize);
@@ -142,7 +144,7 @@ classdef Price < handle
       fprintf('Price Std. Dev: (%.2f), tol (%.2f)\n',std(x),tol);
       fprintf('IQM negatives: (%.2f), IQM positives (%.2f)\n',lt0,gt0);
 
-      if x(end) < buyLineExtrap+gt0
+      if this.GetBuyConditions(x,buyLineExtrap,gt0,coeffs)
         r = 1;
       else
         r = 0;
@@ -168,6 +170,8 @@ classdef Price < handle
 
       t=this.timestamp;
 
+      [~,coeffs] = Util.GetSignal(t,x);
+
       tmax = t(idxMax);
       xmax = x(idxMax);
       smax = Util.GetSignal(tmax(2:end),xmax(2:end));
@@ -178,7 +182,7 @@ classdef Price < handle
 
       buyLineExtrap = interp1(tmin(2:end),smin,datenum(date()),"extrap");
 
-      if x(end) < buyLineExtrap+gt0
+      if this.GetBuyConditions(x,buyLineExtrap,gt0,coeffs)
         r = 1;
       else
         r = 0;
@@ -301,6 +305,11 @@ classdef Price < handle
           endif
         endif
       endfor
+    endfunction
+
+    function [tof] = GetBuyConditions(~,x,buyLineExtrap,gt0,coeffs)
+      tof = x(end) < buyLineExtrap + gt0 ... % low price
+        && coeffs(1) > 0; % prices rising
     endfunction
   endmethods % Private
 endclassdef
