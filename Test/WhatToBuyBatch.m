@@ -21,6 +21,10 @@ f.DataFolder = fullfile(baseFolder,'data','finance');
 f.SetFolder('etf');
 
 fid_write = fopen(fullfile(batchFolder,'WhatToBuyBatchResult.csv'),'w');
+if fid_write == -1
+  error("Failed to open output file for writing.");
+endif
+fprintf(fid_write,"File,Result,Last Price,Buy Line Extrap,Range,Nr. Samples,ROR\n");
 DoWhatToBuyBatch(fid_write,f,tickernames);
 fclose(fid_write);
 
@@ -35,7 +39,10 @@ f=YahooFile;
 f.DataFolder = fullfile(fullfile(baseFolder,'data'),'finance');
 f.SetFolder('equity');
 
-fid_write = fopen(fullfile(batchFolder,'WhatToBuyBatchResult.txt'),'a');
+fid_write = fopen(fullfile(batchFolder,'WhatToBuyBatchResult.csv'),'a');
+if fid_write == -1
+  error("Failed to open output file for writing.");
+endif
 DoWhatToBuyBatch(fid_write,f,tickernames);
 fclose(fid_write);
 

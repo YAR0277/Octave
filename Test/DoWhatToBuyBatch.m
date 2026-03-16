@@ -3,7 +3,6 @@ function [] = DoWhatToBuyBatch(fid,f,tickernames)
   r = zeros(n,1);
   buyLineExtrap = zeros(n,1);
 
-  fprintf(fid,"File,Result,Last Price,Buy Line Extrap,Range,Nr. Samples,ROR\n");
   for i=1:n
     filename = tickernames{i};
     filename = strcat(filename,'-d.csv');
