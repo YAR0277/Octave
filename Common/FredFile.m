@@ -71,7 +71,7 @@ classdef FredFile < CsvFile
     function [] = DoPlot(this,t,x)
       figure;
       hold on;
-      plot(t,x,'-','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+      plot(t,x,'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
 
       [xticks,fmt] = Util.GetDateTicks(t);
       ax = gca;
