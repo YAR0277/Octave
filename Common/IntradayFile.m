@@ -8,6 +8,7 @@ classdef IntradayFile < YahooFile
       addpath(genpath('../Finance')); % for readf
 
       obj = obj@YahooFile();
+      obj.DataFolder = fullfile(Util.RootDataFolder,'intraday');
       obj.DateFormat = 'yyyy-mm-dd HH:MM:SS';
     endfunction
 

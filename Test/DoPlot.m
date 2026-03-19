@@ -8,7 +8,6 @@ function [] = DoPlot(ticker)
   addpath(fullfile(octaveFolder,'Finance'));
 
   z=IntradayFile;
-  z.SetFolder('intraday');
   filename = strcat(ticker,'-i.csv');
   z.LoadFile(filename);
   z.Plot;

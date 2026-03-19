@@ -4,8 +4,10 @@ classdef MACD < handle
   % https://www.investopedia.com/terms/m/macd.asp
 
   properties
-    fidelityFile    % Reference to FidelityFile class
+    Acceleration
+    InFile        % Reference to FidelityFile or YahooFile class
     timestamp % t - timestamp of prices
+    Velocity
     wndLengthFast % window length fast
     wndLengthSlow % window length fast
     wndLengthSignal % window length signal
@@ -13,24 +15,46 @@ classdef MACD < handle
 
   methods % Public
 
-    function obj = MACD(fidelityFile)
+    function obj = MACD(inFile)
       % c'tor to create an MACD object, input is an FidelityFile object.
-      if ~isa(fidelityFile, 'FidelityFile')
-        return;
+      if ~isa(inFile, 'FidelityFile') && ~isa(inFile, 'YahooFile')
+        error('Invalid input file class (%s)\n',class(inFile));
       endif
 
-      obj.fidelityFile = fidelityFile;
-      obj.timestamp = fidelityFile.GetTimestamp;
+      obj.InFile = inFile;
+      obj.timestamp = inFile.GetTimestamp;
       obj.wndLengthFast = 12;
       obj.wndLengthSlow = 26;
       obj.wndLengthSignal = 9;
+    endfunction
+
+    function [r] = get.Acceleration(this)
+      [signal,macd,~,~] = this.CalcMACD(this.GetPrices);
+      r = macd-signal;
+    endfunction
+
+    function [r] = get.Velocity(this)
+      [~,macd,~,~] = this.CalcMACD(this.GetPrices);
+      r = macd;
+    endfunction
+
+    function [this] = set.WndLengthFast(this,x)
+      this.wndLengthFast = x;
+    endfunction
+
+    function [this] = set.WndLengthSlow(this,x)
+      this.wndLengthSlow = x;
+    endfunction
+
+    function [this] = set.WndLengthSignal(this,x)
+      this.wndLengthSignal = x;
     endfunction
 
     function [] = Plot(this)
       figure;
       this.Subplot();
       ## https://stackoverflow.com/questions/67171470/easy-waybuiltin-function-to-put-main-title-in-plot-in-octave
-      S = axes('visible','off','title',this.fidelityFile.symbol,'FontSize',16);
+      S = axes('visible','off','title',this.InFile.Symbol,'FontSize',16);
     endfunction
   endmethods %Public
 
@@ -50,7 +74,7 @@ classdef MACD < handle
     endfunction
 
     function [r] = GetPrices(this)
-      r = this.fidelityFile.data.(this.fidelityFile.dataCol);
+      r = this.InFile.Data.(this.InFile.DataCol);
     endfunction
 
     function [] = Subplot(this)
