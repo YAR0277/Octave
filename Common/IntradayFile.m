@@ -10,6 +10,7 @@ classdef IntradayFile < YahooFile
       obj = obj@YahooFile();
       obj.DataFolder = fullfile(Util.RootDataFolder,'intraday');
       obj.DateFormat = 'yyyy-mm-dd HH:MM:SS';
+      obj.MACD = MACDIday(); # has-a
     endfunction
 
     function [] = Plot(this)
@@ -21,6 +22,15 @@ classdef IntradayFile < YahooFile
         return;
       endif
       this.DoPlot(t,x);
+    endfunction
+
+    function [] = PlotMACD(this)
+      t = this.GetTimestamp;
+      x = this.GetValue;
+      if isempty(x)
+        error('No data to plot.');
+      endif
+      this.MACD.Plot(this.Ticker,t,x);
     endfunction
   endmethods %Public
 

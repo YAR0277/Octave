@@ -8,14 +8,18 @@ classdef YahooFile < CsvFile
     DateFormat
     DescendFlag
     FileName
-    Symbol
+    MACD
+    Ticker
   endproperties
 
   methods % Public
 
     function [obj] = YahooFile()
 
-      addpath(genpath('../Finance')); % for readf
+      baseFolder = fileparts(fileparts(fileparts(fileparts(mfilename('fullpath')))));
+      projectsFolder = fullfile(baseFolder,'Projects');
+      octaveFolder = fullfile(projectsFolder,'Octave');
+      addpath(fullfile(octaveFolder,'Finance'));
 
       obj = obj@CsvFile();
       obj.DataCol = 'Close'; % 'Open','High','Low','Close','Volume'
@@ -23,7 +27,8 @@ classdef YahooFile < CsvFile
       obj.DateFormat = 'yyyy-mm-dd';
       obj.DescendFlag = 0; % data is in ascending order: oldest -> newest
       obj.FileName = '';
-      obj.Symbol = '';
+      obj.Ticker = '';
+      obj.MACD = MACDEx(); # has-a
     endfunction
 
     function [r] = get.DataCol(this)
@@ -66,12 +71,12 @@ classdef YahooFile < CsvFile
       this.FileName = fileName;
     endfunction
 
-    function [r] = get.Symbol(this)
-      r = this.Symbol;
+    function [r] = get.Ticker(this)
+      r = this.Ticker;
     endfunction
 
-    function [] = set.Symbol(this,symbol)
-      this.Symbol = symbol;
+    function [] = set.Ticker(this,ticker)
+      this.Ticker = ticker;
     endfunction
 
     function [r] = GetTimestamp(this)
@@ -100,10 +105,18 @@ classdef YahooFile < CsvFile
       t = this.GetTimestamp;
       x = this.GetValue;
       if isempty(x)
-        fprintf('No data to plot.\n');
-        return;
+        error('No data to plot.');
       endif
       this.DoPlot(t,x);
+    endfunction
+
+    function [] = PlotMACD(this)
+      t = this.GetTimestamp;
+      x = this.GetValue;
+      if isempty(x)
+        error('No data to plot.');
+      endif
+      this.MACD.Plot(this.Ticker,t,x);
     endfunction
 
     function [] = PlotAggregate(this,dt)

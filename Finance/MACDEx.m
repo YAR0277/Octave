@@ -1,0 +1,111 @@
+classdef MACDEx < handle
+  % MACDEx - Moving Average Convergence/Divergence, Ex = redesign
+  % https://en.wikipedia.org/wiki/MACD
+  % https://www.investopedia.com/terms/m/macd.asp
+
+  properties
+    Acceleration
+    Velocity
+    wndLengthFast % window length fast
+    wndLengthSlow % window length fast
+    wndLengthSignal % window length signal
+  endproperties
+
+  methods % Public
+
+    function obj = MACDEx()
+      obj.wndLengthFast = 12;
+      obj.wndLengthSlow = 26;
+      obj.wndLengthSignal = 9;
+    endfunction
+
+    function [r] = get.Acceleration(this,price)
+      [signal,macd,~,~] = this.CalcMACD(price);
+      r = macd-signal;
+    endfunction
+
+    function [r] = get.Velocity(this,price)
+      [~,macd,~,~] = this.CalcMACD(price);
+      r = macd;
+    endfunction
+
+    function [this] = set.WndLengthFast(this,x)
+      this.wndLengthFast = x;
+    endfunction
+
+    function [this] = set.WndLengthSlow(this,x)
+      this.wndLengthSlow = x;
+    endfunction
+
+    function [this] = set.WndLengthSignal(this,x)
+      this.wndLengthSignal = x;
+    endfunction
+
+    function [] = AddMidLine(this,y)
+      xlim = get(gca(),'xlim');
+      n=xlim(2)-xlim(1)+1;
+      plot([xlim(1):xlim(2)],ones(1,n)*y,'--','color',[0.5,0.5,0.5],'LineWidth',Constant.PlotLineWidth);
+    endfunction
+
+    function [r,macd,fast,slow] = CalcMACD(this,x)
+      % calculates the moving average convergence divergence
+      fast = MovingAvg.EMA(x,this.wndLengthFast);
+      slow = MovingAvg.EMA(x,this.wndLengthSlow);
+      macd = fast - slow; % macd line
+      r = MovingAvg.EMA(macd,this.wndLengthSignal); % signal line
+    endfunction
+
+    function [] = Plot(this,ticker,t,x)
+      figure;
+      this.Subplot(t,x);
+      ## https://stackoverflow.com/questions/67171470/easy-waybuiltin-function-to-put-main-title-in-plot-in-octave
+      S = axes('visible','off','title',ticker,'FontSize',16);
+    endfunction
+  endmethods %Public
+
+  methods (Access = private)
+    function [] = Subplot(this,t,x)
+
+      [signal,macd,fast,slow] = this.CalcMACD(x);
+
+      subplot(2,1,1);
+      plot(t,x,'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+
+      hold on;
+      plot(t,fast,'-','color','magenta','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+      plot(t,slow,'-','color',[0.65,0.16,0.16],'MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+
+      [xticks,fmt] = Util.GetDateTicks(t);
+      ax = gca;
+      set(ax,"XTick",xticks);
+      datetick('x',fmt,'keepticks','keeplimits');
+      xlim([xticks(1) xticks(end)]);
+
+      ylabel('Price','FontSize',Constant.YLabelFontSize);
+      legend('price','fast','slow','location','northwest');
+
+      grid on;
+      grid minor;
+      hold off;
+
+      subplot(2,1,2);
+      plot(t,signal,'-','color','red','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+
+      hold on;
+      plot(t,macd,'-','color','blue','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+      this.AddMidLine(0.0);
+
+      ax = gca;
+      set(ax,"XTick",xticks);
+      datetick('x',fmt,'keepticks','keeplimits');
+      xlim([xticks(1) xticks(end)]);
+
+      ylabel('MACD','FontSize',Constant.YLabelFontSize);
+      legend('signal','macd','location','northwest');
+
+      grid on;
+      grid minor;
+      hold off;
+    endfunction
+  endmethods
+endclassdef
