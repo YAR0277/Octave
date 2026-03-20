@@ -7,9 +7,9 @@ classdef MACDIday < MACDEx
 
     function obj = MACDIday()
       obj = obj@MACDEx();
-      obj.wndLengthFast = 12;
-      obj.wndLengthSlow = 26;
-      obj.wndLengthSignal = 9;
+      obj.wndLengthFast = 5;
+      obj.wndLengthSlow = 13;
+      obj.wndLengthSignal = 4;
     endfunction
 
     function [] = Plot(this,ticker,t,x)
