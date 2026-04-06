@@ -61,7 +61,11 @@ classdef Util < handle
       dataSorted = sort(data,"ascend");
       idx = ( percentile * length(data) ) / 100;
       idx = ceil(idx); % round up
-      r = dataSorted(idx);
+      if idx >= 1 && idx <= length(dataSorted)
+        r = dataSorted(idx);
+      else
+        r = 0;
+      endif
     endfunction
 
     function [r] = Diff(x,p)
@@ -107,8 +111,13 @@ classdef Util < handle
       lowerBound = Util.CalcPercentileValue(data,25);
       upperBound = Util.CalcPercentileValue(data,75);
       dataSorted = sort(data,"ascend");
-      ix = lowerBound <= dataSorted & dataSorted <= upperBound;
-      r = mean(dataSorted(ix));
+      if (lowerBound >= 1 && lowerBound <= length(dataSorted)) && ...
+          (upperBound >= 1 && upperBound <= length(dataSorted))
+        ix = lowerBound <= dataSorted & dataSorted <= upperBound;
+        r = mean(dataSorted(ix));
+      else
+        r = 0;
+      endif
     endfunction
 
     function [r] = GetAPR(t,y)
