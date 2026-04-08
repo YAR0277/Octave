@@ -258,8 +258,19 @@ classdef Util < handle
     function [r,p] = GetSignal(t,x)
       % p(x) coefficients of a polynomial of degree n that minimizes the least-squares-error of the fit to the points [x(:),y(:)]
       % s is a structure containing: 'yf' - the values of the polynomial for each value of x. etc.
-      [p,s] = polyfit(t,x,1);
-      r = s.yf;
+      r=[];
+      p=[];
+      % polyfit finds a polynomial of degree 1. Thus, there must be at least 2 data points in x.
+      if length(x) < 1
+        fprintf('Size of input data array is 0.\n');
+        return;
+      elseif length(x) == 1
+        p=x(1);
+        r=x(1);
+      else
+        [p,s] = polyfit(t,x,1);
+        r = s.yf;
+      endif
     endfunction
 
     function [r] = GetTimeStep(timestamp)

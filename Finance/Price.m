@@ -175,29 +175,10 @@ classdef Price < handle
       tmax = t(idxMax);
       xmax = x(idxMax);
 
-      if length(xmax) < 2
-        fprintf('Insufficient max price data (length=%d) to infer signal.\n',length(xmax));
-        smax = xmax;
-      else
-        smax = Util.GetSignal(tmax(2:end),xmax(2:end));
-      endif
-
       tmin = t(idxMin);
       xmin = x(idxMin);
-
-      if length(xmin) < 2
-        fprintf('Insufficient min price data (length=%d) to infer signal.\n',length(xmin));
-        smin = xmin;
-      else
-        smin = Util.GetSignal(tmin(2:end),xmin(2:end));
-      endif
-
-      if length(smin) < 2
-        fprintf('Insufficient min price signal (length=%d) for extrapolation, extrapolated price set to minimum price.\n',length(xmin));
-        buyLineExtrap = xmin;
-      else
-        buyLineExtrap = interp1(tmin(2:end),smin,datenum(date()),"extrap");
-      endif
+      smin = Util.GetSignal(tmin,xmin);
+      buyLineExtrap = interp1(tmin,smin,datenum(date()),"extrap");
 
       if this.GetBuyConditions(x,buyLineExtrap,gt0,coeffs)
         r = 1;
