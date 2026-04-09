@@ -170,7 +170,7 @@ classdef Price < handle
 
       t=this.timestamp;
 
-      [~,coeffs] = Util.GetSignal(t,x);
+      [sx,coeffs] = Util.GetSignal(t,x);
 
       tmax = t(idxMax);
       xmax = x(idxMax);
@@ -178,7 +178,16 @@ classdef Price < handle
       tmin = t(idxMin);
       xmin = x(idxMin);
       smin = Util.GetSignal(tmin,xmin);
-      buyLineExtrap = interp1(tmin,smin,datenum(date()),"extrap");
+
+      % if there is only 1 value in smin, i.e. prices have always increased,
+      % then do the extrapolation using the price data and its signal (x & sx)
+      % instead of the minimum price data and its signal (xmin & smin)
+      if length(smin) < 2
+        buyLineExtrap = interp1(t,sx,datenum(date()),"extrap");
+      else
+        buyLineExtrap = interp1(tmin,smin,datenum(date()),"extrap");
+      endif
+
 
       if this.GetBuyConditions(x,buyLineExtrap,gt0,coeffs)
         r = 1;

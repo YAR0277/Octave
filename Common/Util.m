@@ -111,13 +111,8 @@ classdef Util < handle
       lowerBound = Util.CalcPercentileValue(data,25);
       upperBound = Util.CalcPercentileValue(data,75);
       dataSorted = sort(data,"ascend");
-      if (lowerBound >= 1 && lowerBound <= length(dataSorted)) && ...
-          (upperBound >= 1 && upperBound <= length(dataSorted))
-        ix = lowerBound <= dataSorted & dataSorted <= upperBound;
-        r = mean(dataSorted(ix));
-      else
-        r = 0;
-      endif
+      ix = lowerBound <= dataSorted & dataSorted <= upperBound;
+      r = mean(dataSorted(ix));
     endfunction
 
     function [r] = GetAPR(t,y)
