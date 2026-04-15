@@ -129,6 +129,9 @@ classdef Price < handle
 
       ylabel('Price','FontSize',Constant.YLabelFontSize);
 
+      title_str = this.InFile.FileName;
+      title(title_str,'FontSize',Constant.TitleFontSize);
+
       grid on;
       grid minor;
       hold off;
