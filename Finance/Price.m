@@ -88,7 +88,7 @@ classdef Price < handle
     function [r] = WhatToBuy(varargin)
       % call is either 1) WhatToBuy() - no params, tol=std(x) or 2) WhatToBuy(10) - tol as parameter
       this = varargin{1}; % first param for a class method is 'this'
-      x = this.GetPrices();
+      [t,x] = this.GetPriceData(20); % ca. 20 trading days in one month
       [lt0,gt0] = this.GetIQM(x);
       switch nargin
         case 1
@@ -103,10 +103,8 @@ classdef Price < handle
       idxMin = imregionalmin(x);
       [idxMin,idxMax] = this.FilterNoiseFromLocalMaxMin(idxMin,idxMax,x,tol);
 
-      t=this.timestamp;
-
       figure;
-      plot(t,x,'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+      plot(this.timestamp,this.GetPrices,'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
 
       [xticks,fmt] = Util.GetDateTicks(this.timestamp);
       ax = gca;
@@ -115,18 +113,19 @@ classdef Price < handle
       xlim([t(1) t(end)]);
 
       hold on;
-      [vals,coeffs] = Util.GetSignal(t,x);
-      plot(t,vals,'--','Color',Color.Brown);
+      [t1,x1] = this.GetPriceData(5); % trend based on last 5
+      [sx,coeffs] = Util.GetSignal(t1,x1);
+      plot(t1,sx,'--','Color',Color.Brown);
 
       tmax = t(idxMax);
       xmax = x(idxMax);
-      smax = Util.GetSignal(tmax(2:end),xmax(2:end));
-      plot(tmax(2:end),smax,'--','Color',Color.Green,'MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+      smax = Util.GetSignal(tmax,xmax);
+      plot(tmax,smax,'--','Color',Color.Green,'MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
 
       tmin = t(idxMin);
       xmin = x(idxMin);
-      smin = Util.GetSignal(tmin(2:end),xmin(2:end));
-      plot(tmin(2:end),smin,'--','Color',Color.Red,'MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+      smin = Util.GetSignal(tmin,xmin);
+      plot(tmin,smin,'--','Color',Color.Red,'MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
 
       ylabel('Price','FontSize',Constant.YLabelFontSize);
 
@@ -134,26 +133,28 @@ classdef Price < handle
       grid minor;
       hold off;
 
-      t1 = this.timestamp(1);
-      t2 = this.timestamp(end);
-      fprintf('Time Period: [%s,%s], Time Step: %s, Nr.: %d\n',datestr(t1),datestr(t2),this.timestep,numel(x));
-      buyLineExtrap = interp1(tmin(2:end),smin,datenum(date()),"extrap");
+      fprintf('Time Period: [%s,%s], Time Step: %s, Nr.: %d\n',datestr(this.timestamp(1)),datestr(this.timestamp(end)),this.timestep,numel(x));
+      if length(smin) < 2
+        buyLineExtrap = interp1(t1,sx,datenum(date()),"extrap");
+      else
+        buyLineExtrap = interp1(tmin,smin,datenum(date()),"extrap");
+      endif
       fprintf('Buy Line Extrap: (%s) %.2f \n',date(),buyLineExtrap);
       fprintf('Buy Price Range: [%.2f,%.2f]\n',buyLineExtrap+lt0,buyLineExtrap+gt0);
       fprintf('Price Last: (%.2f)\n',x(end));
       fprintf('Price Std. Dev: (%.2f), tol (%.2f)\n',std(x),tol);
       fprintf('IQM negatives: (%.2f), IQM positives (%.2f)\n',lt0,gt0);
 
-      if this.GetBuyConditions(x,buyLineExtrap,gt0,coeffs)
+      if this.GetBuyConditions(x,buyLineExtrap,gt0)
         r = 1;
       else
         r = 0;
       endif
     endfunction
 
-    function [r,buyLineExtrap] = WhatToBuyBatch(varargin)
+    function [r,buyLineExtrap,m] = WhatToBuyBatch(varargin)
       this = varargin{1}; % first param for a class method is 'this'
-      x = this.GetPrices();
+      [t,x] = this.GetPriceData(20); % ca. 20 trading days in one month
       [lt0,gt0] = this.GetIQM(x);
       switch nargin
         case 1
@@ -168,9 +169,10 @@ classdef Price < handle
       idxMin = imregionalmin(x);
       [idxMin,idxMax] = this.FilterNoiseFromLocalMaxMin(idxMin,idxMax,x,tol);
 
-      t=this.timestamp;
 
-      [sx,coeffs] = Util.GetSignal(t,x);
+      [t1,x1] = this.GetPriceData(5); % trend based on last 5
+      [sx,coeffs] = Util.GetSignal(t1,x1);
+      m = coeffs(1); % first coefficient is slope of trend line
 
       tmax = t(idxMax);
       xmax = x(idxMax);
@@ -183,13 +185,13 @@ classdef Price < handle
       % then do the extrapolation using the price data and its signal (x & sx)
       % instead of the minimum price data and its signal (xmin & smin)
       if length(smin) < 2
-        buyLineExtrap = interp1(t,sx,datenum(date()),"extrap");
+        buyLineExtrap = interp1(t1,sx,datenum(date()),"extrap");
       else
         buyLineExtrap = interp1(tmin,smin,datenum(date()),"extrap");
       endif
 
 
-      if this.GetBuyConditions(x,buyLineExtrap,gt0,coeffs)
+      if this.GetBuyConditions(x,buyLineExtrap,gt0)
         r = 1;
       else
         r = 0;
@@ -314,9 +316,26 @@ classdef Price < handle
       endfor
     endfunction
 
-    function [tof] = GetBuyConditions(~,x,buyLineExtrap,gt0,coeffs)
-      tof = x(end) < buyLineExtrap + gt0 ... % low price
-        && coeffs(1) > 0; % prices rising
+    function [tof] = GetBuyConditions(~,x,buyLineExtrap,gt0)
+      tof = x(end) < buyLineExtrap + gt0; % low price
     endfunction
+
+    function [t,x] = GetPriceData(this,n)
+      % return most recent n prices
+      x = this.GetPrices();
+      if length(x) < n
+        x = x(1:end);
+      else
+        x = x(end-(n-1):end);
+      endif
+
+      t = this.timestamp;
+      if length(t) < n
+        t = t(1:end);
+      else
+        t = t(end-(n-1):end);
+      endif
+    endfunction
+
   endmethods % Private
 endclassdef
