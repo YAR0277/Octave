@@ -79,6 +79,14 @@ classdef YahooFile < CsvFile
       this.Ticker = ticker;
     endfunction
 
+    function [r] = GetClose(this)
+      r = this.Data.('Close');
+    end
+
+    function [r] = GetOpen(this)
+      r = this.Data.('Open');
+    end
+
     function [r] = GetTimestamp(this)
       r = this.Data.Date;
     end
@@ -117,6 +125,65 @@ classdef YahooFile < CsvFile
         error('No data to plot.');
       endif
       this.MACD.Plot(this.Ticker,t,x);
+    endfunction
+
+    function [] = PlotOO(this)
+      % PlotOO stands for plot on/off market:
+      % on = NYSE market hours, off = after hrs + pre-market
+      ts = this.GetTimestamp;
+      open = this.GetOpen;
+      close = this.GetClose;
+      t = ts(2:end);
+      doff = open(2:end)-close(1:end-1); % off market diffs
+      don = diff(close); % on market diffs
+
+      figure;
+      hold on;
+
+      for i = 1:length(t)
+        plot([t(i) t(i)],[don(i) doff(i)],'k');
+
+        if don(i) >= 0 && doff(i) >= 0
+          rectangle('Position', [t(i)-0.3, 0, 0.6, don(i)], ...
+            'FaceColor', Color.LightGrey, 'EdgeColor', 'k');
+          rectangle('Position', [t(i)-0.3, don(i), 0.6, don(i)+doff(i)], ...
+            'FaceColor', Color.Maroon, 'EdgeColor', 'k');
+        elseif don(i) < 0 && doff(i) < 0
+          rectangle('Position', [t(i)-0.3, don(i), 0.6, -don(i)], ...
+            'FaceColor', Color.LightGrey, 'EdgeColor', 'k');
+          rectangle('Position', [t(i)-0.3, don(i)+doff(i), 0.6, -doff(i)], ...
+            'FaceColor', Color.Maroon, 'EdgeColor', 'k');
+        elseif don(i) < 0 && doff(i) >= 0
+          rectangle('Position', [t(i)-0.3, don(i), 0.6, -don(i)], ...
+            'FaceColor', Color.LightGrey, 'EdgeColor', 'k');
+          rectangle('Position', [t(i)-0.3, 0, 0.6, doff(i)], ...
+            'FaceColor', Color.Maroon, 'EdgeColor', 'k');
+        elseif don(i) >= 0 && doff(i) < 0
+          rectangle('Position', [t(i)-0.3, 0, 0.6, don(i)], ...
+            'FaceColor', Color.LightGrey, 'EdgeColor', 'k');
+          rectangle('Position', [t(i)-0.3, doff(i), 0.6, -doff(i)], ...
+            'FaceColor', Color.Maroon, 'EdgeColor', 'k');
+        endif
+      endfor
+
+      plot(t,don,'k--');
+
+      [xticks,fmt] = Util.GetDateTicks(t);
+      ax = gca;
+      set(ax,"XTick",xticks);
+      datetick('x',fmt,'keepticks','keeplimits');
+      xlim([t(1) t(end)]);
+
+      label_str = "Price Differences";
+      ylabel(label_str,'FontSize',Constant.YLabelFontSize);
+
+      ylimits = ylim;
+      ylim([ylimits(1) ylimits(2)]);
+
+      title_str = this.FileName;
+      title(title_str,'FontSize',Constant.TitleFontSize);
+      grid on;
+      hold off;
     endfunction
 
     function [] = PlotAggregate(this,dt)
