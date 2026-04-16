@@ -135,7 +135,7 @@ classdef YahooFile < CsvFile
       close = this.GetClose;
       t = ts(2:end);
       doff = open(2:end)-close(1:end-1); % off market diffs
-      don = diff(close); % on market diffs
+      don = close(2:end)-open(2:end); % on market diffs
 
       figure;
       hold on;
@@ -184,6 +184,9 @@ classdef YahooFile < CsvFile
       title(title_str,'FontSize',Constant.TitleFontSize);
       grid on;
       hold off;
+
+      fprintf('Total price changes -  on hours (%.2f)\n', sum(don(don>0)) - sum(don(don<0)) );
+      fprintf('Total price changes - off hours (%.2f)\n', sum(doff(doff>0)) - sum(doff(doff<0)) );
     endfunction
 
     function [] = PlotAggregate(this,dt)
