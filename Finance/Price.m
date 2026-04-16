@@ -88,7 +88,7 @@ classdef Price < handle
     function [r] = WhatToBuy(varargin)
       % call is either 1) WhatToBuy() - no params, tol=std(x) or 2) WhatToBuy(10) - tol as parameter
       this = varargin{1}; % first param for a class method is 'this'
-      [t,x] = this.GetPriceData(20); % ca. 20 trading days in one month
+      [t,x] = this.GetPriceData(1e4); % 10000, a big number, returns all availabe data
       [lt0,gt0] = this.GetIQM(x);
       switch nargin
         case 1
@@ -104,7 +104,7 @@ classdef Price < handle
       [idxMin,idxMax] = this.FilterNoiseFromLocalMaxMin(idxMin,idxMax,x,tol);
 
       figure;
-      plot(this.timestamp,this.GetPrices,'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+      plot(t,x,'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
 
       [xticks,fmt] = Util.GetDateTicks(this.timestamp);
       ax = gca;
@@ -157,7 +157,7 @@ classdef Price < handle
 
     function [r,buyLineExtrap,m] = WhatToBuyBatch(varargin)
       this = varargin{1}; % first param for a class method is 'this'
-      [t,x] = this.GetPriceData(20); % ca. 20 trading days in one month
+      [t,x] = this.GetPriceData(1e4); % 10000, a big number, returns all availabe data
       [lt0,gt0] = this.GetIQM(x);
       switch nargin
         case 1
