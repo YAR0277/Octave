@@ -26,8 +26,7 @@ function [] = DoWhatToBuy(ticker)
   endif
 
   y.LoadFile(filename);
-  p=Price(y);
-  p.WhatToBuy;
+  y.WhatToBuy;
 
 endfunction
 

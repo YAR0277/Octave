@@ -9,6 +9,7 @@ classdef YahooFile < CsvFile
     DescendFlag
     FileName
     MACD
+    PriceEx
     Ticker
   endproperties
 
@@ -29,6 +30,7 @@ classdef YahooFile < CsvFile
       obj.FileName = '';
       obj.Ticker = '';
       obj.MACD = MACDEx(); # has-a
+      obj.PriceEx = PriceEx(obj); # has-a
     endfunction
 
     function [r] = get.DataCol(this)
@@ -69,6 +71,14 @@ classdef YahooFile < CsvFile
 
     function [] = set.FileName(this,fileName)
       this.FileName = fileName;
+    endfunction
+
+    function [lt0,gt0] = GetIQM(this,x)
+      [lt0,gt0] = this.PriceEx.GetIQM(x);
+    endfunction
+
+    function [r] = GetPrices(this)
+      r = this.PriceEx.GetPrices;
     endfunction
 
     function [r] = get.Ticker(this)
@@ -212,6 +222,14 @@ classdef YahooFile < CsvFile
           fprintf('%-30s %10d bytes   %s\n', files(k).name, files(k).bytes, files(k).date);
         endif
       endfor
+    endfunction
+
+    function [r] = WhatToBuy(this,varargin)
+      [r] = this.PriceEx.WhatToBuy(varargin);
+    endfunction
+
+    function [r,buyLineExtrap,m] = WhatToBuyBatch(this,varargin)
+      [r,buyLineExtrap,m] = this.PriceEx.WhatToBuyBatch(varargin);
     endfunction
   endmethods %Public
 

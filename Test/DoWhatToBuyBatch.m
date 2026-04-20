@@ -7,10 +7,9 @@ function [] = DoWhatToBuyBatch(fid,f,tickernames)
     filename = tickernames{i};
     filename = strcat(filename,'-d.csv');
     f.LoadFile(filename);
-    p=Price(f);
-    x=p.GetPrices;
-    [lt0,gt0] = p.GetIQM(x);
-    [r(i),buyLineExtrap(i),m]=p.WhatToBuyBatch;
+    x=f.GetPrices;
+    [lt0,gt0] = f.GetIQM(x);
+    [r(i),buyLineExtrap(i),m]=f.WhatToBuyBatch;
     returns=Returns(f);
     [num,ror,~]=returns.WhatToBuyBatch;
     fprintf(fid, ...
@@ -22,7 +21,6 @@ function [] = DoWhatToBuyBatch(fid,f,tickernames)
       buyLineExtrap(i),...
       buyLineExtrap(i)+lt0,buyLineExtrap(i)+gt0,...
       num,ror);
-    clear p;
   endfor
 endfunction
 
