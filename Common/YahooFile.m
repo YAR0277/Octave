@@ -10,6 +10,7 @@ classdef YahooFile < CsvFile
     FileName
     MACD
     PriceEx
+    ReturnsEx
     Ticker
   endproperties
 
@@ -31,6 +32,7 @@ classdef YahooFile < CsvFile
       obj.Ticker = '';
       obj.MACD = MACDEx(); # has-a
       obj.PriceEx = PriceEx(obj); # has-a
+      obj.ReturnsEx = ReturnsEx(obj); # has-a
     endfunction
 
     function [r] = get.DataCol(this)
@@ -231,6 +233,11 @@ classdef YahooFile < CsvFile
     function [r,buyLineExtrap,m] = WhatToBuyBatch(this,varargin)
       [r,buyLineExtrap,m] = this.PriceEx.WhatToBuyBatch(varargin);
     endfunction
+
+    function [num,ror,apr] = CalcReturns(this)
+      [num,ror,apr] = this.ReturnsEx.CalcReturns();
+    endfunction
+
   endmethods %Public
 
   methods (Access = private)

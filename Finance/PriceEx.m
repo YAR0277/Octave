@@ -7,9 +7,13 @@ classdef PriceEx < handle
 
   methods % Public
 
-    function obj = PriceEx(Infile)
+    function obj = PriceEx(inFile)
+      % c'tor to create a Price object, input is an FidelityFile object.
+      if ~isa(inFile, 'FidelityFile') && ~isa(inFile, 'YahooFile')
+        error('Invalid input file class (%s)\n',class(inFile));
+      endif
+      obj.InFile = inFile;
       pkg load image; % imregionalmax, imregionalmin
-      obj.InFile = Infile;
     endfunction
 
     function [lt0,gt0] = GetIQM(this,x)

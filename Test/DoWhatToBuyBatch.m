@@ -10,8 +10,7 @@ function [] = DoWhatToBuyBatch(fid,f,tickernames)
     x=f.GetPrices;
     [lt0,gt0] = f.GetIQM(x);
     [r(i),buyLineExtrap(i),m]=f.WhatToBuyBatch;
-    returns=Returns(f);
-    [num,ror,~]=returns.WhatToBuyBatch;
+    [num,ror,~]=f.CalcReturns;
     fprintf(fid, ...
       '%s,%d,%.2f,%.2f,%.2f,[%.2f:%.2f],%d,%.2f\n',...
       filename,...
