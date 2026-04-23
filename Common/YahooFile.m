@@ -234,8 +234,8 @@ classdef YahooFile < CsvFile
       [r,buyLineExtrap,m] = this.PriceEx.WhatToBuyBatch(varargin);
     endfunction
 
-    function [num,ror,apr] = CalcReturns(this)
-      [num,ror,apr] = this.ReturnsEx.CalcReturns();
+    function [num,ror,apr] = CalcReturn(this)
+      [num,ror,apr] = this.ReturnsEx.CalcReturn();
     endfunction
 
   endmethods %Public

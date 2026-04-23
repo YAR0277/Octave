@@ -5,8 +5,6 @@ classdef ReturnsEx < handle
     Acceleration
     InFile        % Reference to FidelityFile class
     PlotType      % 1='stem', 2='bar', 3='line', 4='line with velocity & acceleration'
-    rateOfReturn  % rate of return
-    rateOfReturnApproximate  % rate of return using natural log approximation
     startDay      % calculate returns starting at startDay
     endDay        % calculate returns vis-a-vis endDay
     Velocity
@@ -36,11 +34,13 @@ classdef ReturnsEx < handle
     endfunction
 
     function [r] = get.Acceleration(this)
-      r = diff(this.rateOfReturn);
+      [~,y,~] = this.GetReturnData();
+      r = diff(y);
     endfunction
 
     function [r] = get.Velocity(this)
-      r = this.rateOfReturn;
+      [~,y,~] = this.GetReturnData();
+      r = y;
     endfunction
 
     function [this] = set.EndDay(this,date)
@@ -53,19 +53,44 @@ classdef ReturnsEx < handle
       this.startDay = Util.GetDatenum(date);
     endfunction
 
+    function [num,ror,apr] = CalcReturn(this)
+      % main method for a simple ror.
+      [t,y,z] = this.GetReturnData();
+      num = numel(y);
+      ror = exp(sum(z))-1;
+      ror = Util.Round(ror*100); % as a percent, rounded to 2 decimal places
+      apr = Util.GetAPR(t,z);
+      apr = Util.Round(apr*100); % as a percent, rounded to 2 decimal places
+    endfunction
+
     function [r] = GetTimestamp(this)
       r = this.InFile.GetTimestamp();
     end
 
     function [r] = GetValue(this)
-      r = this.RateOfReturn;
+      [~,r,~] = this.GetReturnData();
     end
 
     function [t,y,z] = GetReturnData(this)
-      % calls CalcROR and sets return data rateOfReturn and rateOfReturnApproximate
-      [t,this.rateOfReturn,this.rateOfReturnApproximate] = this.CalcROR();
-      y = this.rateOfReturn;
-      z = this.rateOfReturnApproximate;
+      % main method to get return data, arrays of returns for each period.
+      timestamp = this.GetTimestamp();
+
+      if isempty(this.startDay)
+        this.startDay = timestamp(1);
+      endif
+
+      if isempty(this.endDay)
+        this.endDay = timestamp(end);
+      endif
+
+      ix = this.startDay <= timestamp & timestamp <= this.endDay;
+      t = timestamp(ix);
+      price = this.InFile.GetValue;
+      x = price(ix);
+
+      t = t(2:end); % n price values => n-1 returns
+      y = Util.CalcPctChangeRaw(x);
+      z = Util.CalcPctChangeLogRaw(x);
     endfunction
 
     function [r] = Plot(this)
@@ -118,75 +143,9 @@ classdef ReturnsEx < handle
       this.DoStats();
     endfunction
 
-    function [num,ror,apr] = CalcReturns(this)
-      [t,y,z] = this.GetReturnData();
-      num = numel(y);
-      ror = sum(z);
-      apr = Util.GetAPR(t,z);
-    endfunction
   endmethods % Public
 
   methods (Access = private)
-
-    function [r] = CalcReturnLog(~,x)
-
-      if numel(x) < 2 % at least 2 to get a return
-        return;
-      endif
-
-      dx = diff(log(x));
-      rlog = sum(dx);
-      r = exp(rlog)-1;
-      r = Util.Round(r*100); % as a percent, rounded to 2 decimal places
-    endfunction
-
-    function [r] = CalcReturnSimple(~,x)
-
-      if numel(x) < 2 % at least 2 to get a return
-        return;
-      endif
-
-      r = (x(end)-x(1))/ x(1);
-      r = Util.Round(r*100); % as a percent, rounded to 2 decimal places
-    endfunction
-
-    function [t,ror,aror] = CalcROR(this)
-      % returns ROR and approximate ROR
-      timestamp = this.GetTimestamp();
-
-      if isempty(this.startDay)
-        this.startDay = timestamp(1);
-      endif
-
-      if isempty(this.endDay)
-        this.endDay = timestamp(end);
-      endif
-
-      ix = this.startDay <= timestamp & timestamp <= this.endDay;
-      t = timestamp(ix);
-      price = this.InFile.GetValue;
-      x = price(ix);
-
-      t = timestamp(2:end); % n price values => n-1 returns
-      ror = this.CalcReturnSimple(x);
-      aror = this.CalcReturnLog(x);
-    endfunction
-
-  function [] = DoLabels(this,dt,dx)
-      t = [this.returns.firstDay];
-      x = [this.returns.rateOfReturn];
-
-      labels = num2str(x(:));
-
-      t = arrayfun(@(t) t+dt, t(:)); % adjust t position
-
-      ix = x > 0;
-      x(ix) = arrayfun(@(x) x+dx, x(ix)); % adjust x position for pos returns
-      ix = x <= 0;
-      x(ix) = arrayfun(@(x) x-dx, x(ix)); % adjust x position for neg returns
-
-      text(t,x,labels,'FontWeight','bold','FontSize',9);
-    endfunction
 
     function [r] = DoStats(this)
 
@@ -197,10 +156,11 @@ classdef ReturnsEx < handle
         return;
       endif
 
-      timestep = Util.GetTimeStep(this.GetTimestamp());
-      fprintf('Time Period: [%s,%s], Time Step: %s, Nr. Samples: %d\n',datestr(t(1)),datestr(t(2)),timestep,numel(y));
+      timestep = Util.GetTimeStep(t);
+      fprintf('Time Period: [%s,%s], Time Step: %s, Nr. Samples: %d\n',datestr(t(1)),datestr(t(end)),timestep,numel(y));
       fprintf('Returns: range: [%.2f%%,%.2f%%], mean: %.2f%%, std. dev.: %.2f%%\n',min(y),max(y),mean(y),std(y));
-      fprintf('Returns: sum: %.2f%%, APR=%.2f%%\n',sum(z),Util.GetAPR(t,z));
+      [~,ror,apr] = CalcReturn(this);
+      fprintf('Returns: cumulative: %.2f%%, APR=%.2f%%\n',ror,apr);
       tol = 0;
       % returns gt, ls tolerance
       ix1 = y >= tol;
@@ -225,6 +185,9 @@ classdef ReturnsEx < handle
         return;
       endif
 
+      y = Util.Round(y*100); % as a percent, rounded to 2 decimal places
+      z = Util.Round(z*100); % as a percent, rounded to 2 decimal places
+
       figure;
       bar(t,y);
 
@@ -246,6 +209,9 @@ classdef ReturnsEx < handle
         fprintf('Length of return data (l.t. %d) insufficient to plot.\n',Constant.MinLengthReturns);
         return;
       endif
+
+      y = Util.Round(y*100); % as a percent, rounded to 2 decimal places
+      z = Util.Round(z*100); % as a percent, rounded to 2 decimal places
 
       figure;
       hold on;
@@ -272,6 +238,9 @@ classdef ReturnsEx < handle
         return;
       endif
 
+      y = Util.Round(y*100); % as a percent, rounded to 2 decimal places
+      z = Util.Round(z*100); % as a percent, rounded to 2 decimal places
+
       figure;
       hold on;
       plot(t,this.Velocity,'--.','Color',Color.Magenta,'MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
@@ -297,6 +266,9 @@ classdef ReturnsEx < handle
         fprintf('No return data found to plot.\n');
         return;
       endif
+
+      y = Util.Round(y*100); % as a percent, rounded to 2 decimal places
+      z = Util.Round(z*100); % as a percent, rounded to 2 decimal places
 
       figure;
       stem(t,y);

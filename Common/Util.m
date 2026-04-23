@@ -48,6 +48,26 @@ classdef Util < handle
       r = Util.Round(dx*100); % as a percent, rounded to 2 decimal places
     endfunction
 
+    function [r] = CalcPctChangeRaw(x)
+
+      if numel(x) < 2 % at least 2 to get a return
+        return;
+      endif
+
+      dx = diff(x);
+      r = ( dx./ x(1:end-1) );
+    endfunction
+
+    function [r] = CalcPctChangeLogRaw(x)
+
+      if numel(x) < 2 % at least 2 to get a return
+        return;
+      endif
+
+      dx = diff(log(x));
+      r = dx;
+    endfunction
+
     function [r] = CalcPercentile(data,value)
       data = data(:)';
       value = value(:);
