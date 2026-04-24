@@ -11,6 +11,7 @@ classdef YahooFile < CsvFile
     MACD
     PriceEx
     ReturnsEx
+    RSI
     Ticker
   endproperties
 
@@ -33,6 +34,7 @@ classdef YahooFile < CsvFile
       obj.MACD = MACDEx(obj); # has-a
       obj.PriceEx = PriceEx(obj); # has-a
       obj.ReturnsEx = ReturnsEx(obj); # has-a
+      obj.RSI = RSIEx(obj); # has-a
     endfunction
 
     function [r] = get.DataCol(this)
@@ -84,7 +86,12 @@ classdef YahooFile < CsvFile
     endfunction
 
     function [r] = get.Ticker(this)
-      r = this.Ticker;
+      if isempty(this.Ticker)
+        [~,filename,~] = fileparts(this.FileName);
+        r = regexprep(filename,'-[di]$', '');
+      else
+        r = this.Ticker;
+      endif
     endfunction
 
     function [] = set.Ticker(this,ticker)
@@ -136,7 +143,11 @@ classdef YahooFile < CsvFile
       if isempty(x)
         error('No data to plot.');
       endif
-      this.MACD.Plot(this.Ticker,t,x);
+      this.MACD.Plot(t,x);
+    endfunction
+
+    function [] = PlotRSI(this)
+      this.RSI.Plot;
     endfunction
 
     function [] = PlotOO(this)
@@ -243,12 +254,13 @@ classdef YahooFile < CsvFile
   methods (Access = private)
 
     function [] = DoPlot(this,t,x)
-      figure;
+      ax = figure;
       hold on;
-      plot(t,x,'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+      plot(ax,x,'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+
+      Util.AddWatermark(ax,this.Ticker);
 
       [xticks,fmt] = Util.GetDateTicks(t);
-      ax = gca;
       set(ax,"XTick",xticks);
       datetick('x',fmt,'keepticks','keeplimits');
       xlim([t(1) t(end)]);

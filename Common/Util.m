@@ -12,6 +12,14 @@ classdef Util < handle
       hold off;
     endfunction
 
+    function [] = AddWatermark(ax,txt)
+      text(ax,0.5, 0.5, txt, ...
+           'units', 'normalized', ...
+           'fontsize', 50, ...
+           'color', Color.LightGrey, ...
+           'horizontalalignment', 'center');
+    endfunction
+
     function [t_out,x_out] = Aggregate(t_in,x_in,dt)
       % [t_out,x_out] = Aggregate(t_in,x_in,dt) where t_in=input times, x_in=input values, dt=12, for example.
       a = int16(0:dt:length(x_in));

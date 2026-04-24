@@ -5,18 +5,16 @@ classdef MACDIday < MACDEx
 
   methods % Public
 
-    function obj = MACDIday()
-      obj = obj@MACDEx();
+    function obj = MACDIday(inFile)
+      obj = obj@MACDEx(inFile);
       obj.wndLengthFast = 8;
       obj.wndLengthSlow = 21;
       obj.wndLengthSignal = 5;
     endfunction
 
-    function [] = Plot(this,ticker,t,x)
+    function [] = Plot(this,t,x)
       figure;
       this.Subplot(t,x);
-      ## https://stackoverflow.com/questions/67171470/easy-waybuiltin-function-to-put-main-title-in-plot-in-octave
-      S = axes('visible','off','title',ticker,'FontSize',16);
     endfunction
   endmethods %Public
 

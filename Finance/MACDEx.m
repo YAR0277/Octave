@@ -61,22 +61,22 @@ classdef MACDEx < handle
       r = MovingAvg.EMA(macd,this.wndLengthSignal); % signal line
     endfunction
 
-    function [] = Plot(this,ticker,t,x)
+    function [] = Plot(this,t,x)
       figure;
       this.Subplot(t,x);
       ## https://stackoverflow.com/questions/67171470/easy-waybuiltin-function-to-put-main-title-in-plot-in-octave
-      S = axes('visible','off','title',ticker,'FontSize',16);
     endfunction
   endmethods %Public
 
   methods (Access = private)
     function [] = Subplot(this,t,x)
 
-      [signal,macd,fast,slow] = this.CalcMACD(x);
-      volume = this.InFile.GetVolume;
-
       ax1=subplot(3,1,1);
+
+      [signal,macd,fast,slow] = this.CalcMACD(x);
       plot(t,x,'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+
+      Util.AddWatermark(ax1,this.InFile.Ticker);
 
       hold on;
       plot(t,fast,'-','color',Color.Magenta,'MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
@@ -94,7 +94,8 @@ classdef MACDEx < handle
       hold off;
 
       ax2=subplot(3,1,2);
-      bar(t,volume);
+      volume = this.InFile.GetVolume;
+      bar(t,volume,'facecolor',Color.LightGrey);
 
       set(ax2,"xticklabel",[]);
       xlim([xticks(1) xticks(end)]);
@@ -102,7 +103,6 @@ classdef MACDEx < handle
       yticks = get(ax2,"YTick");
       ticklabels = arrayfun(@(x) strcat(num2str(x),'k'), yticks/1000, "UniformOutput", false);
       yticklabels(ticklabels);
-
       ylabel('Volume','FontSize',Constant.YLabelFontSize);
 
       grid on;
@@ -144,7 +144,6 @@ classdef MACDEx < handle
       set(ax2, "position", pos2);
 
       linkaxes([ax1, ax2], "x");
-
     endfunction
   endmethods
 endclassdef

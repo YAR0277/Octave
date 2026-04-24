@@ -10,7 +10,7 @@ classdef IntradayFile < YahooFile
       obj = obj@YahooFile();
       obj.DataFolder = fullfile(Util.RootDataFolder,'intraday');
       obj.DateFormat = 'yyyy-mm-dd HH:MM:SS';
-      obj.MACD = MACDIday(); # has-a
+      obj.MACD = MACDIday(obj); # has-a
     endfunction
 
     function [] = Plot(this)
@@ -30,7 +30,7 @@ classdef IntradayFile < YahooFile
       if isempty(x)
         error('No data to plot.');
       endif
-      this.MACD.Plot(this.Ticker,t,x);
+      this.MACD.Plot(t,x);
     endfunction
   endmethods %Public
 
@@ -42,6 +42,8 @@ classdef IntradayFile < YahooFile
       tod = (t-floor(t))*86400; % time of day is seconds since midnight
       plot(tod,x,'--.','Color',Color.LightGrey);
 
+      Util.AddWatermark(gca,this.Ticker);
+
       m = MovingAvg.CMA(x,6); % trend, 6*5min = 30min
       plot(tod,m,'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
 
@@ -51,8 +53,8 @@ classdef IntradayFile < YahooFile
                       xt, 'UniformOutput', false);
       set(gca, 'xticklabel', labels);
 
-      title_str = this.FileName;
-      title(title_str,'FontSize',Constant.TitleFontSize);
+##      title_str = this.FileName;
+##      title(title_str,'FontSize',Constant.TitleFontSize);
       grid on;
       hold off;
     endfunction

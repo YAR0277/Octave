@@ -30,11 +30,15 @@ classdef PriceEx < handle
       r = this.InFile.Data.(this.InFile.DataCol);
     endfunction
 
+    function [r] = GetTimestamp(this)
+      r = this.InFile.GetTimestamp();
+    end
+
     function [r] = Plot(this)
       figure;
       this.DoPlot();
       ## https://stackoverflow.com/questions/67171470/easy-waybuiltin-function-to-put-main-title-in-plot-in-octave
-      S = axes('visible','off','title',this.InFile.Symbol,'FontSize',16);
+##      S = axes('visible','off','title',this.InFile.Symbol,'FontSize',16);
     endfunction
 
     function [r] = Stats(this)
@@ -46,7 +50,7 @@ classdef PriceEx < handle
       endif
 
       fprintf('Symbol: %s\n',this.InFile.Symbol);
-      timestamp = this.InFile.GetTimestamp();
+      timestamp = this.GetTimestamp();
       t1 = timestamp(1);
       t2 = timestamp(end);
       timestep = Util.GetTimeStep(timestamp);
@@ -103,10 +107,11 @@ classdef PriceEx < handle
       figure;
       plot(t,x,'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
 
-      timestamp = this.InFile.GetTimestamp();
+      Util.AddWatermark(gca,this.InFile.Ticker);
+
+      timestamp = this.GetTimestamp();
       [xticks,fmt] = Util.GetDateTicks(timestamp);
-      ax = gca;
-      set(ax,"XTick",xticks);
+      set(gca,"XTick",xticks);
       datetick('x',fmt,'keepticks','keeplimits');
       xlim([t(1) t(end)]);
 
@@ -126,9 +131,6 @@ classdef PriceEx < handle
       plot(tmin,smin,'--','Color',Color.Red,'MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
 
       ylabel('Price','FontSize',Constant.YLabelFontSize);
-
-      title_str = this.InFile.FileName;
-      title(title_str,'FontSize',Constant.TitleFontSize);
 
       grid on;
       grid minor;
@@ -227,21 +229,23 @@ classdef PriceEx < handle
 
     function [] = DoPlot(this)
 
-      t=this.InFile.GetTimestamp();
+      timestamp=this.GetTimestamp();
       price = this.GetPrices();
 
-      subplot(2,1,1);
-      plot(t(2:end),price(2:end),'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+      ax1=subplot(2,1,1);
+      plot(ax1,timestamp(2:end),price(2:end),'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+
+      Util.AddWatermark(ax1,this.InFile.Ticker);
 
       hold on;
-      s = Util.GetSignal(t,price);
-      plot(t(2:end),s(2:end),'--','Color',Color.Red,'MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+      s = Util.GetSignal(timestamp,price);
+      plot(ax1,timestamp(2:end),s(2:end),'--','Color',Color.Red,'MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
 
       [xticks,fmt] = Util.GetDateTicks(timestamp);
-      ax = gca;
-      set(ax,"XTick",xticks);
+
+      set(ax1,"XTick",xticks);
       datetick('x',fmt,'keepticks','keeplimits');
-      xlim([t(1) t(end)]);
+      xlim([timestamp(1) timestamp(end)]);
 
       ylabel('Price','FontSize',Constant.YLabelFontSize);
 
@@ -249,18 +253,16 @@ classdef PriceEx < handle
       grid minor;
       hold off;
 
-      subplot(2,1,2);
+      ax2=subplot(2,1,2);
       dp = Util.Diff(price);
-      plot(t(2:end),dp,'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+      plot(ax2,timestamp(2:end),dp,'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
 
       hold on;
       this.AddStdDevLines(dp);
 
-      ax = gca;
-      set(ax,"XTick",xticks);
+      set(ax2,"XTick",xticks);
       datetick('x',fmt,'keepticks','keeplimits');
-      xlim([t(1) t(end)]);
-
+      xlim([timestamp(1) timestamp(end)]);
       ylabel('Price Differences','FontSize',Constant.YLabelFontSize);
 
       grid on;
@@ -333,7 +335,7 @@ classdef PriceEx < handle
         x = x(end-(n-1):end);
       endif
 
-      t = this.InFile.GetTimestamp();
+      t = this.GetTimestamp();
       if length(t) < n
         t = t(1:end);
       else
