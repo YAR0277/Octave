@@ -1,4 +1,4 @@
-function [] = DoPlot(ticker)
+function [] = DoShow(ticker)
 
   baseFolder = fileparts(fileparts(fileparts(fileparts(mfilename('fullpath')))));
   projectsFolder = fullfile(baseFolder,'Projects');
