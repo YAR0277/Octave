@@ -30,9 +30,11 @@ classdef Color
     Brown = [0.55,0.27,0.1];
     Green = [0,0.5,0];
     Grey = [0.5,0.5,0.5];
+    LightBlue = [0.68,0.84,0.9];
     LightGrey = [0.8,0.8,0.8];
     Magenta = [1,0,1];
     Maroon = [0.5,0,0];
+    Orange = [1,0.64,0];
     Red = [1,0,0];
   endproperties
 endclassdef

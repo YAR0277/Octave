@@ -30,7 +30,7 @@ classdef YahooFile < CsvFile
       obj.DescendFlag = 0; % data is in ascending order: oldest -> newest
       obj.FileName = '';
       obj.Ticker = '';
-      obj.MACD = MACDEx(); # has-a
+      obj.MACD = MACDEx(obj); # has-a
       obj.PriceEx = PriceEx(obj); # has-a
       obj.ReturnsEx = ReturnsEx(obj); # has-a
     endfunction
