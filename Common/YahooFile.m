@@ -254,26 +254,22 @@ classdef YahooFile < CsvFile
   methods (Access = private)
 
     function [] = DoPlot(this,t,x)
-      ax = figure;
-      hold on;
-      plot(ax,x,'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
 
-      Util.AddWatermark(ax,this.Ticker);
+      plot(t,x,'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+
+      hold on;
+      Util.AddWatermark(gca,this.Ticker);
 
       [xticks,fmt] = Util.GetDateTicks(t);
-      set(ax,"XTick",xticks);
+      set(gca,"XTick",xticks);
       datetick('x',fmt,'keepticks','keeplimits');
       xlim([t(1) t(end)]);
-
-      label_str = "Values";
-      ylabel(label_str,'FontSize',Constant.YLabelFontSize);
 
       ylimits = ylim;
       ylim([ylimits(1) ylimits(2)]);
 
-      title_str = this.FileName;
-      title(title_str,'FontSize',Constant.TitleFontSize);
       grid on;
+      grid minor;
       hold off;
     endfunction
   endmethods
