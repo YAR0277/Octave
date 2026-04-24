@@ -1,4 +1,4 @@
-function [] = PlotMACD(ticker)
+function [] = ShowMACD(ticker)
 
   baseFolder = fileparts(fileparts(fileparts(fileparts(mfilename('fullpath')))));
   projectsFolder = fullfile(baseFolder,'Projects');
@@ -10,7 +10,7 @@ function [] = PlotMACD(ticker)
   z=IntradayFile;
   filename = strcat(ticker,'-i.csv');
   z.LoadFile(filename);
-  z.PlotMACD;
+  z.ShowMACD;
 
 endfunction
 

@@ -24,7 +24,7 @@ classdef IntradayFile < YahooFile
       this.DoPlot(t,x);
     endfunction
 
-    function [] = PlotMACD(this)
+    function [] = ShowMACD(this)
       t = this.GetTimestamp;
       x = this.GetValue;
       if isempty(x)
