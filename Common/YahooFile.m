@@ -8,6 +8,7 @@ classdef YahooFile < CsvFile
     DateFormat
     DescendFlag
     FileName
+    BB
     MACD
     PriceEx
     ReturnsEx
@@ -31,6 +32,7 @@ classdef YahooFile < CsvFile
       obj.DescendFlag = 0; % data is in ascending order: oldest -> newest
       obj.FileName = '';
       obj.Ticker = '';
+      obj.BB = BBEx(obj); # has-a
       obj.MACD = MACDEx(obj); # has-a
       obj.PriceEx = PriceEx(obj); # has-a
       obj.ReturnsEx = ReturnsEx(obj); # has-a
@@ -135,6 +137,10 @@ classdef YahooFile < CsvFile
         error('No data to plot.');
       endif
       this.DoPlot(t,x);
+    endfunction
+
+    function [] = PlotBB(this)
+      this.BB.Plot;
     endfunction
 
     function [] = PlotMACD(this)
