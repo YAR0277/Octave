@@ -237,8 +237,8 @@ classdef YahooFile < CsvFile
       endfor
     endfunction
 
-    function [r] = WhatToBuy(this,varargin)
-      [r] = this.PriceEx.WhatToBuy(varargin);
+    function [r] = PlotMM(this,varargin)
+      [r] = this.PriceEx.PlotMM(varargin);
     endfunction
 
     function [r,buyLineExtrap,m] = WhatToBuyBatch(this,varargin)

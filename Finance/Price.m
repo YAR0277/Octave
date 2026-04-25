@@ -85,8 +85,8 @@ classdef Price < handle
       fprintf('Volume: range: [%d,%d], last price (%d), percentile (%.2f%%)\n',min(vol),max(vol),vol(end),Util.CalcPercentile(vol,vol(end)));
     endfunction
 
-    function [r] = WhatToBuy(varargin)
-      % call is either 1) WhatToBuy() - no params, tol=std(x) or 2) WhatToBuy(10) - tol as parameter
+    function [r] = PlotMM(varargin)
+      % call to Plot Max Min is either 1) PlotMM() - no params, tol=std(x) or 2) PlotMM(10) - tol as parameter
       this = varargin{1}; % first param for a class method is 'this'
       [t,x] = this.GetPriceData(1e4); % 10000, a big number, returns all availabe data
       [lt0,gt0] = this.GetIQM(x);
