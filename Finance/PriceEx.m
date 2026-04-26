@@ -332,7 +332,7 @@ classdef PriceEx < handle
       a = acc(end-n:end);
 
       tol = 1e-9;
-      tof = all(a > 1.0) && all(diff(a) >= tol);
+      tof = all(a > tol);
     endfunction
 
     function [t,x] = GetPriceData(this,n)
