@@ -321,8 +321,18 @@ classdef PriceEx < handle
       endfor
     endfunction
 
-    function [tof] = GetBuyConditions(~,x,buyLineExtrap,gt0)
-      tof = x(end) < buyLineExtrap + gt0; % low price
+    function [tof] = GetBuyConditions(this,x,buyLineExtrap,gt0)
+##      tof = x(end) < buyLineExtrap + gt0; % low price
+
+      [signal,macd,~,~] = this.InFile.MACD.CalcMACD(x);
+      vel = macd;
+      acc = macd-signal;
+
+      n = min(3,length(x)); % consider last 3 values
+      a = acc(end-n:end);
+
+      tol = 1e-9;
+      tof = all(a > 1.0) && all(diff(a) >= tol);
     endfunction
 
     function [t,x] = GetPriceData(this,n)

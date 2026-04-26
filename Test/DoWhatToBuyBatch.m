@@ -7,19 +7,31 @@ function [] = DoWhatToBuyBatch(fid,f,tickernames)
     filename = tickernames{i};
     filename = strcat(filename,'-d.csv');
     f.LoadFile(filename);
-    x=f.GetPrices;
+    t = f.GetTimestamp;
+    x = f.GetValue;
     [lt0,gt0] = f.GetIQM(x);
     [r(i),buyLineExtrap(i),m]=f.WhatToBuyBatch;
     [num,ror,~]=f.CalcReturn;
+
+    [signal,macd,~,~] = f.MACD.CalcMACD(x);
+    vel = macd;
+    acc = macd-signal;
+
+    n = min(5,length(x)); % consider last 5 values
+    v = sprintf('%.2f;',vel(end-n:end));
+    v(end) = [];
+    a = sprintf('%.2f;',acc(end-n:end));
+    a(end) = [];
+
     fprintf(fid, ...
-      '%s,%d,%.2f,%.2f,%.2f,[%.2f:%.2f],%d,%.2f\n',...
+      '%s,%d,%.2f,%.2f,[%.2f:%.2f],%d,%.2f,%.2f,%s,%s\n',...
       filename,...
       r(i),...
       x(end),...
-      m,...
       buyLineExtrap(i),...
       buyLineExtrap(i)+lt0,buyLineExtrap(i)+gt0,...
-      num,ror);
+      num,ror,...
+      m,v,a);
   endfor
 endfunction
 
