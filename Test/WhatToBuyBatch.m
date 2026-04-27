@@ -9,6 +9,7 @@ addpath(fullfile(octaveFolder,'Finance'));
 addpath(fullfile(octaveFolder,'Test'));
 
 batchFolder = fullfile(projectsFolder,'Batch');
+cfg = Config(fullfile(batchFolder,'config.txt'));
 
 # 1. ETFs
 fid_read = fopen(fullfile(batchFolder,'ETF.txt'), 'r');
@@ -25,7 +26,7 @@ if fid_write == -1
   error("Failed to open output file for writing.");
 endif
 fprintf(fid_write,"File,Result,Last Price,Buy Line Extrap,Range,Nr. Samples,ROR,Trend Slope,Velocity,Acceleration\n");
-DoWhatToBuyBatch(fid_write,f,tickernames);
+DoWhatToBuyBatch(fid_write,f,tickernames,cfg);
 fclose(fid_write);
 
 # 2. Equities
@@ -43,7 +44,7 @@ fid_write = fopen(fullfile(batchFolder,'WhatToBuyBatchResult.csv'),'a');
 if fid_write == -1
   error("Failed to open output file for writing.");
 endif
-DoWhatToBuyBatch(fid_write,f,tickernames);
+DoWhatToBuyBatch(fid_write,f,tickernames,cfg);
 fclose(fid_write);
 
 

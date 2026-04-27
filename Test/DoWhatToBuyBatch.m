@@ -1,11 +1,17 @@
-function [] = DoWhatToBuyBatch(fid,f,tickernames)
+function [] = DoWhatToBuyBatch(fid,f,tickernames,cfg)
   n = numel(tickernames);
   r = zeros(n,1);
   buyLineExtrap = zeros(n,1);
 
   for i=1:n
-    filename = tickernames{i};
-    filename = strcat(filename,'-d.csv');
+    ticker = tickernames{i};
+    dataFrequency=cfg.get('dataFrequency');
+    if strcmpi(dataFrequency,'week')
+      filename = strcat(ticker,'-w.csv');
+    else
+      filename = strcat(ticker,'-d.csv');
+    endif
+
     f.LoadFile(filename);
     t = f.GetTimestamp;
     x = f.GetValue;
