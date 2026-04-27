@@ -40,5 +40,6 @@ classdef Constant
     LegendFontSize = 12;
     PlotMarkerSize = 10;
     PlotLineWidth = 1.0;
+    PlotLineWidthThick = 2.0;
   endproperties
 endclassdef

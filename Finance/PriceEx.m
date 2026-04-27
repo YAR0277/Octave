@@ -3,6 +3,7 @@ classdef PriceEx < handle
 
   properties
     InFile
+    wlen      % length of window or smoothing period
   endproperties
 
   methods % Public
@@ -13,6 +14,7 @@ classdef PriceEx < handle
         error('Invalid input file class (%s)\n',class(inFile));
       endif
       obj.InFile = inFile;
+      obj.wlen = 14;
       pkg load image; % imregionalmax, imregionalmin
     endfunction
 
@@ -153,6 +155,29 @@ classdef PriceEx < handle
       else
         r = 0;
       endif
+    endfunction
+
+    function PlotSMA(this,t,x)
+
+      figure;
+      plot(t,x,'--.','color',Color.LightGrey,'MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+      Util.AddWatermark(gca,this.InFile.Ticker);
+
+      [xticks,fmt] = Util.GetDateTicks(t);
+      set(gca,"XTick",xticks);
+      datetick('x',fmt,'keepticks','keeplimits');
+      xlim([t(1) t(end)]);
+
+      hold on;
+      y = MovingAvg.SMA(x,this.wlen);
+      plot(t,y,'-','color',Color.Orange,'MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidthThick);
+
+      ylabel('SMA','FontSize',Constant.YLabelFontSize);
+
+      grid on;
+      grid minor;
+      hold off;
+
     endfunction
 
     function [r,buyLineExtrap,m] = WhatToBuyBatch(varargin)
