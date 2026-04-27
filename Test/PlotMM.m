@@ -3,6 +3,7 @@ function [] = PlotMM(ticker)
   baseFolder = fileparts(fileparts(fileparts(fileparts(mfilename('fullpath')))));
   projectsFolder = fullfile(baseFolder,'Projects');
   octaveFolder = fullfile(projectsFolder,'Octave');
+  batchFolder = fullfile(projectsFolder,'Batch');
 
   addpath(fullfile(octaveFolder,'Common'));
   addpath(fullfile(octaveFolder,'Finance'));
@@ -14,7 +15,14 @@ function [] = PlotMM(ticker)
 
   y=YahooFile;
 
-  filename = strcat(ticker,'-d.csv');
+  cfg = Config(fullfile(batchFolder,'config.txt'));
+  dataFrequency=cfg.get('dataFrequency');
+  if strcmpi(dataFrequency,'week')
+    filename = strcat(ticker,'-w.csv');
+  else
+    filename = strcat(ticker,'-d.csv');
+  endif
+
   if exist(fullfile(equityFolder,filename), "file") == 2
     y.SetFolder('equity');
   elseif exist(fullfile(etfFolder,filename), "file") == 2
