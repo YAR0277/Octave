@@ -13,24 +13,31 @@ function [] = DoPlot(ticker)
   etfFolder = fullfile(dataFolder,'etf');
   indexFolder = fullfile(dataFolder,'index');
 
-  y=YahooFile;
-
   cfg = Config(fullfile(batchFolder,'config.txt'));
   dataFrequency=cfg.get('dataFrequency');
-  if strcmpi(dataFrequency,'week')
-    filename = strcat(ticker,'-w.csv');
-  else
-    filename = strcat(ticker,'-d.csv');
-  endif
 
-  if exist(fullfile(equityFolder,filename), "file") == 2
-    y.SetFolder('equity');
-  elseif exist(fullfile(etfFolder,filename), "file") == 2
-    y.SetFolder('etf');
-  elseif exist(fullfile(indexFolder,filename), "file") == 2
-    y.SetFolder('index');
+  if strcmpi(dataFrequency,'intraday')
+    y=IntradayFile;
+    filename = strcat(ticker,'-i.csv');
   else
-    error("File not found: %s\n",filename);
+    y=YahooFile;
+    cfg = Config(fullfile(batchFolder,'config.txt'));
+    dataFrequency=cfg.get('dataFrequency');
+    if strcmpi(dataFrequency,'week')
+      filename = strcat(ticker,'-w.csv');
+    else
+      filename = strcat(ticker,'-d.csv');
+    endif
+
+    if exist(fullfile(equityFolder,filename), "file") == 2
+      y.SetFolder('equity');
+    elseif exist(fullfile(etfFolder,filename), "file") == 2
+      y.SetFolder('etf');
+    elseif exist(fullfile(indexFolder,filename), "file") == 2
+      y.SetFolder('index');
+    else
+      error("File not found: %s\n",filename);
+    endif
   endif
 
   y.LoadFile(filename);
