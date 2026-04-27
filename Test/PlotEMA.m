@@ -1,4 +1,4 @@
-function [] = PlotRSI(ticker)
+function [] = PlotEMA(ticker)
 
   baseFolder = fileparts(fileparts(fileparts(fileparts(mfilename('fullpath')))));
   projectsFolder = fullfile(baseFolder,'Projects');
@@ -34,7 +34,7 @@ function [] = PlotRSI(ticker)
   endif
 
   y.LoadFile(filename);
-  y.PlotRSI;
+  y.PlotEMA;
 
 endfunction
 

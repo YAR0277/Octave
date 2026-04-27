@@ -6,8 +6,7 @@ classdef Config < handle
     data  % struct to store config data key-value pairs
   endproperties
 
-  methods % Public
-
+  methods (Access = private)
     function obj = Config(fileName)
       % c'tor returns a Config object
       if nargin > 0
@@ -16,7 +15,24 @@ classdef Config < handle
         obj.data = struct();
       endif
     endfunction
+  endmethods
 
+  methods (Static)
+    function obj = Instance(fileName)
+      persistent uniqueInstance;
+
+      if isempty(uniqueInstance)
+        if nargin == 0
+          error("First call must provide config filename");
+        endif
+        uniqueInstance = Config(fileName);
+      endif
+
+      obj = uniqueInstance;
+    endfunction
+  endmethods
+
+  methods % Public
     function [r] = get(this,key)
       if isfield(this.data,key)
         r = this.data.(key);
@@ -31,7 +47,6 @@ classdef Config < handle
   endmethods
 
   methods (Access = private)
-
     function [data] = readFile(~,fileName)
       % reads config text file and stores as struct
       fid = fopen(fileName, 'r');

@@ -157,6 +157,30 @@ classdef PriceEx < handle
       endif
     endfunction
 
+    function PlotEMA(this,t,x)
+
+      figure;
+      plot(t,x,'--.','color',Color.LightGrey,'MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+      Util.AddWatermark(gca,this.InFile.Ticker);
+
+      [xticks,fmt] = Util.GetDateTicks(t);
+      set(gca,"XTick",xticks);
+      datetick('x',fmt,'keepticks','keeplimits');
+      xlim([t(1) t(end)]);
+
+      hold on;
+      cfg = Config.Instance();
+      y = MovingAvg.EMA(x,cfg.get('EMAWindowLength'),cfg.get('EMAAlpha'));
+      plot(t,y,'-','color',Color.Orange,'MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidthThick);
+
+      ylabel('EMA','FontSize',Constant.YLabelFontSize);
+
+      grid on;
+      grid minor;
+      hold off;
+
+    endfunction
+
     function PlotSMA(this,t,x)
 
       figure;

@@ -161,6 +161,15 @@ classdef YahooFile < CsvFile
       this.PriceEx.PlotSMA(t,x);
     endfunction
 
+    function [] = PlotEMA(this)
+      t = this.GetTimestamp;
+      x = this.GetValue;
+      if isempty(x)
+        error('No data to plot.');
+      endif
+      this.PriceEx.PlotEMA(t,x);
+    endfunction
+
     function [] = PlotRSI(this)
       this.RSI.Plot;
     endfunction

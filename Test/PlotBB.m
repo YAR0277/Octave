@@ -15,7 +15,7 @@ function [] = PlotBB(ticker)
 
   y=YahooFile;
 
-  cfg = Config(fullfile(batchFolder,'config.txt'));
+  cfg = Config.Instance(fullfile(batchFolder,'config.txt'));
   dataFrequency=cfg.get('dataFrequency');
   if strcmpi(dataFrequency,'week')
     filename = strcat(ticker,'-w.csv');
