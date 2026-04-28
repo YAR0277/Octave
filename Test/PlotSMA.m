@@ -40,6 +40,6 @@ function [] = PlotSMA(ticker)
 
   y.LoadFile(filename);
   y.PlotSMA;
-
+  y.ShowMomentum;
 endfunction
 

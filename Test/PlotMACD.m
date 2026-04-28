@@ -40,6 +40,6 @@ function [] = PlotMACD(ticker)
 
   y.LoadFile(filename);
   y.PlotMACD;
-
+  y.ShowMomentum;
 endfunction
 

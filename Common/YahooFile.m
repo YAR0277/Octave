@@ -263,6 +263,29 @@ classdef YahooFile < CsvFile
       endfor
     endfunction
 
+    function [] = ShowMomentum(this)
+      t = this.GetTimestamp;
+      x = this.GetValue;
+
+      [signal,macd,~,~] = this.MACD.CalcMACD(x);
+      vel = macd;
+      acc = macd-signal;
+
+      cfg = Config.Instance();
+      momLen = cfg.get('MomentumLength');
+      n = min(momLen,length(x)); % consider last MomentumLength values
+      [vals,coeffs] = Util.GetSignal(t(end-n+1:end),x(end-n+1:end));
+
+      fprintf('Median price = %.2f, Midrange price = %.2f\n',median(x), (min(x)+max(x))/2);
+      fprintf('Slope of signal (last %d) = %.2f\n',momLen,coeffs(1));
+      fprintf('Velocity (last %d):\t',momLen);
+      fprintf('%10.2f ',vel(end-n+1:end));
+      fprintf('\n');
+      fprintf('Acceleration (last %d):\t',momLen);
+      fprintf('%10.2f ',acc(end-n+1:end));
+      fprintf('\n');
+    endfunction
+
     function [r] = PlotMM(this,varargin)
       [r] = this.PriceEx.PlotMM(varargin);
     endfunction

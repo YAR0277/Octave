@@ -40,6 +40,6 @@ function [] = PlotEMA(ticker)
 
   y.LoadFile(filename);
   y.PlotEMA;
-
+  y.ShowMomentum;
 endfunction
 
