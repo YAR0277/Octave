@@ -213,11 +213,14 @@ classdef YahooFile < CsvFile
         endif
       endfor
 
+      % add watermark
+      text(gca,0.5,0.98,this.Ticker,'units', 'normalized', 'fontsize', 50, ...
+           'color', Color.LightGrey, 'horizontalalignment', 'center', 'verticalalignment', 'top');
+
       plot(t,don,'k--');
 
       [xticks,fmt] = Util.GetDateTicks(t);
-      ax = gca;
-      set(ax,"XTick",xticks);
+      set(gca,"XTick",xticks);
       datetick('x',fmt,'keepticks','keeplimits');
       xlim([t(1) t(end)]);
 
@@ -227,9 +230,8 @@ classdef YahooFile < CsvFile
       ylimits = ylim;
       ylim([ylimits(1) ylimits(2)]);
 
-      title_str = this.FileName;
-      title(title_str,'FontSize',Constant.TitleFontSize);
       grid on;
+      grid minor;
       hold off;
 
       fprintf('Total price changes -  on hours (%.2f)\n', sum(don(don>0)) - sum(don(don<0)) );

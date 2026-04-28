@@ -9,7 +9,7 @@ addpath(fullfile(octaveFolder,'Finance'));
 addpath(fullfile(octaveFolder,'Test'));
 
 batchFolder = fullfile(projectsFolder,'Batch');
-cfg = Config(fullfile(batchFolder,'config.txt'));
+cfg = Config.Instance(fullfile(batchFolder,'config.txt'));
 
 # 1. ETFs
 fid_read = fopen(fullfile(batchFolder,'ETF.txt'), 'r');
