@@ -11,6 +11,7 @@ classdef IntradayFile < YahooFile
       obj.DataFolder = fullfile(Util.RootDataFolder,'intraday');
       obj.DateFormat = 'yyyy-mm-dd HH:MM:SS';
       obj.MACD = MACDIday(obj); # has-a
+      obj.PriceEx = PriceIday(obj); # has-a
     endfunction
 
     function [] = Plot(this)
