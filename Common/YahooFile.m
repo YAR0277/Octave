@@ -2,6 +2,7 @@ classdef YahooFile < CsvFile
   % Duplicate of FidelityFile
 
   properties
+    cfg
     Data
     DataCol
     DataFolder
@@ -18,14 +19,22 @@ classdef YahooFile < CsvFile
 
   methods % Public
 
-    function [obj] = YahooFile()
+    function [obj] = YahooFile(varargin)
 
       baseFolder = fileparts(fileparts(fileparts(fileparts(mfilename('fullpath')))));
       projectsFolder = fullfile(baseFolder,'Projects');
       octaveFolder = fullfile(projectsFolder,'Octave');
+      batchFolder = fullfile(projectsFolder,'Batch');
+
       addpath(fullfile(octaveFolder,'Finance'));
 
       obj = obj@CsvFile();
+      if nargin == 0
+        obj.cfg = Config.Instance(fullfile(batchFolder,'config.txt'));
+      else
+        obj.cfg = varargin(1);
+      endif
+
       obj.DataCol = 'Close'; % 'Open','High','Low','Close','Volume'
       obj.DataFolder = fullfile(Util.RootDataFolder,'etf'); % default data folder is etf;
       obj.DateFormat = 'yyyy-mm-dd';

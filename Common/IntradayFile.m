@@ -3,11 +3,11 @@ classdef IntradayFile < YahooFile
 
   methods % Public
 
-    function [obj] = IntradayFile()
+    function [obj] = IntradayFile(varargin)
 
       addpath(genpath('../Finance')); % for readf
 
-      obj = obj@YahooFile();
+      obj = obj@YahooFile(varargin);
       obj.DataFolder = fullfile(Util.RootDataFolder,'intraday');
       obj.DateFormat = 'yyyy-mm-dd HH:MM:SS';
       obj.MACD = MACDIday(obj); # has-a
