@@ -88,14 +88,6 @@ classdef YahooFile < CsvFile
       this.FileName = fileName;
     endfunction
 
-    function [lt0,gt0] = GetIQM(this,x)
-      [lt0,gt0] = this.PriceEx.GetIQM(x);
-    endfunction
-
-    function [r] = GetPrices(this)
-      r = this.PriceEx.GetPrices;
-    endfunction
-
     function [r] = get.Ticker(this)
       if isempty(this.Ticker)
         [~,filename,~] = fileparts(this.FileName);
@@ -107,6 +99,18 @@ classdef YahooFile < CsvFile
 
     function [] = set.Ticker(this,ticker)
       this.Ticker = ticker;
+    endfunction
+
+    function [num,ror,apr] = CalcReturn(this)
+      [num,ror,apr] = this.ReturnsEx.CalcReturn();
+    endfunction
+
+    function [lt0,gt0] = GetIQM(this,x)
+      [lt0,gt0] = this.PriceEx.GetIQM(x);
+    endfunction
+
+    function [r] = GetPrices(this)
+      r = this.PriceEx.GetPrices;
     endfunction
 
     function [r] = GetClose(this)
@@ -148,6 +152,14 @@ classdef YahooFile < CsvFile
       this.DoPlot(t,x);
     endfunction
 
+    function [] = PlotAggregate(this,dt)
+      TimeSeries.PlotAggregate(this,dt);
+    endfunction
+
+    function [] = PlotTrend(this,wlen)
+      TimeSeries.PlotTrend(this,wlen);
+    endfunction
+
     function [] = PlotBB(this)
       this.BB.Plot;
     endfunction
@@ -177,6 +189,10 @@ classdef YahooFile < CsvFile
         error('No data to plot.');
       endif
       this.PriceEx.PlotEMA(t,x);
+    endfunction
+
+    function [r] = PlotMM(this,varargin)
+      [r] = this.PriceEx.PlotMM(varargin);
     endfunction
 
     function [] = PlotRSI(this)
@@ -247,14 +263,6 @@ classdef YahooFile < CsvFile
       fprintf('Total price changes - off hours (%.2f)\n', sum(doff(doff>0)) - sum(doff(doff<0)) );
     endfunction
 
-    function [] = PlotAggregate(this,dt)
-      TimeSeries.PlotAggregate(this,dt);
-    endfunction
-
-    function [] = PlotTrend(this,wlen)
-      TimeSeries.PlotTrend(this,wlen);
-    endfunction
-
     function [] = SetFolder(this,type)
       % appends DataFolder with type
       if ismember(type,{"bond","equity","etf","index","intraday"})
@@ -295,16 +303,17 @@ classdef YahooFile < CsvFile
       fprintf('\n');
     endfunction
 
-    function [r] = PlotMM(this,varargin)
-      [r] = this.PriceEx.PlotMM(varargin);
+    function [r] = TestEMA(this)
+      t = this.GetTimestamp;
+      x = this.GetValue;
+      if isempty(x)
+        error('No data to test.');
+      endif
+      r = this.PriceEx.TestEMA(t,x);
     endfunction
 
     function [r,buyLineExtrap,m] = WhatToBuyBatch(this,varargin)
       [r,buyLineExtrap,m] = this.PriceEx.WhatToBuyBatch(varargin);
-    endfunction
-
-    function [num,ror,apr] = CalcReturn(this)
-      [num,ror,apr] = this.ReturnsEx.CalcReturn();
     endfunction
 
   endmethods %Public

@@ -18,6 +18,12 @@ classdef PriceEx < handle
       pkg load image; % imregionalmax, imregionalmin
     endfunction
 
+    function [r] = TestEMA(this,t,x)
+      cfg = this.InFile.cfg;
+      ema = MovingAvg.EMA(x,cfg.get('EMAWindowLength'),cfg.get('EMAAlpha'));
+      r =  x(end) <= ema(end);
+    endfunction
+
     function [lt0,gt0] = GetIQM(this,x)
       % returns IQM for negative (lt0) and positive (gt0) price changes
       dx = Util.Diff(x);
@@ -169,7 +175,7 @@ classdef PriceEx < handle
       xlim([t(1) t(end)]);
 
       hold on;
-      cfg = Config.Instance();
+      cfg = this.InFile.cfg;
       y = MovingAvg.EMA(x,cfg.get('EMAWindowLength'),cfg.get('EMAAlpha'));
       plot(t,y,'-','color',Color.Orange,'MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidthThick);
 
@@ -383,7 +389,8 @@ classdef PriceEx < handle
       vel = macd;
       acc = macd-signal;
 
-      n = min(3,length(x)); % consider last 3 values
+      numAccelValsTest = this.InFile.cfg.get('NumAccelValsTest');
+      n = min(numAccelValsTest,length(x)); % consider last numAccelValsTest values
       a = acc(end-n:end);
 
       tol = 1e-9;
