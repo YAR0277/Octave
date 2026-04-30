@@ -150,6 +150,13 @@ classdef PriceIday < PriceEx
 
       ylabel('EMA','FontSize',Constant.YLabelFontSize);
 
+      % the last cross-over
+      d = x - y;
+      idx = find(d(1:end-1) .* d(2:end) < 0); % cross-overs given by change of sign
+      sec = tod(idx(end));
+      fprintf('EMA last crossover: idx=%d,time=%02d:%02d,price=%.2f,EMA=%.2f\n',idx(end),floor(sec/3600),floor(mod(sec,3600)/60),x(idx(end)),y(idx(end)));
+      plot(tod(idx(end)),x(idx(end)),'o','color',Color.Red,'MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidthThick);
+
       grid on;
       grid minor;
       hold off;
