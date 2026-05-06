@@ -153,8 +153,7 @@ classdef PriceEx < handle
       fprintf('Buy Line Extrap: (%s) %.2f \n',date(),buyLineExtrap);
       fprintf('Buy Price Range: [%.2f,%.2f]\n',buyLineExtrap+lt0,buyLineExtrap+gt0);
       fprintf('Price Last: (%.2f)\n',x(end));
-      fprintf('Price Std. Dev: (%.2f), tol (%.2f)\n',std(x),tol);
-      fprintf('IQM negatives: (%.2f), IQM positives (%.2f)\n',lt0,gt0);
+      fprintf('Price Volatility: Std. Dev (%.2f), IQM negatives (%.2f), IQM positives (%.2f)\n',std(x),lt0,gt0);
 
       if this.GetBuyConditions(x,buyLineExtrap,gt0)
         r = 1;
