@@ -25,7 +25,7 @@ fid_write = fopen(fullfile(batchFolder,'WhatToBuyBatchResult.csv'),'w');
 if fid_write == -1
   error("Failed to open output file for writing.");
 endif
-fprintf(fid_write,"File,Accel Test,EMA Test,Last Price,IQM(+),Max Bid,Buy Line Extrap,Range,Nr. Samples,ROR,Trend Slope,Velocity,Acceleration\n");
+fprintf(fid_write,"File,Accel Test,EMA Test,Last Price,IQM(+),Max Bid,IQM(-),Sell Limit,Buy Line Extrap,Range,Nr. Samples,ROR,Trend Slope,Velocity,Acceleration\n");
 DoWhatToBuyBatch(fid_write,f,tickernames,cfg);
 fclose(fid_write);
 
