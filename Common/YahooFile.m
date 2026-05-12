@@ -121,6 +121,14 @@ classdef YahooFile < CsvFile
       r = this.Data.('Open');
     end
 
+    function [r] = GetHigh(this)
+      r = this.Data.('High');
+    end
+
+    function [r] = GetLow(this)
+      r = this.Data.('Low');
+    end
+
     function [r] = GetTimestamp(this)
       r = this.Data.Date;
     end
@@ -293,7 +301,7 @@ classdef YahooFile < CsvFile
       n = min(momLen,length(x)); % consider last MomentumLength values
       [vals,coeffs] = Util.GetSignal(t(end-n+1:end),x(end-n+1:end));
 
-      fprintf('Median price = %.2f, Midrange price = %.2f\n',median(x), (min(x)+max(x))/2);
+      fprintf('Price range = [%.2f,%.2f], Median price = %.2f, Midrange price = %.2f\n',min(this.GetLow),max(this.GetHigh),median(x), (min(x)+max(x))/2);
       fprintf('Slope of signal (last %d) = %.2f\n',momLen,coeffs(1));
       fprintf('Velocity (last %d):\t',momLen);
       fprintf('%10.2f ',vel(end-n+1:end));
