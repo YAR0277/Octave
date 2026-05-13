@@ -134,6 +134,26 @@ classdef Util < handle
       pkg load optim;
     endfunction
 
+    function [str] = FormatNumber(value)
+        % Convert a number to human-readable string with K, M, B, T
+        if isnumeric(value)
+            absVal = abs(value);
+            if absVal >= 1e12
+                str = sprintf('%.2f T', value/1e12);
+            elseif absVal >= 1e9
+                str = sprintf('%.2f B', value/1e9);
+            elseif absVal >= 1e6
+                str = sprintf('%.2f M', value/1e6);
+            elseif absVal >= 1e3
+                str = sprintf('%.2f K', value/1e3);
+            else
+                str = num2str(value);
+            end
+        else
+            str = value;  % leave non-numeric as-is
+        end
+    endfunction
+
     function [r] = IQM(data)
       % https://en.wikipedia.org/wiki/Interquartile_mean
       lowerBound = Util.CalcPercentileValue(data,25);
