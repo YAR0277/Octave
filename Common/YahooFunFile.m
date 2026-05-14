@@ -77,16 +77,116 @@ classdef YahooFunFile < CsvFile
       this.Ticker = ticker;
     endfunction
 
+    function [r] = GetFundamentals(this)
+      r = struct(...
+                'freeCashflow', this.GetFreeCashFlow, ...
+                'netIncomeToCommon', this.GetNetIncomeToCommon, ...
+                'forwardPE', this.GetForwardPE, ...
+                'trailingPE', this.GetTrailingPE, ...
+                'epsForward', this.GetEpsForward, ...
+                'epsCurrentYear', this.GetEpsCurrentYear, ...
+                'epsTrailingTwelveMonths', this.GetEpsTrailingTwelveMonths, ...
+                'earningsGrowth', this.GetEarningsGrowth, ...
+                'revenueGrowth', this.GetRevenueGrowth, ...
+                'pegRatio', this.GetPegRatio, ...
+                'priceToBook', this.GetPriceToBook, ...
+                'beta', this.GetBeta, ...
+                'dividendYield', this.GetDividendYield ...
+                );
+    endfunction
+
+    function [r] = GetFundamentalsZero(this)
+      r = struct(...
+                'freeCashflow', 0, ...
+                'netIncomeToCommon', 0, ...
+                'forwardPE', 0, ...
+                'trailingPE', 0, ...
+                'epsForward', 0, ...
+                'epsCurrentYear', 0, ...
+                'epsTrailingTwelveMonths', 0, ...
+                'earningsGrowth', 0, ...
+                'revenueGrowth', 0, ...
+                'pegRatio', 0, ...
+                'priceToBook', 0, ...
+                'beta', 0, ...
+                'dividendYield', 0 ...
+                );
+    endfunction
+
+    function [r] = GetFreeCashFlow(this)
+      r = this.GetValue('freeCashflow');
+    endfunction
+
+    function [r] = GetNetIncomeToCommon(this)
+      r = this.GetValue('netIncomeToCommon');
+    endfunction
+
+    function [r] = GetForwardPE(this)
+      r = this.GetValue('forwardPE');
+    endfunction
+
+    function [r] = GetTrailingPE(this)
+      r = this.GetValue('trailingPE');
+    endfunction
+
+    function [r] = GetEpsForward(this)
+      r = this.GetValue('epsForward');
+    endfunction
+
+    function [r] = GetEpsCurrentYear(this)
+      r = this.GetValue('epsCurrentYear');
+    endfunction
+
+    function [r] = GetEpsTrailingTwelveMonths(this)
+      r = this.GetValue('epsTrailingTwelveMonths');
+    endfunction
+
+    function [r] = GetEarningsGrowth(this)
+      r = this.GetValue('earningsGrowth');
+    endfunction
+
+    function [r] = GetRevenueGrowth(this)
+      r = this.GetValue('revenueGrowth');
+    endfunction
+
+    function [r] = GetPegRatio(this)
+      r = this.GetValue('pegRatio');
+    endfunction
+
+    function [r] = GetPriceToBook(this)
+      r = this.GetValue('priceToBook');
+    endfunction
+
+    function [r] = GetBeta(this)
+      r = this.GetValue('beta');
+    endfunction
+
+    function [r] = GetDividendYield(this)
+      r = this.GetValue('dividendYield');
+    endfunction
+
     function [r] = GetTimestamp(this)
       r = this.Data.lastUpdated;
     endfunction
 
     function [r] = GetValue(this,name)
+
       if isfield(this.Data, name)
-        r = this.Data.(name);
+        val = this.Data.(name);
+
+        if iscell(val)
+          val = val{1};
+        endif
+
+        if ischar(val)
+          r = str2double(val);
+        else
+          r = val;
+        endif
+
       else
-        error('Field "%s" does not exist.', name);
-      end
+        r = 0;
+      endif
     endfunction
 
     function col = GetValueFormatted(this,name)

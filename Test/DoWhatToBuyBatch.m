@@ -1,4 +1,4 @@
-function [] = DoWhatToBuyBatch(fid,f,tickernames,cfg)
+function [] = DoWhatToBuyBatch(fid,f,tickernames,cfg,equityFlag)
   n = numel(tickernames);
   r = zeros(n,1);
   buyLineExtrap = zeros(n,1);
@@ -31,8 +31,41 @@ function [] = DoWhatToBuyBatch(fid,f,tickernames,cfg)
     a = sprintf('%.2f;',acc(end-n:end));
     a(end) = [];
 
-    fprintf(fid, ...
-      '%s,%d,%d,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,[%.2f:%.2f],%d,%.2f,%.2f,%s,%s\n',...
+    clear ff;
+    ff = YahooFunFile;
+    if equityFlag
+      ff.LoadFile(strcat(ticker,'.csv'));
+      fundamentals = ff.GetFundamentals;
+    else
+      fundamentals = ff.GetFundamentalsZero;
+    endif
+
+    fmt = [...
+          '%s,'...    % filename
+          '%d,'...    % r(i)
+          '%d,'...    % emaTest
+          '%.2f,'...  % x(end)
+          '%.2f,'...  % gt0
+          '%.2f,'...  % x(end)+gt0
+          '%.2f,'...  % lt0
+          '%.2f,'...  % x(end)+lt0
+          '%.2f,'...  % buyLineExtrap(i)
+          '[%.2f:%.2f],'... % buyLineExtrap(i)+lt0,buyLineExtrap(i)+gt0
+          '%d,'...    % num
+          '%.2f,'...  % ror
+          '%.2f,'...  % m
+          '%s,'...    % v
+          '%s,'...    % a
+          '%.2f,'...  % trailingPE
+          '%.2f,'...  % forwardPE
+          '%ld,'...   % netIncomeToCommon
+          '%ld,'...   % freeCashflow
+          '%.2f,'...  % epsCurrentYear
+          '%.2f,'...  % earningsGrowth
+          '%.2f\n'... % pegRatio
+          ];
+
+    fprintf(fid, fmt,...
       filename,...
       r(i),...
       emaTest,...
@@ -43,8 +76,18 @@ function [] = DoWhatToBuyBatch(fid,f,tickernames,cfg)
       x(end)+lt0,...
       buyLineExtrap(i),...
       buyLineExtrap(i)+lt0,buyLineExtrap(i)+gt0,...
-      num,ror,...
-      m,v,a);
+      num,...
+      ror,...
+      m,...
+      v,...
+      a,...
+      fundamentals.trailingPE,
+      fundamentals.forwardPE,
+      fundamentals.netIncomeToCommon,
+      fundamentals.freeCashflow,
+      fundamentals.epsCurrentYear,
+      fundamentals.earningsGrowth,
+      fundamentals.pegRatio);
   endfor
 endfunction
 
