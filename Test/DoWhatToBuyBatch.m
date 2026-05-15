@@ -35,7 +35,7 @@ function [] = DoWhatToBuyBatch(fid,f,tickernames,cfg,equityFlag)
     ff = YahooFunFile;
     if equityFlag
       ff.LoadFile(strcat(ticker,'.csv'));
-      fundamentals = ff.GetFundamentals;
+      fundamentals = ff.GetFundamentalsLast;
     else
       fundamentals = ff.GetFundamentalsZero;
     endif

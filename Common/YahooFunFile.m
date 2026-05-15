@@ -95,6 +95,18 @@ classdef YahooFunFile < CsvFile
                 );
     endfunction
 
+    function [r] = GetFundamentalsLast(this)
+      s = this.GetFundamentals;
+      f = @(x) x(end);
+      r = Util.ApplyToStructFields(s,f);
+    endfunction
+
+    function [r] = GetFundamentalsMean(this)
+      s = this.GetFundamentals;
+      f = @mean;
+      r = Util.ApplyToStructFields(s,f);
+    endfunction
+
     function [r] = GetFundamentalsZero(this)
       r = struct(...
                 'freeCashflow', 0, ...
@@ -175,10 +187,14 @@ classdef YahooFunFile < CsvFile
         val = this.Data.(name);
 
         if iscell(val)
-          val = val{1};
-        endif
 
-        if ischar(val)
+          if all(cellfun(@ischar,val))
+            r = cellfun(@str2double,val);
+          else
+            r = cell2mat(val);
+          endif
+
+        elseif ischar(val)
           r = str2double(val);
         else
           r = val;

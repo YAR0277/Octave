@@ -36,6 +36,17 @@ classdef Util < handle
       x_out(n) = mean( x_in(a(end)+1:end) );
     endfunction
 
+    function [out] = ApplyToStructFields(s,func)
+      % ChatGPT
+      fields = fieldnames(s);
+
+      for i = 1:numel(fields)
+        name = fields{i};
+        val = s.(name);
+        out.(name) = func(val);
+      endfor
+    endfunction
+
     function [r] = CalcPctChange(x)
 
       if numel(x) < 2 % at least 2 to get a return
