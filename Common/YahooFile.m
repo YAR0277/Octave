@@ -109,6 +109,10 @@ classdef YahooFile < CsvFile
       [lt0,gt0] = this.PriceEx.GetIQM(x);
     endfunction
 
+    function [ltm,utm] = GetTailMeans(this,x)
+      [ltm,utm] = this.PriceEx.GetTailMeans(x);
+    endfunction
+
     function [r] = GetPrices(this)
       r = this.PriceEx.GetPrices;
     endfunction

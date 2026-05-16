@@ -174,6 +174,22 @@ classdef Util < handle
       r = mean(dataSorted(ix));
     endfunction
 
+    function [r] = LTM(data)
+      % LTM (Lower Tail Mean) = mean of values below 1st quartile
+      lowerBound = Util.CalcPercentileValue(data,25);
+      dataSorted = sort(data,"ascend");
+      ix = dataSorted <= lowerBound;
+      r = mean(dataSorted(ix));
+    endfunction
+
+    function [r] = UTM(data)
+      % UTM (Upper Tail Mean) = mean of values above the 3rd quartile
+      upperBound = Util.CalcPercentileValue(data,75);
+      dataSorted = sort(data,"ascend");
+      ix = upperBound <= dataSorted;
+      r = mean(dataSorted(ix));
+    endfunction
+
     function [r] = GetAPR(t,y)
       timestep = Util.GetTimeStep(t);
       n = length(t);

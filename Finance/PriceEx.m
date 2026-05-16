@@ -34,6 +34,16 @@ classdef PriceEx < handle
       gt0 = Util.IQM(dx(iu));
     endfunction
 
+    function [ltm,utm] = GetTailMeans(this,x)
+      % returns LTM of negative and UTM of positive price changes
+      dx = Util.Diff(x);
+      id = dx < 0;
+      iu = dx > 0;
+      iz = dx == 0;
+      ltm = Util.LTM(dx(id));
+      utm = Util.UTM(dx(iu));
+    endfunction
+
     function [r] = GetPrices(this)
       r = this.InFile.Data.(this.InFile.DataCol);
     endfunction
