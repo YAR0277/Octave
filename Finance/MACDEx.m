@@ -84,7 +84,7 @@ classdef MACDEx < handle
 
       [xticks,fmt] = Util.GetDateTicks(t);
       set(ax1,"xticklabel",[]);
-      xlim([xticks(1) xticks(end)]);
+      xlim([t(1) t(end)]);
 
       ylabel('Price','FontSize',Constant.YLabelFontSize);
       legend('price','fast','slow','location','northwest');
@@ -98,7 +98,7 @@ classdef MACDEx < handle
       bar(t,volume,'facecolor',Color.LightGrey);
 
       set(ax2,"xticklabel",[]);
-      xlim([xticks(1) xticks(end)]);
+      xlim([t(1) t(end)]);
 
       yticks = get(ax2,"YTick");
       ticklabels = arrayfun(@(x) strcat(num2str(x),'k'), yticks/1000, "UniformOutput", false);
@@ -119,7 +119,7 @@ classdef MACDEx < handle
 
       set(ax3,"XTick",xticks);
       datetick('x',fmt,'keepticks','keeplimits');
-      xlim([xticks(1) xticks(end)]);
+      xlim([t(1) t(end)]);
 
       ylabel('MACD','FontSize',Constant.YLabelFontSize);
       legend('signal','macd','delta','location','northwest');
