@@ -91,7 +91,7 @@ classdef YahooFile < CsvFile
     function [r] = get.Ticker(this)
       if isempty(this.Ticker)
         [~,filename,~] = fileparts(this.FileName);
-        r = regexprep(filename,'-[diw]$', '');
+        r = regexprep(filename,'-[deiw]$', '');
       else
         r = this.Ticker;
       endif

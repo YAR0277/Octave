@@ -54,8 +54,6 @@ classdef IntradayFile < YahooFile
                       xt, 'UniformOutput', false);
       set(gca, 'xticklabel', labels);
 
-##      title_str = this.FileName;
-##      title(title_str,'FontSize',Constant.TitleFontSize);
       grid on;
       hold off;
     endfunction

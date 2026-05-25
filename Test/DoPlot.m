@@ -19,6 +19,9 @@ function [] = DoPlot(ticker)
   if strcmpi(dataFrequency,'intraday')
     y=IntradayFile;
     filename = strcat(ticker,'-i.csv');
+  elseif strcmpi(dataFrequency,'extended')
+    y=ExtendedFile;
+    filename = strcat(ticker,'-e.csv');
   else
     y=YahooFile;
     if strcmpi(dataFrequency,'week')
