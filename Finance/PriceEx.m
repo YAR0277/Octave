@@ -193,8 +193,10 @@ classdef PriceEx < handle
       % the last cross-over
       d = x - y;
       idx = find(d(1:end-1) .* d(2:end) < 0); % cross-overs given by change of sign
-      fprintf('EMA last crossover: idx=%d,date=%s,price=%.2f,EMA=%.2f\n',idx(end),Util.GetDatestr(t(idx(end))),x(idx(end)),y(idx(end)));
-      plot(t(idx(end)),x(idx(end)),'o','color',Color.Red,'MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidthThick);
+      if ~isempty(idx)
+        fprintf('EMA last crossover: idx=%d,date=%s,price=%.2f,EMA=%.2f\n',idx(end),Util.GetDatestr(t(idx(end))),x(idx(end)),y(idx(end)));
+        plot(t(idx(end)),x(idx(end)),'o','color',Color.Red,'MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidthThick);
+      endif
 
       grid on;
       grid minor;
