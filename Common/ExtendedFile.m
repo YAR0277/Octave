@@ -32,61 +32,87 @@ classdef ExtendedFile < YahooFile
       grid on;
       hold on;
 
-      plot(t,x,'--.','Color',Color.LightGrey);
-      Util.AddWatermark(gca,this.Ticker);
-      m = MovingAvg.CMA(x,6); % trend, 6*5min = 30min
-      plot(t,m,'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+      %-----------------------------------------
+      % COMPRESS TIME AXIS
+      %-----------------------------------------
 
-      d0 = floor(min(t));
-      d1 = floor(max(t));
+      % Unique trading days actually present
+      trading_days = unique(floor(t));
+
+      % Build compressed x coordinate
+      tc = zeros(size(t));
+
+      for k = 1:length(trading_days)
+
+        d = trading_days(k);
+
+        idx = floor(t) == d;
+
+        % Fractional part of day
+        frac = t(idx) - d;
+
+        % Compressed day number
+        tc(idx) = (k-1) + frac;
+
+      end
+
+      %-----------------------------------------
+      % PLOTS
+      %-----------------------------------------
+
+      plot(tc,x,'--.','Color',Color.LightGrey);
+
+      Util.AddWatermark(gca,this.Ticker);
+
+      m = MovingAvg.CMA(x,6); % trend, 6*5min = 30min
+
+      plot(tc,m,'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+
 
       ticks = [];
       labels = {};
 
-      % LOCK axes after initial plot
-      xlim([min(t) max(t)]);
       yl = ylim;
 
-      for d = d0:d1
+      %-----------------------------------------
+      % DAY SHADING + TICKS
+      %-----------------------------------------
+
+      for k = 1:length(trading_days)
+
+        base = k - 1;
 
         % Premarket: 04:00–09:30
-          patch([d+4/24 d+9.5/24 d+9.5/24 d+4/24], ...
+          patch([base+4/24 base+9.5/24 base+9.5/24 base+4/24], ...
                 [yl(1) yl(1) yl(2) yl(2)], ...
                 [0.95 0.95 1.0], ...
                 'EdgeColor', 'none');
 
           % After-hours: 16:00–20:00
-          patch([d+16/24 d+20/24 d+20/24 d+16/24], ...
+          patch([base+16/24 base+20/24 base+20/24 base+16/24], ...
                 [yl(1) yl(1) yl(2) yl(2)], ...
                 [1.0 0.95 0.95], ...
                 'EdgeColor', 'none');
 
 
         % Midnight separator
-        line([d d], yl, 'Color', Color.LightGrey, 'LineStyle', '--');
+        line([base base], yl, 'Color', Color.LightGrey, 'LineStyle', '--');
 
         % Midnight tick
-        ticks(end+1) = d;
-        labels{end+1} = datestr(d, 'dd');
+        ticks(end+1) = base;
+        labels{end+1} = datestr(trading_days(k), 'dd');
 
         % Trading-hour ticks
         special_times = [4, 9.5, 16, 20];
 
         for h = special_times
 
-          tt = d + h/24;
+          ticks(end+1) = base + h/24;
 
-          ticks(end+1) = tt;
-          labels{end+1} = datestr(tt, 'HH:MM');
+          labels{end+1} = datestr(d + h/24, 'HH:MM');
 
         end
       end
-
-      % Keep only visible ticks
-      idx = (ticks >= min(t)) & (ticks <= max(t));
-
-      ticks = ticks(idx);
-      labels = labels(idx);
 
       % Apply
       set(gca, 'xtick', ticks);
@@ -95,9 +121,11 @@ classdef ExtendedFile < YahooFile
       xtickangle(45);
 
       % Replot line on top (important so shading doesn't cover it)
-      plot(t,x,'--.','Color',Color.LightGrey);
+      plot(tc,x,'--.','Color',Color.LightGrey);
+
       Util.AddWatermark(gca,this.Ticker);
-      plot(t,m,'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+
+      plot(tc,m,'--.','MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
 
       % Duplicate y-axis on right
       ax1 = gca;
