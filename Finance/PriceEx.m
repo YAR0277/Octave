@@ -125,33 +125,16 @@ classdef PriceEx < handle
       vol = this.InFile.GetVolume;
       fprintf('Volume: range: [%d,%d], last price (%d), percentile (%.2f%%)\n',min(vol),max(vol),vol(end),Util.CalcPercentile(vol,vol(end)));
 
-      [ups,downs] = this.CalcUpsAndDowns();
-
-      fprintf('Downs:\n');
-      fprintf('Time change [days]:\t');
-      fprintf('%10.2f ',downs.deltaTime(1:end));
-      fprintf('\n');
-      fprintf('Price change [dollars]:\t');
-      fprintf('%10.2f ',downs.deltaPrice(1:end));
-      fprintf('\n');
+      this.ShowUpsAndDowns;
 
     endfunction
 
-    function [r] = PlotMM(varargin)
-      % call is either 1) PlotMM() - no params, tol=std(x) or 2) PlotMM(10) - tol as parameter
-      this = varargin{1}; % first param for a class method is 'this'
+    function [r] = PlotMM(this)
+
       [t,x] = this.GetPriceData(1e4); % 10000, a big number, returns all availabe data
+
       [lt0,gt0] = this.GetIQM(x);
-      switch nargin
-        case 1
-          % the first parameter is the 'this', the PriceEx object
-        case 2
-          tol = gt0 - lt0; % default case, no tolerance parameter given
-        case 3
-          tol = varargin{2}; % tol given as parameter
-        otherwise
-          error('invalid number of arguments %d. \n',nargin);
-      endswitch
+      tol = gt0 - lt0;
 
       idxMax = imregionalmax(x);
       idxMin = imregionalmin(x);
@@ -177,11 +160,13 @@ classdef PriceEx < handle
       xmax = x(idxMax);
       smax = Util.GetSignal(tmax,xmax);
       plot(tmax,smax,'--','Color',Color.Green,'MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+      plot(tmax,xmax,'o','Color',Color.Green,'MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
 
       tmin = t(idxMin);
       xmin = x(idxMin);
       smin = Util.GetSignal(tmin,xmin);
       plot(tmin,smin,'--','Color',Color.Red,'MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
+      plot(tmin,xmin,'o','Color',Color.Red,'MarkerSize',Constant.PlotMarkerSize,'LineWidth',Constant.PlotLineWidth);
 
       ylabel('Price','FontSize',Constant.YLabelFontSize);
 
@@ -261,6 +246,19 @@ classdef PriceEx < handle
       grid minor;
       hold off;
 
+    endfunction
+
+    function [] = ShowUpsAndDowns(this)
+
+      [ups,downs] = this.CalcUpsAndDowns();
+
+      fprintf('Price Decreases:\n');
+      fprintf('Time change [days]:\t');
+      fprintf('%10.2f ',downs.deltaTime(1:end));
+      fprintf('\n');
+      fprintf('Price change [dollars]:\t');
+      fprintf('%10.2f ',downs.deltaPrice(1:end));
+      fprintf('\n');
     endfunction
 
     function [r,buyLineExtrap,m] = WhatToBuyBatch(varargin)

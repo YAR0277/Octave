@@ -55,5 +55,7 @@ function [] = PlotMM(ticker)
   fprintf('%10.2f ',acc(end-n+1:end));
   fprintf('\n');
 
+  y.ShowUpsAndDowns;
+
 endfunction
 

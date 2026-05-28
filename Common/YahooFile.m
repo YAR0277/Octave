@@ -218,8 +218,8 @@ classdef YahooFile < CsvFile
       this.PriceEx.PlotEMA(t,x);
     endfunction
 
-    function [r] = PlotMM(this,varargin)
-      [r] = this.PriceEx.PlotMM(varargin);
+    function [r] = PlotMM(this)
+      [r] = this.PriceEx.PlotMM();
     endfunction
 
     function [] = PlotRSI(this)
@@ -343,6 +343,10 @@ classdef YahooFile < CsvFile
       fprintf('Acceleration (last %d):\t',momLen);
       fprintf('%10.2f ',acc(end-n+1:end));
       fprintf('\n');
+    endfunction
+
+    function [] = ShowUpsAndDowns(this)
+      this.PriceEx.ShowUpsAndDowns();
     endfunction
 
     function [r] = TestEMA(this)
