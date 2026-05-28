@@ -24,6 +24,27 @@ classdef PriceEx < handle
       r =  x(end) <= ema(end);
     endfunction
 
+    function [ups,downs] = CalcUpsAndDowns(this)
+
+      [t,x] = this.GetPriceData(1e4); % 10000, a big number, returns all availabe data
+
+      [lt0,gt0] = this.GetIQM(x);
+      tol = gt0 - lt0;
+
+      idxMax = imregionalmax(x);
+      idxMin = imregionalmin(x);
+      [idxMin,idxMax] = this.FilterNoiseFromLocalMaxMin(idxMin,idxMax,x,tol);
+
+      tmax = t(idxMax);
+      xmax = x(idxMax);
+
+      tmin = t(idxMin);
+      xmin = x(idxMin);
+
+      downs = this.CalcDowns(t,tmin,xmin,tmax,xmax);
+      ups = this.CalcUps(t,tmin,xmin,tmax,xmax);
+    endfunction
+
     function [lt0,gt0] = GetIQM(this,x)
       % returns IQM for negative (lt0) and positive (gt0) price changes
       dx = Util.Diff(x);
@@ -42,6 +63,10 @@ classdef PriceEx < handle
       iz = dx == 0;
       ltm = Util.LTM(dx(id));
       utm = Util.UTM(dx(iu));
+    endfunction
+
+    function [r] = GetLow(this)
+      r = this.InFile.GetLow();
     endfunction
 
     function [r] = GetPrices(this)
@@ -66,7 +91,7 @@ classdef PriceEx < handle
         return;
       endif
 
-      fprintf('Symbol: %s\n',this.InFile.Symbol);
+      fprintf('Symbol: %s\n',this.InFile.Ticker);
       timestamp = this.GetTimestamp();
       t1 = timestamp(1);
       t2 = timestamp(end);
@@ -99,6 +124,17 @@ classdef PriceEx < handle
 
       vol = this.InFile.GetVolume;
       fprintf('Volume: range: [%d,%d], last price (%d), percentile (%.2f%%)\n',min(vol),max(vol),vol(end),Util.CalcPercentile(vol,vol(end)));
+
+      [ups,downs] = this.CalcUpsAndDowns();
+
+      fprintf('Downs:\n');
+      fprintf('Time change [days]:\t');
+      fprintf('%10.2f ',downs.deltaTime(1:end));
+      fprintf('\n');
+      fprintf('Price change [dollars]:\t');
+      fprintf('%10.2f ',downs.deltaPrice(1:end));
+      fprintf('\n');
+
     endfunction
 
     function [r] = PlotMM(varargin)
@@ -296,6 +332,54 @@ classdef PriceEx < handle
       text(xlim(1)+dx,(m - std(x))-dy,sprintf('m-1σ=%.2f',m-std(x)),'color','red');
       plot([xlim(1):xlim(2)],ones(1,n)*(m - 2*std(x)),'--','color','red');%,'LineWidth',Constant.PlotLineWidth);
       text(xlim(1)+dx,(m - 2*std(x))-dy,sprintf('m-2σ=%.2f',m-2*std(x)),'color','red');
+    endfunction
+
+    function [downs] = CalcDowns(this,t,tmin,xmin,tmax,xmax)
+
+      downs = struct("deltaTime",[],"deltaPrice",[]);
+
+      % keep only those (tmax,xmax) that are followed by an (tmin,xmin)
+      keep = false(size(tmax));
+      for i = 1:length(tmax)-1
+          keep(i) = any( tmin > tmax(i) & tmin < tmax(i+1) );
+      endfor
+
+      % keep the final xmax
+      keep(end) = 1;
+
+      tmax_filtered = tmax(keep);
+      xmax_filtered = xmax(keep);
+
+      % find lowest price value between two tmax_filtered
+      xlow = this.GetLow();
+
+      xlow_filtered = zeros(1, length(tmax_filtered)-1);
+      tlow_filtered = zeros(1, length(tmax_filtered)-1);
+      for i = 1:length(tmax_filtered)-1
+          idx = find(...
+                t > tmax_filtered(i) & ...
+                t < tmax_filtered(i+1)...
+                );
+
+          [xlow_filtered(i),k] = min(xlow(idx));
+          tlow_filtered(i) = t(idx(k));
+      endfor
+
+      delta_trading_days = zeros(size(tlow_filtered));
+      for i = 1:length(tlow_filtered)
+          i1 = find(t == tmax_filtered(i));
+          i2 = find(t == tlow_filtered(i));
+
+          delta_trading_days(i) = i2 - i1;
+      endfor
+
+      downs.deltaTime = delta_trading_days(:);
+      % ignore the final max
+      downs.deltaPrice = xmax_filtered(1:end-1) - xlow_filtered(:);
+    endfunction
+
+    function [ups] = CalcUps(this,t,tmin,xmin,tmax,xmax)
+      ups = struct("deltaTime",[],"deltaPrice",[]);
     endfunction
 
     function [] = DoPlot(this)
