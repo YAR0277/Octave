@@ -138,6 +138,21 @@ classdef YahooFile < CsvFile
     end
 
     function [r] = GetValue(this)
+
+      cfg = Config.Instance();
+      priceType = cfg.get('PriceType');
+
+      switch priceType
+        case "high"
+          this.DataCol = 'High';
+        case "low"
+          this.DataCol = 'Low';
+        case "open"
+          this.DataCol = 'Open';
+        otherwise
+          this.DataCol = 'Close';
+      endswitch
+
       r = this.Data.(this.DataCol);
     end
 
