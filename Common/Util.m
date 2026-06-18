@@ -107,6 +107,14 @@ classdef Util < handle
       endif
     endfunction
 
+    function [r] = DateStringsToDatenums(dates)
+      r = cellfun(@(s) datenum(s, "yyyy-mm-dd"), dates);
+    endfunction
+
+    function [r] = DatenumsToDateStrings(datenums)
+      r = datestr(datenums, "yyyy-mm-dd");
+    endfunction
+
     function [r] = Diff(x,p)
       % computes pth order difference of vector x
       % [r] = Diff([1 4 7 8],2).
@@ -401,6 +409,11 @@ classdef Util < handle
         fprintf(fid,'%s=%s\n',names{i},value{i});
       endfor
       fclose(fid);
+    endfunction
+
+    function [T] = ScalarStruct2Table(s)
+      pkg load tablicious;
+      T = struct2table(s);
     endfunction
   endmethods
 endclassdef
