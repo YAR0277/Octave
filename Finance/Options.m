@@ -103,16 +103,16 @@ classdef Options < handle
       volatility = sigma;
     endfunction
 
-    function [put] = GetCallPrice(this,S,K,r,tau,sigma)
-    % price of a put option using Black-Scholes formula
+    function [call] = GetCallPrice(this,S,K,r,tau,sigma)
+    % price of a call option using Black-Scholes formula
       d1 = this.fcnD1(S,K,r,tau,sigma);
       d2 = this.fcnD2(d1,tau,sigma);
       N = this.fcnNormCdf;
-      put = S*N(d1) - K*exp(-r*tau)*N(d2);
+      call = S*N(d1) - K*exp(-r*tau)*N(d2);
     endfunction
 
     function [prob] = GetRiskNeutralProb(this,S,K,r,tau,sigma)
-      % The risk-neutral probability that the put expires in the money: P(S>K).
+      % The risk-neutral probability that the option expires in the money: P(S>K).
       d1 = this.fcnD1(S,K,r,tau,sigma);
       d2 = this.fcnD2(d1,tau,sigma);
       N = this.fcnNormCdf;
@@ -144,7 +144,7 @@ classdef Options < handle
 
         [x,idx] = sort(Texp.strike);
 
-        plot(x, Texp.lastPrice(idx), '--', 'DisplayName', datestr(expiries(k), 'yyyy-mm-dd'));
+        plot(x, Texp.lastPrice(idx), '--.', 'DisplayName', datestr(expiries(k), 'yyyy-mm-dd'));
 
       endfor
 
@@ -152,19 +152,19 @@ classdef Options < handle
       prices = this.PriceFile.GetClose;
       S = prices(end);
 
-      hSpot = line([S S], [yl(1) yl(2)], 'Color', Color.Red, 'LineStyle', '--');
+      hSpot = line([S S], [yl(1) yl(2)], 'Color', Color.Brown, 'LineStyle', '--');
       set(hSpot, 'HandleVisibility', 'off'); % disable legend entry
 
-      text(S, yl(2), sprintf('S = %g', S), 'Color', Color.Red, 'VerticalAlignment', 'top');
+      text(S, yl(2), sprintf('S = %g', S), 'Color', Color.Brown, 'VerticalAlignment', 'top');
 
       % add watermark
       hwm = text(gca,0.5,0.5,this.InFile.Ticker,'units', 'normalized', 'fontsize', 50, ...
            'color', Color.LightGrey, 'horizontalalignment', 'center', 'verticalalignment', 'middle');
 
-      xlabel('K');
-      ylabel('Option Price');
+      xlabel('Strike Price($)');
+      ylabel('Call Option Price($)');
       legend show;
-
+      legend("location", "northeast");
     endfunction
 
     function [] = PlotPuts(this,numDays)
@@ -184,7 +184,7 @@ classdef Options < handle
 
         [x,idx] = sort(Texp.strike);
 
-        plot(x, Texp.lastPrice(idx), '--', 'DisplayName', datestr(expiries(k), 'yyyy-mm-dd'));
+        plot(x, Texp.lastPrice(idx), '--.', 'DisplayName', datestr(expiries(k), 'yyyy-mm-dd'));
 
       endfor
 
@@ -192,18 +192,19 @@ classdef Options < handle
       prices = this.PriceFile.GetClose;
       S = prices(end);
 
-      hSpot = line([S S], [yl(1) yl(2)], 'Color', Color.Red, 'LineStyle', '--');
+      hSpot = line([S S], [yl(1) yl(2)], 'Color', Color.Brown, 'LineStyle', '--');
       set(hSpot, 'HandleVisibility', 'off'); % disable legend entry
 
-      text(S, yl(2), sprintf('S = %g', S), 'Color', Color.Red, 'VerticalAlignment', 'top');
+      text(S, yl(2), sprintf('S = %g', S), 'Color', Color.Brown, 'VerticalAlignment', 'top');
 
       % add watermark
       hwm = text(gca,0.5,0.5,this.InFile.Ticker,'units', 'normalized', 'fontsize', 50, ...
            'color', Color.LightGrey, 'horizontalalignment', 'center', 'verticalalignment', 'middle');
 
-      xlabel('K');
-      ylabel('Option Price');
+      xlabel('Strike Price($)');
+      ylabel('Put Option Price($)');
       legend show;
+      legend("location", "northwest");
     endfunction
 
   endmethods %Public
