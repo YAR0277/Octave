@@ -127,12 +127,14 @@ classdef Options < handle
       put = -S*N(-d1) + K*exp(-r*tau)*N(-d2);
     endfunction
 
-    function [] = PlotCalls(this)
+    function [] = PlotCalls(this,numDays)
 
       T = this.InFile.GetOptionsByType('call');
 
+      dn0 = Util.GetDatenumToday;
+
       expiries = unique(T.expiration);
-      expiries = expiries(expiries >= datenum(2026,6,1) & expiries <= datenum(2026,8,1));
+      expiries = expiries(expiries >= dn0 & expiries <= dn0 + numDays);
 
       figure;
       hold on;
@@ -150,10 +152,14 @@ classdef Options < handle
       prices = this.PriceFile.GetClose;
       S = prices(end);
 
-      vSpot = line([S S], [yl(1) yl(2)], 'Color', Color.Red, 'LineStyle', '--');
-      set(vSpot, 'HandleVisibility', 'off'); % disable legend entry
+      hSpot = line([S S], [yl(1) yl(2)], 'Color', Color.Red, 'LineStyle', '--');
+      set(hSpot, 'HandleVisibility', 'off'); % disable legend entry
 
       text(S, yl(2), sprintf('S = %g', S), 'Color', Color.Red, 'VerticalAlignment', 'top');
+
+      % add watermark
+      hwm = text(gca,0.5,0.5,this.InFile.Ticker,'units', 'normalized', 'fontsize', 50, ...
+           'color', Color.LightGrey, 'horizontalalignment', 'center', 'verticalalignment', 'middle');
 
       xlabel('K');
       ylabel('Option Price');
@@ -161,12 +167,14 @@ classdef Options < handle
 
     endfunction
 
-    function [] = PlotPuts(this)
+    function [] = PlotPuts(this,numDays)
 
       T = this.InFile.GetOptionsByType('put');
 
+      dn0 = Util.GetDatenumToday;
+
       expiries = unique(T.expiration);
-      expiries = expiries(expiries >= datenum(2026,6,1) & expiries <= datenum(2026,8,1));
+      expiries = expiries(expiries >= dn0 & expiries <= dn0 + numDays);
 
       figure;
       hold on;
@@ -184,10 +192,14 @@ classdef Options < handle
       prices = this.PriceFile.GetClose;
       S = prices(end);
 
-      vSpot = line([S S], [yl(1) yl(2)], 'Color', Color.Red, 'LineStyle', '--');
-      set(vSpot, 'HandleVisibility', 'off'); % disable legend entry
+      hSpot = line([S S], [yl(1) yl(2)], 'Color', Color.Red, 'LineStyle', '--');
+      set(hSpot, 'HandleVisibility', 'off'); % disable legend entry
 
       text(S, yl(2), sprintf('S = %g', S), 'Color', Color.Red, 'VerticalAlignment', 'top');
+
+      % add watermark
+      hwm = text(gca,0.5,0.5,this.InFile.Ticker,'units', 'normalized', 'fontsize', 50, ...
+           'color', Color.LightGrey, 'horizontalalignment', 'center', 'verticalalignment', 'middle');
 
       xlabel('K');
       ylabel('Option Price');
