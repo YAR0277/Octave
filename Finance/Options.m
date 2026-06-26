@@ -239,6 +239,10 @@ classdef Options < handle
       expiries = unique(T.expiration);
       expiries = expiries(expiries > dn0 & expiries <= dn0 + numDays);
 
+      if length(expiries) == 0
+        error('No %s options found within %d days.', type, numDays);
+      endif
+
       expiration = [];
       strike = [];
       lastPrice = [];
