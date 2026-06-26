@@ -26,7 +26,9 @@ classdef Options < handle
       etfFolder = fullfile(dataFolder,'etf');
 
       obj.InFile = inFile;
-      obj.RiskFreeInterestRate = 0.02;
+
+      cfg = Config.Instance();
+      obj.RiskFreeInterestRate = cfg.get('RiskFreeInterestRate');
       obj.fcnNormCdf = @(x) normcdf(x);
       obj.fcnNormPdf = @(x) normpdf(x);
       obj.fcnD1 = @(S,K,r,tau,sigma) (log(S./K) + (r + (sigma.^2)./2).*tau) ./ (sigma .* sqrt(tau));
@@ -207,9 +209,76 @@ classdef Options < handle
       legend("location", "northwest");
     endfunction
 
+    function [] = ShowCalls(this,numDays)
+
+      T = this.InFile.GetOptionsByType('call');
+
+      this.ShowOptions(T,numDays,'call');
+
+    endfunction
+
+    function [] = ShowPuts(this,numDays)
+
+      T = this.InFile.GetOptionsByType('put');
+
+      this.ShowOptions(T,numDays,'put');
+
+    endfunction
+
   endmethods %Public
 
   methods (Access = private)
 
+    function [] = ShowOptions(this,T,numDays,type)
+
+      prices = this.PriceFile.GetClose;
+      S = prices(end);
+
+      dn0 = Util.GetDatenumToday;
+
+      expiries = unique(T.expiration);
+      expiries = expiries(expiries > dn0 & expiries <= dn0 + numDays);
+
+      expiration = [];
+      strike = [];
+      lastPrice = [];
+      change = [];
+      bid = [];
+      ask = [];
+      volume = [];
+      openInterest = [];
+      impliedVolatility = [];
+      delta = [];
+
+      for k=1:numel(expiries)
+
+        T1 = this.InFile.GetExpiration(T, expiries(k));
+        T2 = this.InFile.GetStrike(T1,S,type);
+
+        n = height(T2);
+
+        expiration = [expiration; repmat(expiries(k), n, 1)];
+        strike = [strike;T2.strike];
+        lastPrice = [lastPrice;T2.lastPrice];
+        change = [change;T2.change];
+        bid = [bid;T2.bid];
+        ask = [ask;T2.ask];
+        volume = [volume;T2.volume];
+        openInterest = [openInterest;T2.openInterest];
+        impliedVolatility = [impliedVolatility;T2.impliedVolatility];
+
+        tau =  expiries(k) - Util.GetDatenumToday;
+        del = this.GetDelta(S,T2.strike,this.RiskFreeInterestRate,tau,T2.impliedVolatility);
+        delta = [delta;del];
+
+      endfor
+
+      expiration = cellstr(datestr(expiration, "yyyy-mm-dd"));
+
+      T = table(expiration,strike,lastPrice,change,bid,ask,volume,openInterest,impliedVolatility,delta);
+      % https://wiki.octave.org/Function_tableprint#Usage
+      prettyprint(T);
+
+    endfunction
   endmethods
 endclassdef

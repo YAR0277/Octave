@@ -102,6 +102,22 @@ classdef OptionsFile < CsvFile
       tbl = T(idx,:);
     endfunction
 
+    function [tbl] = GetStrike(~,T,S,type)
+    % get ITM strike prices
+      cfg = Config.Instance();
+      n = cfg.get('NumStrikePrices');
+
+      if strcmpi(type,'call')
+        idx = T.strike > S & T.strike < S + n*2.50; % ITM for call options, K > S
+      elseif strcmpi(type,'put')
+        idx = T.strike < S & T.strike > S - n*2.50; % ITM for put options, K < S
+      else
+        error('incorrect option type %s',type);
+      end
+
+      tbl = T(idx,:);
+    endfunction
+
 ##    function [r] = GetFundamentalsLast(this)
 ##      s = this.GetFundamentals;
 ##      f = @(x) x(end);
