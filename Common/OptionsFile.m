@@ -108,9 +108,21 @@ classdef OptionsFile < CsvFile
       n = cfg.get('NumStrikePrices');
 
       if strcmpi(type,'call')
-        idx = T.strike > S & T.strike < S + n*2.50; % ITM for call options, K > S
+
+        % largest strike price less than S
+        K0 = max(T.strike(T.strike < S));
+
+        % ITM for call options, K > S
+        idx = T.strike >= K0 & T.strike < K0 + n*2.50;
+
       elseif strcmpi(type,'put')
-        idx = T.strike < S & T.strike > S - n*2.50; % ITM for put options, K < S
+
+        % smallest strike price greater than S
+        K0 = min(T.strike(T.strike > S));
+
+        % ITM for put options, K < S
+        idx = T.strike <= K0 & T.strike >= K0 - n*2.50;
+
       else
         error('incorrect option type %s',type);
       end
