@@ -107,25 +107,27 @@ classdef OptionsFile < CsvFile
       cfg = Config.Instance();
       n = cfg.get('NumStrikePrices');
 
+      strikes = sort(unique(T.strike));
+
       if strcmpi(type,'call')
 
-        % largest strike price less than S
-        K0 = max(T.strike(T.strike < S));
-
-        % ITM for call options, K > S
-        idx = T.strike >= K0 & T.strike < K0 + n*2.50;
+        % index of first strike price (K), take the largest K such that K < S.
+        i0 = find(strikes < S, 1, 'last');
+        % select n strike prices starting with index i0
+        selected = strikes(i0 : min(i0+(n-1),numel(strikes)));
 
       elseif strcmpi(type,'put')
 
-        % smallest strike price greater than S
-        K0 = min(T.strike(T.strike > S));
-
-        % ITM for put options, K < S
-        idx = T.strike <= K0 & T.strike >= K0 - n*2.50;
+        % index of first strike price (K), take the smallest K such that K > S.
+        i0 = find(strikes > S, 1, 'first');
+        % select n strike prices starting with i0 - (n-1)
+        selected = strikes(max(1,i0-(n-1)) : i0);
 
       else
         error('incorrect option type %s',type);
       end
+
+      idx = ismember(T.strike, selected);
 
       tbl = T(idx,:);
     endfunction
