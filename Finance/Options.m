@@ -278,8 +278,9 @@ classdef Options < handle
       endfor
 
       expiration = cellstr(datestr(expiration, "yyyy-mm-dd"));
+      midpoint = (bid + ask ) ./ 2;
 
-      T = table(expiration,strike,lastPrice,change,bid,ask,volume,openInterest,impliedVolatility,delta);
+      T = table(expiration,strike,lastPrice,change,midpoint,volume,openInterest,impliedVolatility,delta);
       % https://wiki.octave.org/Function_tableprint#Usage
       prettyprint(T);
 
