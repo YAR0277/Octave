@@ -279,8 +279,15 @@ classdef Options < handle
 
       expiration = cellstr(datestr(expiration, "yyyy-mm-dd"));
       midpoint = (bid + ask ) ./ 2;
+      spread = ask - bid;
+      % best measure of liquidity is the relative spread
+      % l.t. 2% : excellent
+      % 2-5%    : good
+      % 5-10%   : fair
+      % g.t. 10%: poor
+      relSpread = ( spread ./ midpoint ) * 100; % in percent
 
-      T = table(expiration,strike,lastPrice,change,midpoint,volume,openInterest,impliedVolatility,delta);
+      T = table(expiration,strike,lastPrice,change,midpoint,relSpread,volume,openInterest,impliedVolatility,delta);
       % https://wiki.octave.org/Function_tableprint#Usage
       prettyprint(T);
 
