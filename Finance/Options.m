@@ -253,6 +253,7 @@ classdef Options < handle
       openInterest = [];
       impliedVolatility = [];
       delta = [];
+      Nd2 = [];
 
       for k=1:numel(expiries)
 
@@ -274,6 +275,8 @@ classdef Options < handle
         tau =  expiries(k) - Util.GetDatenumToday;
         del = this.GetDelta(S,T2.strike,this.RiskFreeInterestRate,tau,T2.impliedVolatility);
         delta = [delta;del];
+        nd2 = this.GetRiskNeutralProb(S,T2.strike,this.RiskFreeInterestRate,tau,T2.impliedVolatility);
+        Nd2 = [Nd2;nd2];
 
       endfor
 
@@ -287,7 +290,7 @@ classdef Options < handle
       % g.t. 10%: poor
       relSpread = ( spread ./ midpoint ) * 100; % in percent
 
-      T = table(expiration,strike,lastPrice,change,midpoint,relSpread,volume,openInterest,impliedVolatility,delta);
+      T = table(expiration,strike,lastPrice,change,midpoint,relSpread,volume,openInterest,impliedVolatility,delta,Nd2);
       % https://wiki.octave.org/Function_tableprint#Usage
       prettyprint(T);
 

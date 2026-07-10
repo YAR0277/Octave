@@ -108,27 +108,54 @@ classdef OptionsFile < CsvFile
       n = cfg.get('NumStrikePrices');
 
       strikes = sort(unique(T.strike));
+      N = numel(strikes);
 
-      if strcmpi(type,'call')
+      % index of largest strike l.t. S
+      i0 = find(strikes < S, 1, 'last');
 
-        % index of first strike price (K), take the largest K such that K < S.
-        i0 = find(strikes < S, 1, 'last');
-        % select n strike prices starting with index i0
-        selected = strikes(i0 : min(i0+(n-1),numel(strikes)));
-
-      elseif strcmpi(type,'put')
-
-        % index of first strike price (K), take the smallest K such that K > S.
-        i0 = find(strikes > S, 1, 'first');
-        % select n strike prices starting with i0 - (n-1)
-        selected = strikes(max(1,i0-(n-1)) : i0);
-
+      if isempty(i0)
+        idxFirst = 1;
+        idxLast = min(n,N);
+      elseif i0 == N
+        idxLast = N;
+        idxFirst = max(1,N-n+1);
       else
-        error('incorrect option type %s',type);
-      end
+        % S lies between strikes(idxFirst) and strikes(idxLast)
 
+        % n even, equal number above and below
+        if mod(n,2) == 0
+          numBelow = n/2;
+          numAbove = n/2;
+        % n odd
+        else
+          if strcmpi(type,'call') % one extra strike ITM
+            numBelow = (n+1)/2;
+            numAbove = (n-1)/2;
+          elseif strcmpi(type,'put') % one extra strike ITM
+            numBelow = (n-1)/2;
+            numAbove = (n+1)/2;
+          else
+            error('incorrect option type %s',type);
+          endif
+        endif
+
+        idxFirst = i0 - numBelow + 1;
+        idxLast = i0 + numAbove;
+
+        % shift window if it runs off either end
+        if idxFirst < 1
+          idxLast = min(N, idxLast + (1-idxFirst));
+          idxFirst = 1;
+        endif
+
+        if idxLast > N
+          idxFirst = max(1,idxFirst - (idxLast-N));
+          idxLast = N;
+        endif
+      endif
+
+      selected = strikes(idxFirst:idxLast);
       idx = ismember(T.strike, selected);
-
       tbl = T(idx,:);
     endfunction
 
