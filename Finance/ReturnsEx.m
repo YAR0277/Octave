@@ -71,6 +71,12 @@ classdef ReturnsEx < handle
       [~,r,~] = this.GetReturnData();
     end
 
+    function [sigma_annual] = GetVolatility(this)
+      [~,~,z] = this.GetReturnData();
+      sigma_daily = std(z); % daily returns
+      sigma_annual = sigma_daily * sqrt(252); % annualize returns
+    endfunction
+
     function [t,y,z] = GetReturnData(this)
       % main method to get return data, arrays of returns for each period.
       timestamp = this.GetTimestamp();
