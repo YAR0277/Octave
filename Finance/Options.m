@@ -280,6 +280,8 @@ classdef Options < handle
 
       endfor
 
+      numDaysToExpiration = (expiration - dn0);
+
       expiration = cellstr(datestr(expiration, "yyyy-mm-dd"));
       midpoint = (bid + ask ) ./ 2;
       spread = ask - bid;
@@ -290,7 +292,29 @@ classdef Options < handle
       % g.t. 10%: poor
       relSpread = ( spread ./ midpoint ) * 100; % in percent
 
-      T = table(expiration,strike,lastPrice,change,midpoint,relSpread,volume,openInterest,impliedVolatility,delta,Nd2);
+      % PY = premium yield, PPD = premium per day
+      PY = (midpoint ./ strike) * 100; % PY = premium / K assuming midpoint = premium
+      PPD = (PY ./ numDaysToExpiration) * 100;
+
+      prices = this.PriceFile.GetClose;
+      S = prices(end);
+
+      fprintf('Last closing price: %.2f\n',S);
+      fprintf('\n');
+
+      % BE = break-even
+      if strcmpi(type,'call')
+        BE = strike + midpoint; % BE = K + c0
+        upside = ((BE - S) ./ S) * 100; % upside over current price
+        T = table(expiration,strike,lastPrice,change,midpoint,PY,PPD,BE,upside,relSpread,volume,openInterest,impliedVolatility,delta,Nd2);
+      elseif strcmpi(type,'put')
+        BE = strike - midpoint; % BE = K - p0
+        discount = ((S - BE) ./ S) * 100; % discount below current price
+        T = table(expiration,strike,lastPrice,change,midpoint,PY,PPD,BE,discount,relSpread,volume,openInterest,impliedVolatility,delta,Nd2);
+      else
+        T = table();
+      endif
+
       % https://wiki.octave.org/Function_tableprint#Usage
       prettyprint(T);
 
