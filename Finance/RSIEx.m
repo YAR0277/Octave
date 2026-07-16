@@ -111,13 +111,15 @@ classdef RSIEx < handle
     function [] = AddGuideLines(this,high,low)
       xlim = get(gca(),'xlim');
       n=xlim(2)-xlim(1)+1;
-      dx=100;dy=5;
+      xrange = diff(xlim);
+      dx=0.02*xrange; % 2% of plot width
+      dy=5;
 
       plot([xlim(1):xlim(2)],ones(1,n)*high,'--','color','red','LineWidth',Constant.PlotLineWidth);
-      text(xlim(1)+dx,high+dy,'Overbought > 70');
+      text(xlim(1)+dx,high+dy,'Overbought > 70', "HorizontalAlignment", "left");
 
       plot([xlim(1):xlim(2)],ones(1,n)*low,'--','color','red','LineWidth',Constant.PlotLineWidth);
-      text(xlim(1)+dx,low-dy,'Oversold < 30');
+      text(xlim(1)+dx,low-dy,'Oversold < 30', "HorizontalAlignment", "left");
     endfunction
 
     function [r] = CalcRSI(this)
