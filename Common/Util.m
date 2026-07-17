@@ -43,7 +43,11 @@ classdef Util < handle
       for i = 1:numel(fields)
         name = fields{i};
         val = s.(name);
-        out.(name) = func(val);
+        if isempty(val)
+          out.(name) = 0;
+        else
+          out.(name) = func(val);
+        endif
       endfor
     endfunction
 
