@@ -294,7 +294,7 @@ classdef Options < handle
 
       % PY = premium yield, PPD = premium per day
       PY = (midpoint ./ strike) * 100; % PY = premium / K assuming midpoint = premium
-      PPD = (PY ./ numDaysToExpiration) * 100;
+      PPD = (PY ./ numDaysToExpiration);
 
       prices = this.PriceFile.GetClose;
       S = prices(end);
