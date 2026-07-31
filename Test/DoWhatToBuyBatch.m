@@ -62,7 +62,11 @@ function [] = DoWhatToBuyBatch(fid,f,tickernames,cfg,equityFlag)
           '%ld,'...   % freeCashflow
           '%.2f,'...  % epsCurrentYear
           '%.2f,'...  % earningsGrowth
-          '%.2f\n'... % pegRatio
+          '%.2f,'...  % pegRatio
+          '%.2f,'...  % priceToBook
+          '%.2f,'...  % beta
+          '%.2f,'...  % dividendRate
+          '%.2f\n'... % dividendYield
           ];
 
     fprintf(fid, fmt,...
@@ -87,7 +91,11 @@ function [] = DoWhatToBuyBatch(fid,f,tickernames,cfg,equityFlag)
       fundamentals.freeCashflow,
       fundamentals.epsCurrentYear,
       fundamentals.earningsGrowth,
-      fundamentals.pegRatio);
+      fundamentals.pegRatio,
+      fundamentals.priceToBook,
+      fundamentals.beta,
+      fundamentals.dividendRate,
+      fundamentals.dividendYield);
   endfor
 endfunction
 

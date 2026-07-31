@@ -146,7 +146,9 @@ classdef Options < handle
 
         [x,idx] = sort(Texp.strike);
 
-        plot(x, Texp.lastPrice(idx), '--.', 'DisplayName', datestr(expiries(k), 'yyyy-mm-dd'));
+        % instead of lastPrice, use bid-ask midpoint
+        midpt = (Texp.bid + Texp.ask) / 2;
+        plot(x, midpt(idx), '--.', 'DisplayName', datestr(expiries(k), 'yyyy-mm-dd'));
 
       endfor
 
@@ -186,7 +188,9 @@ classdef Options < handle
 
         [x,idx] = sort(Texp.strike);
 
-        plot(x, Texp.lastPrice(idx), '--.', 'DisplayName', datestr(expiries(k), 'yyyy-mm-dd'));
+        % instead of lastPrice, use bid-ask midpoint
+        midpt = (Texp.bid + Texp.ask) / 2;
+        plot(x, midpt(idx), '--.', 'DisplayName', datestr(expiries(k), 'yyyy-mm-dd'));
 
       endfor
 
@@ -209,6 +213,62 @@ classdef Options < handle
       legend("location", "northwest");
     endfunction
 
+    function [] = PlotDiffs(this,numDays)
+
+      Calls = this.InFile.GetOptionsByType('call');
+      Puts  = this.InFile.GetOptionsByType('put');
+
+      dn0 = Util.GetDatenumToday;
+      expiries = unique(Calls.expiration);
+      expiries = expiries(dn0 < expiries & expiries <= dn0 + numDays);
+
+      figure;
+      hold on;
+
+      for k=1:numel(expiries)
+
+        C = this.InFile.GetExpiration(Calls, expiries(k));
+        P = this.InFile.GetExpiration(Puts, expiries(k));
+
+        % keep only stikes that exist in both tables
+        [K,ic,ip] = intersect(C.strike, P.strike);
+
+        [K,idx] = sort(K);
+        ic = ic(idx);
+        ip = ip(idx);
+
+        callMid = (C.bid(ic) + C.ask(ic)) / 2;
+        putMid  = (P.bid(ic) + P.ask(ic)) / 2;
+        diff    = callMid - putMid;
+
+        plot(K, diff, '--.', 'DisplayName', datestr(expiries(k), 'yyyy-mm-dd'));
+      endfor
+
+      prices = this.PriceFile.GetClose;
+      S = prices(end);
+
+      yl = ylim;
+      xl = xlim;
+
+      h0 = line([xl(1) xl(2)], [0 0], 'Color', Color.LightGrey, 'LineStyle', '--');
+      set(h0, 'HandleVisibility', 'off');
+
+      hSpot = line([S S], [yl(1) yl(2)], 'Color', Color.Brown, 'LineStyle', '--');
+      set(hSpot, 'HandleVisibility', 'off'); % disable legend entry
+
+      text(S, yl(2), sprintf('S = %g', S), 'Color', Color.Brown, 'VerticalAlignment', 'top');
+
+      % add watermark
+      hwm = text(gca,0.97,0.03,this.InFile.Ticker,'units', 'normalized', 'fontsize', 50, ...
+           'color', Color.LightGrey, 'horizontalalignment', 'right', 'verticalalignment', 'bottom');
+
+      xlabel('Strike Price($)');
+      ylabel('Call - Put($)');
+      legend show;
+      legend("location", "northeast");
+
+    endfunction
+
     function [] = ShowCalls(this,numDays)
 
       T = this.InFile.GetOptionsByType('call');
@@ -223,6 +283,62 @@ classdef Options < handle
 
       this.ShowOptions(T,numDays,'put');
 
+    endfunction
+
+    function [] = ShowDiffs(this,numDays)
+
+      Calls = this.InFile.GetOptionsByType('call');
+      Puts  = this.InFile.GetOptionsByType('put');
+
+      prices = this.PriceFile.GetClose;
+      S = prices(end);
+
+      dn0 = Util.GetDatenumToday;
+      expiries = unique(Calls.expiration);
+      expiries = expiries(dn0 < expiries & expiries <= dn0 + numDays);
+
+      expiration = [];
+      strike = [];
+      callMid = [];
+      putMid = [];
+      diff = [];
+      parity = [];
+      days = [];
+
+      for k=1:numel(expiries)
+
+        C = this.InFile.GetExpiration(Calls, expiries(k));
+        P = this.InFile.GetExpiration(Puts, expiries(k));
+
+        % keep only stikes that exist in both tables
+        [K,ic,ip] = intersect(C.strike, P.strike);
+
+        expiration = [expiration; repmat(expiries(k), numel(K), 1)];
+        strike = [strike; K];
+
+        cmid = (C.bid(ic) + C.ask(ic))/2;
+        pmid = (P.bid(ic) + P.ask(ic))/2;
+
+        callMid = [callMid; cmid];
+        putMid  = [putMid;  pmid];
+
+        diff = [diff; cmid - pmid];
+
+        tau = (expiries(k) - dn0) / 365; % years to expiration
+        par = K .* exp(this.RiskFreeInterestRate * tau);
+        parity = [parity; S-par];
+        days = [days; repmat(expiries(k)-dn0, numel(K), 1)];
+      endfor
+
+      expiration = cellstr(datestr(expiration, "yyyy-mm-dd"));
+
+      error = diff - parity;
+
+      fprintf('Last closing price: %.2f\n',S);
+      fprintf('\n');
+
+      T = table(expiration, strike, callMid, putMid, diff, parity, error, days);
+      prettyprint(T);
     endfunction
 
   endmethods %Public
