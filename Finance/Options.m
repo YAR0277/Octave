@@ -238,7 +238,7 @@ classdef Options < handle
         ip = ip(idx);
 
         callMid = (C.bid(ic) + C.ask(ic)) / 2;
-        putMid  = (P.bid(ic) + P.ask(ic)) / 2;
+        putMid  = (P.bid(ip) + P.ask(ip)) / 2;
         diff    = callMid - putMid;
 
         plot(K, diff, '--.', 'DisplayName', datestr(expiries(k), 'yyyy-mm-dd'));
@@ -317,7 +317,7 @@ classdef Options < handle
         strike = [strike; K];
 
         cmid = (C.bid(ic) + C.ask(ic))/2;
-        pmid = (P.bid(ic) + P.ask(ic))/2;
+        pmid = (P.bid(ip) + P.ask(ip))/2;
 
         callMid = [callMid; cmid];
         putMid  = [putMid;  pmid];
