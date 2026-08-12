@@ -32,13 +32,18 @@ function [] = DoWhatToBuyBatch(fid,f,tickernames,cfg,equityFlag)
     a(end) = [];
 
     clear ff;
-    ff = YahooFunFile;
-    if equityFlag
-      ff.LoadFile(strcat(ticker,'.csv'));
-      fundamentals = ff.GetFundamentalsLast;
-    else
-      fundamentals = ff.GetFundamentalsZero;
-    endif
+    try
+      ff = YahooFunFile;
+      if equityFlag
+        ff.LoadFile(strcat(ticker,'.csv'));
+        fundamentals = ff.GetFundamentalsLast;
+      else
+        fundamentals = ff.GetFundamentalsZero;
+      endif
+    catch ME
+      error('Exception for ticker (%s) at file(%s), name(%s), line(%d), column(%d): %s',...
+        ticker,ME.stack(end).file,ME.stack(end).name,ME.stack(end).line,ME.stack(end).column,ME.message);
+    end_try_catch
 
     fmt = [...
           '%s,'...    % filename

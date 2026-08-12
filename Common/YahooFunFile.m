@@ -193,12 +193,17 @@ classdef YahooFunFile < CsvFile
         val = this.Data.(name);
 
         if iscell(val)
+          r = NaN(size(val));
 
-          if all(cellfun(@ischar,val))
-            r = cellfun(@str2double,val);
-          else
-            r = cell2mat(val);
-          endif
+          for i=1:numel(val)
+            if isempty(val{i})
+              r(i) = NaN;
+            elseif ischar(val{i})
+              r(i) = str2double(val{i});
+            else
+              r(i) = val{i};
+            endif
+          endfor
 
         elseif ischar(val)
           r = str2double(val);
