@@ -363,7 +363,7 @@ classdef Util < handle
 
         dt = diff(timestamp);
         dd = mode(dt); % delta (in) days
-        if dd >= 1 && dd <2
+        if dd >= 1 && dd <= 3
           r = 'day';
         elseif dd >= 6 && dd <= 7
           r = 'week';

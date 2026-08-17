@@ -5,8 +5,8 @@ classdef ReturnsEx < handle
     Acceleration
     InFile        % Reference to FidelityFile class
     PlotType      % 1='stem', 2='bar', 3='line', 4='line with velocity & acceleration'
-    startDay      % calculate returns starting at startDay
-    endDay        % calculate returns vis-a-vis endDay
+    StartDay      % calculate returns starting at StartDay
+    EndDay        % calculate returns vis-a-vis EndDay
     Velocity
   endproperties
 
@@ -45,12 +45,12 @@ classdef ReturnsEx < handle
 
     function [this] = set.EndDay(this,date)
       % [] = EndDay(date) where date='2025-09-23'
-      this.endDay = Util.GetDatenum(date);
+      this.EndDay = Util.GetDatenum(date);
     endfunction
 
     function [this] = set.StartDay(this,date)
       % [] = StartDay(date) where date='2025-09-23'
-      this.startDay = Util.GetDatenum(date);
+      this.StartDay = Util.GetDatenum(date);
     endfunction
 
     function [num,ror,apr] = CalcReturn(this)
@@ -81,15 +81,15 @@ classdef ReturnsEx < handle
       % main method to get return data, arrays of returns for each period.
       timestamp = this.GetTimestamp();
 
-      if isempty(this.startDay)
-        this.startDay = timestamp(1);
+      if isempty(this.StartDay)
+        this.StartDay = timestamp(1);
       endif
 
-      if isempty(this.endDay)
-        this.endDay = timestamp(end);
+      if isempty(this.EndDay)
+        this.EndDay = timestamp(end);
       endif
 
-      ix = this.startDay <= timestamp & timestamp <= this.endDay;
+      ix = this.StartDay <= timestamp & timestamp <= this.EndDay;
       t = timestamp(ix);
       price = this.InFile.GetValue;
       x = price(ix);
