@@ -23,6 +23,8 @@ classdef ReturnsEx < handle
       endif
       obj.InFile = inFile;
       obj.PlotType = 3;
+      obj.StartDay = 0;
+      obj.EndDay = 0;
     endfunction
 
     function [r] = get.PlotType(this)
@@ -81,11 +83,11 @@ classdef ReturnsEx < handle
       % main method to get return data, arrays of returns for each period.
       timestamp = this.GetTimestamp();
 
-      if isempty(this.StartDay)
+      if this.StartDay == 0
         this.StartDay = timestamp(1);
       endif
 
-      if isempty(this.EndDay)
+      if this.EndDay == 0
         this.EndDay = timestamp(end);
       endif
 

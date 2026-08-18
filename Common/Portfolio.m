@@ -35,45 +35,47 @@ classdef Portfolio
 
       timestamp = this.Data.Date;
       tickers = this.Data.Ticker;
-      cost = this.Data.Cost;
+      purchasePrice = this.Data.Price;
+      shares = this.Data.Shares;
       equityFlag = this.Data.EquityFlag;
 
       n = numel(tickers);
-      numDays = zeros(n,1);
-      ror = zeros(n,1);
-      apr = zeros(n,1);
+      daysData = NaN(n,1);
+      rorData = NaN(n,1);
+      aprData = NaN(n,1);
 
-      numDaysBuy = zeros(n,1);
-      rorBuy = zeros(n,1);
-      aprBuy = zeros(n,1);
+      daysHolding = NaN(n,1);
+      rorHolding = NaN(n,1);
+      aprHolding = NaN(n,1);
 
-      f=YahooFile;
+      for i=1:n
 
-        for i=1:n
+        f = YahooFile;
+        if equityFlag(i)
+          f.SetFolder('equity');
+        else
+          f.SetFolder('etf');
+        endif
 
-          if equityFlag(i)
-            f.SetFolder('equity');
-          else
-            f.SetFolder('etf');
-          endif
+        try
+          ticker = tickers{i};
+          filename = strcat(ticker,'-d.csv');
+          f.LoadFile(filename);
 
-          try
-            ticker = tickers{i};
-            filename = strcat(ticker,'-d.csv');
-            f.LoadFile(filename);
-            r=ReturnsEx(f);
-            [numDays(i),ror(i),apr(i)] = r.CalcReturn();
+          r = ReturnsEx(f);
+          [daysData(i),rorData(i),aprData(i)] = r.CalcReturn();
 
-            r.StartDay = timestamp(i);
-            [numDaysBuy(i),rorBuy(i),aprBuy(i)] = r.CalcReturn();
-          catch ME
-            continue;
-          end_try_catch
-        endfor
+          r.StartDay = timestamp(i);
+          [daysHolding(i),rorHolding(i),aprHolding(i)] = r.CalcReturn();
+        catch ME
+          fprintf('Error processing %s: %s\n', ticker, ME.message);
+          continue;
+        end_try_catch
+      endfor
 
-      T = table(tickers,...
-                numDays,ror,apr,...
-                numDaysBuy,rorBuy,aprBuy);
+      T = table(tickers,purchasePrice,shares,...
+                daysData,rorData,aprData,...
+                daysHolding,rorHolding,aprHolding);
       prettyprint(T);
     endfunction
 
@@ -83,15 +85,16 @@ classdef Portfolio
 
     function [this] = LoadPortfolio(this)
 
-      s = struct('Date',0,'Ticker',0,'Cost',0,'EquityFlag',0);
+      s = struct('Date',0,'Ticker',0,'Price',0,'Shares',0,'EquityFlag',0);
 
       data=csv2cell(this.FileName);
       firstDataRow=2; % row 1 is for header
 
       this.Data.Date=datenum(data(firstDataRow:end,1),this.DateFormat);
       this.Data.Ticker = data(firstDataRow:end,2);
-      this.Data.Cost = cell2mat(data(firstDataRow:end,3));
-      this.Data.EquityFlag = cell2mat(data(firstDataRow:end,4));
+      this.Data.Price = cell2mat(data(firstDataRow:end,3));
+      this.Data.Shares = cell2mat(data(firstDataRow:end,4));
+      this.Data.EquityFlag = cell2mat(data(firstDataRow:end,5));
 
     endfunction
 
