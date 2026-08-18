@@ -66,6 +66,7 @@ classdef Portfolio
           [daysData(i),rorData(i),aprData(i)] = r.CalcReturn();
 
           r.StartDay = timestamp(i);
+          r.PurchasePrice = purchasePrice(i);
           [daysHolding(i),rorHolding(i),aprHolding(i)] = r.CalcReturn();
         catch ME
           fprintf('Error processing %s: %s\n', ticker, ME.message);
